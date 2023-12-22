@@ -550,12 +550,12 @@ namespace ft
 				size = _size / _chunkSize;
 				if (_size % _chunkSize)
 					++size;
-				_base.assign(size, nullptr);
+				_chunks.assign(size, nullptr);
 				while (n--)
 				{
 					if (_end.second == 0)
-						_base[_end.first] = _getNewChunk();
-					_constructDataChunk(_base[_end.first] + _end.second, val);
+						_chunks[_end.first] = _getNewChunk();
+					_constructDataChunk(_chunks[_end.first] + _end.second, val);
 					++_end.second;
 					if (_end.second == _chunkSize)
 					{
@@ -579,12 +579,12 @@ namespace ft
 				size = _size / _chunkSize;
 				if (_size % _chunkSize)
 					++size;
-				_base.assign(size, nullptr);
+				_chunks.assign(size, nullptr);
 				for (const_iterator cit = o._begin(); cit != o._end(); ++cit)
 				{
 					if (_end.second == 0)
-						_base[_end.first] = _getNewChunk();
-					_constructDataChunk(_base[_end.first + _end.second], *cit);
+						_chunks[_end.first] = _getNewChunk();
+					_constructDataChunk(_chunks[_end.first + _end.second], *cit);
 					++_end.second;
 					if (_end.second == _chunkSize)
 					{
@@ -596,7 +596,7 @@ namespace ft
 		}
 		template< class InputIterator >
 		deque(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
-			enable_if<!ft::is_integral< InputIterator >::value >::type* = 0) :
+			typename enable_if<!ft::is_integral< InputIterator >::value >::type* = 0) :
 			_alloc(alloc),
 			_size(0),
 			_begin(ft::make_pair(0, 0)),
@@ -614,12 +614,12 @@ namespace ft
 				baseSize = _size / _chunkSize;
 				if (_size % _chunkSize)
 					++baseSize;
-				_base.assign(baseSize, nullptr);
+				_chunks.assign(baseSize, nullptr);
 				while (first != last)
 				{
 					if (_end.second == 0)
-						_base[_end.first] = _getNewChunk();
-					_constructDataChunk(_base[_end.first + _end.second], *first);
+						_chunks[_end.first] = _getNewChunk();
+					_constructDataChunk(_chunks[_end.first + _end.second], *first);
 					++_end.second;
 					if (_end.second == _chunkSize)
 					{
