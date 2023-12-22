@@ -59,9 +59,9 @@ namespace ft
 		//PRIVATE MEMBERS
 
 		_base							_chunks;
-		static const int				_chunkSize = 8;
-		//_chunkSize is int for signed operations later,
-		//so I'll not need to recast it for signed result
+		static const difference_type	_chunkSize = 8;
+		//_chunkSize is difference_type for signed operations later,
+		//so I'll not need to recast it for any signed results
 		_elt							_begin;
 		_elt							_end;
 
@@ -78,9 +78,9 @@ namespace ft
 		private:
 
 			_baseIterator	_basePosition;
-			int				_chunkPosition;
+			difference_type	_chunkPosition;
 
-			MyIterator(const _baseIterator& b, int c) : _basePosition(b), _chunkPosition(c) {}
+			MyIterator(const _baseIterator& b, difference_type c) : _basePosition(b), _chunkPosition(c) {}
 
 			MyIterator& _move(difference_type val)
 			{
@@ -166,7 +166,306 @@ namespace ft
 				return &_basePosition[_chunkPosition];
 			}
 
+			MyIterator& operator++()
+			{
+				_move(1);
+				return (*this);
+			}
+
+			MyIterator	operator++(int)
+			{
+				MyIterator	tmp(*this);
+				_move(1);
+				return (tmp);
+			}
+
+			MyIterator& operator--()
+			{
+				_move(-1);
+				return (*this);
+			}
+
+			MyIterator	operator--(int)
+			{
+				MyIterator	tmp(*this);
+				_move(-1);
+				return (tmp);
+			}
+
+			MyIterator	operator+(difference_type val)	const
+			{
+				MyIterator	newIt;
+
+				newIt += val;
+				return (newIt);
+			}
+
+			MyIterator	operator-(difference_type val)	const
+			{
+				MyIterator	newIt;
+
+				newIt -= val;
+				return (newIt);
+			}
+
+			difference_type operator-(const MyIterator& other)	const
+			{
+				return (_chunkSize * (_basePosition - other._basePosition) + (_chunkPosition - other._chunkPosition));
+			}
+
+			difference_type operator-(const MyConstIterator& other)	const
+			{
+				return (_chunkSize * (_basePosition - other._basePosition) + (_chunkPosition - other._chunkPosition));
+			}
+
+			bool	operator<(const MyIterator& other)	const
+			{
+				return (_basePosition < other._basePosition ||
+						(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+			}
+
+			bool	operator<(const MyConstIterator& other)	const
+			{
+				return (_basePosition < other._basePosition ||
+					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+			}
+
+			bool	operator<=(const MyIterator& other)	const
+			{
+				return !(other < *this);
+			}
+
+			bool	operator<=(const MyConstIterator& other)	const
+			{
+				return !(other < *this);
+			}
+
+			bool	operator>(const MyIterator& other)	const
+			{
+				return (other < *this);
+			}
+
+			bool	operator>(const MyConstIterator& other)	const
+			{
+				return (other < *this);
+			}
+
+			bool	operator>=(const MyIterator& other)	const
+			{
+				return !(*this < other);
+			}
+
+			bool	operator>=(const MyConstIterator& other)	const
+			{
+				return !(*this < other);
+			}
+
+			reference	operator[](int val)
+			{
+				return *(*this + val);
+			}
 		};
+
+		class MyConstIterator : public ft::iterator< ft::bidirectional_iterator_tag, const value_type >
+		{
+			friend ft::deque<value_type>;
+			friend MyIterator;
+
+		private:
+
+			_baseIterator	_basePosition;
+			difference_type	_chunkPosition;
+
+			MyConstIterator(const _baseIterator& b, difference_type c) : _basePosition(b), _chunkPosition(c) {}
+
+			MyConstIterator& _move(difference_type val)
+			{
+				_basePosition += val / _chunkSize;
+				_chunkPosition += val % _chunkSize;
+				if (_chunkPosition < 0)
+				{
+					--_basePosition;
+					_chunkPosition += _chunkSize;
+				}
+				else if (_chunkPosition >= _chunkSize)
+				{
+					++_basePosition;
+					_chunkPosition -= _chunkSize;
+				}
+				return *this;
+			}
+
+		public:
+
+			MyConstIterator() : _chunkPosition(0) {}
+			MyConstIterator(const MyConstIterator& o) : _basePosition(o._basePosition), _chunkPosition(o._chunkPosition) {}
+			MyConstIterator(const MyIterator& o) : _basePosition(o._basePosition), _chunkPosition(o._chunkPosition) {}
+			~MyConstIterator() {}
+
+			bool	operator==(const MyIterator& other)	const
+			{
+				return (_basePosition == other._basePosition && _chunkPosition == other._chunkPosition);
+			}
+
+			bool	operator==(const MyConstIterator& other)	const
+			{
+				return (_basePosition == other._basePosition && _chunkPosition == other._chunkPosition);
+			}
+
+			bool	operator!=(const MyIterator& other)	const
+			{
+				return !(*this == other);
+			}
+
+			bool	operator!=(const MyConstIterator& other)	const
+			{
+				return !(*this == other);
+			}
+
+			bool operator=(const MyIterator& o)
+			{
+				if (o != *this)
+				{
+					_basePosition = o._basePosition;
+					_chunkPosition = o._basePosition;
+				}
+				return *this;
+			}
+
+			bool operator=(const MyConstIterator& o)
+			{
+				if (o != *this)
+				{
+					_basePosition = o._basePosition;
+					_chunkPosition = o._basePosition;
+				}
+				return *this;
+			}
+
+			MyIterator& operator+=(difference_type val)
+			{
+				return _move(val);
+			}
+
+			MyIterator& operator-=(difference_type val)
+			{
+				return _move(-val);
+			}
+
+			const_reference	operator*()
+			{
+				return _basePosition[_chunkPosition];
+			}
+
+			const_pointer		operator->()
+			{
+				return &_basePosition[_chunkPosition];
+			}
+
+			MyConstIterator& operator++()
+			{
+				_move(1);
+				return (*this);
+			}
+
+			MyConstIterator	operator++(int)
+			{
+				MyConstIterator	tmp(*this);
+				_move(1);
+				return (tmp);
+			}
+
+			MyConstIterator& operator--()
+			{
+				_move(-1);
+				return (*this);
+			}
+
+			MyConstIterator	operator--(int)
+			{
+				MyConstIterator	tmp(*this);
+				_move(-1);
+				return (tmp);
+			}
+
+			MyConstIterator	operator+(difference_type val)	const
+			{
+				MyConstIterator	newIt;
+
+				newIt += val;
+				return (newIt);
+			}
+
+			MyConstIterator	operator-(difference_type val)	const
+			{
+				MyConstIterator	newIt;
+
+				newIt -= val;
+				return (newIt);
+			}
+
+			difference_type operator-(const MyIterator& other)	const
+			{
+				return (_chunkSize * (_basePosition - other._basePosition) + (_chunkPosition - other._chunkPosition));
+			}
+
+			difference_type operator-(const MyConstIterator& other)	const
+			{
+				return (_chunkSize * (_basePosition - other._basePosition) + (_chunkPosition - other._chunkPosition));
+			}
+
+			bool	operator<(const MyIterator& other)	const
+			{
+				return (_basePosition < other._basePosition ||
+					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+			}
+
+			bool	operator<(const MyConstIterator& other)	const
+			{
+				return (_basePosition < other._basePosition ||
+					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+			}
+
+			bool	operator<=(const MyIterator& other)	const
+			{
+				return !(other < *this);
+			}
+
+			bool	operator<=(const MyConstIterator& other)	const
+			{
+				return !(other < *this);
+			}
+
+			bool	operator>(const MyIterator& other)	const
+			{
+				return (other < *this);
+			}
+
+			bool	operator>(const MyConstIterator& other)	const
+			{
+				return (other < *this);
+			}
+
+			bool	operator>=(const MyIterator& other)	const
+			{
+				return !(*this < other);
+			}
+
+			bool	operator>=(const MyConstIterator& other)	const
+			{
+				return !(*this < other);
+			}
+
+			const_reference	operator[](int val)
+			{
+				return *(*this + val);
+			}
+		};
+
+		typedef MyIterator								iterator;
+		typedef MyConstIterator							const_iterator;
+		typedef ft::reverse_iterator<iterator>			reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator>	const_reverse_iterator;
 	};
 }
 
