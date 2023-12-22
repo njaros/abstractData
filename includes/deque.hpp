@@ -631,6 +631,21 @@ namespace ft
 			}
 
 		}
+		
+		//DESTRUCTOR
+
+		~deque()
+		{
+			for (iterator it = begin(); it != end(); ++it)
+			{
+				_alloc.destroy(&(*it));
+			}
+			for (_baseIterator it = _chunks.begin(); it != _chunks.end(); ++it)
+			{
+				_deleteChunk(&(*it));
+			}
+		}
+		
 		//BEGIN END ITERATORS REVERSE_ITERATORS
 
 		iterator	begin() {
