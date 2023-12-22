@@ -248,6 +248,8 @@ int main()
 			std::cout << e.what() << std::endl;
 		}
 		displayData(b, "b");*/
+		int i = -7;
+		std::cout << i % (size_t)4 << std::endl;
 	}
 
 	return 0;
