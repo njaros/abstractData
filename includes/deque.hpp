@@ -26,7 +26,7 @@ namespace ft
 	class deque
 	{
 
-		//THEY USED TO BE FRIENDS
+		//THEY HAVE TO BE FRIENDS
 
 		friend class MyIterator;
 		friend class MyConstIterator;
@@ -54,16 +54,18 @@ namespace ft
 		typedef typename _base::iterator		_baseIterator;
 		typedef typename _base::const_iterator	_baseConstIterator;
 		typedef typename _base::difference_type	_baseDifferenceType;
-		typedef ft::pair< _baseSizeType, int >	_elt;
+		typedef ft::pair< _baseSizeType, int >	_edge;
 
 		//PRIVATE MEMBERS
 
 		_base							_chunks;
+		Alloc							_alloc;
+		size_type						_size;
 		static const difference_type	_chunkSize = 8;
 		//_chunkSize is difference_type for signed operations later,
 		//so I'll not need to recast it for any signed results
-		_elt							_begin;
-		_elt							_end;
+		_edge							_begin;
+		_edge							_end;
 
 	public:
 
@@ -221,7 +223,7 @@ namespace ft
 			bool	operator<(const MyIterator& other)	const
 			{
 				return (_basePosition < other._basePosition ||
-						(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
 			}
 
 			bool	operator<(const MyConstIterator& other)	const
@@ -466,6 +468,187 @@ namespace ft
 		typedef MyConstIterator							const_iterator;
 		typedef ft::reverse_iterator<iterator>			reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>	const_reverse_iterator;
+
+	private:
+
+		//CHUNK HANDLER FUNCTIONS
+
+		_chunk _getNewChunk()
+		{
+			_chunk toRet;
+
+			toRet = _alloc.allocate(_chunkSize);
+			if (!toRet)
+				throw(ft::bad_alloc("ft::deque : failed to allocate a chunk."));
+			return toRet;
+		}
+
+		void	_constructDataChunk(_chunk, size_t pos, const value_type& data = value_type())
+		{
+			_alloc.construct(_chunk + pos, data);
+		}
+
+		void	_destroyDataChunk(_chunk, size_t start, size_t lenght)
+		{
+			while (lenght--)
+				_alloc.destroy(_chunk + start++);
+		}
+
+		void	_deleteChunk(_chunk& chunk)
+		{
+			_alloc.deallocate(chunk, _chunkSize);
+			chunk = 0;
+		}
+
+		void	_moveChunkLeft(iterator position, _baseSizeType holeChunkSize)
+		{
+
+		}
+
+		void	_moveDataLeft(iterator position, size_type holeSize) //insert BEFORE position
+		{
+			size_type chunkNeed;
+
+			if (holeSize)
+			{
+				chunkNeed = holeSize / _chunkSize;
+				if (holeSize % _chunkSize)
+					++chunkNeed;
+				else
+				{
+					_moveChunkLeft(position, chunkNeed);
+					return;
+				}
+			}
+		}
+
+		void	_moveDataRight(iterator position, size_type holeSize) //insert BEFORE position
+		{
+
+		}
+
+	public:
+
+		//CONSTRUCTORS
+
+		deque(const allocator_type& alloc = allocator_type()) :
+			_alloc(alloc),
+			_size(0),
+			_begin(ft::make_pair(0, 0)),
+			_end(_begin)
+		{}
+		deque(size_type n, const value_type& val, const allocator_type& alloc = allocator_type()) :
+			_alloc(alloc),
+			_size(n),
+			_begin(ft::make_pair(0, 0)),
+			_end(_begin)
+		{
+			_baseSizeType	size;
+
+			if (_size)
+			{
+				size = _size / _chunkSize;
+				if (_size % _chunkSize)
+					++size;
+				_base.assign(size, nullptr);
+				while (n--)
+				{
+					if (_end.second == 0)
+						_base[_end.first] = _getNewChunk();
+					_constructDataChunk(_base[_end.first] + _end.second, val);
+					++_end.second;
+					if (_end.second == _chunkSize)
+					{
+						++_end.first;
+						_end.second = 0;
+					}
+				}
+			}
+
+		}
+		deque(const deque& o) :
+			_alloc(o._alloc),
+			_size(o._size),
+			_begin(ft::make_pair(0, 0)),
+			_end(_begin)
+		{
+			_baseSizeType	size;
+
+			if (_size)
+			{
+				size = _size / _chunkSize;
+				if (_size % _chunkSize)
+					++size;
+				_base.assign(size, nullptr);
+				for (const_iterator cit = o._begin(); cit != o._end(); ++cit)
+				{
+					if (_end.second == 0)
+						_base[_end.first] = _getNewChunk();
+					_constructDataChunk(_base[_end.first + _end.second], *cit);
+					++_end.second;
+					if (_end.second == _chunkSize)
+					{
+						++_end.first;
+						_end.second = 0;
+					}
+				}
+			}
+		}
+		template< class InputIterator >
+		deque(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
+			enable_if<!ft::is_integral< InputIterator >::value >::type* = 0) :
+			_alloc(alloc),
+			_size(0),
+			_begin(ft::make_pair(0, 0)),
+			_end(_begin)
+		{
+			difference_type dist;
+			_baseSizeType	baseSize;
+
+			if (first != last)
+			{
+				dist = ft::distance<InputIterator>(first, last);
+				if (dist < 0)
+					throw (ft::length_error("deque::deque(random_access_iterator first, random_access_iterator last) : first must be < last"));
+				_size = dist;
+				baseSize = _size / _chunkSize;
+				if (_size % _chunkSize)
+					++baseSize;
+				_base.assign(baseSize, nullptr);
+				while (first != last)
+				{
+					if (_end.second == 0)
+						_base[_end.first] = _getNewChunk();
+					_constructDataChunk(_base[_end.first + _end.second], *first);
+					++_end.second;
+					if (_end.second == _chunkSize)
+					{
+						++_end.first;
+						_end.second = 0;
+					}
+					++first;
+				}
+			}
+
+		}
+		//BEGIN END ITERATORS REVERSE_ITERATORS
+
+		iterator	begin() {
+			return iterator(_base.begin() + _begin.first, _begin.second);
+		}
+		const_iterator begin() {
+			return const_iterator(_base.begin() + _begin.first, _begin.second);
+		}
+		iterator	end() {
+			return iterator(_base.begin() + _end.first, _end.second);
+		}
+		const_iterator	end() {
+			return const_iterator(_base.begin() + _end.first, _end.second);
+		}
+		reverse_iterator		rbegin() { return reverse_iterator(end()); }
+		const_reverse_iterator	rbegin() { return const_reverse_iterator(end()); }
+		reverse_iterator		rend() { return reverse_iterator(begin()); }
+		const_reverse_iterator	rend() { return const_reverse_iterator(begin()); }
 	};
 }
 

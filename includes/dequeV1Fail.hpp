@@ -605,7 +605,7 @@ namespace ft
 				difference_type dist = ft::distance<InputIterator>(first, last);
 				size_type idx = 0;
 				if (dist < 0)
-					throw (ft::length_error("deque::deque(random_access_iterator first, random_access_iterator last) : First must be > last"));
+					throw (ft::length_error("deque::deque(random_access_iterator first, random_access_iterator last) : First must be < last"));
 				_size = dist;
 				_capacity = 3 * _size;
 				_trueFirstPtr = _al.allocate(3 * _size);

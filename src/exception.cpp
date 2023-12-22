@@ -58,6 +58,11 @@ namespace ft
 		setMsg(str);
 	}
 
+	bad_alloc::bad_alloc(const std::string& str) : exception::exception()
+	{
+		setMsg(str);
+	}
+
 	out_of_range::out_of_range(const std::string& str) : logic_error::logic_error(str)
 	{}
 

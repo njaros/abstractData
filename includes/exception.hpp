@@ -32,6 +32,12 @@ namespace ft
 		explicit logic_error(const std::string& str);
 	};
 
+	class bad_alloc : public exception
+	{
+	public:
+		explicit bad_alloc(const std::string& str);
+	};
+
 	class out_of_range : public logic_error
 	{
 	public:
