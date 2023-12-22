@@ -555,7 +555,7 @@ namespace ft
 				{
 					if (_end.second == 0)
 						_chunks[_end.first] = _getNewChunk();
-					_constructDataChunk(_chunks[_end.first] + _end.second, val);
+					_constructDataChunk(_chunks[_end.first], _end.second, val);
 					++_end.second;
 					if (_end.second == _chunkSize)
 					{
@@ -584,7 +584,7 @@ namespace ft
 				{
 					if (_end.second == 0)
 						_chunks[_end.first] = _getNewChunk();
-					_constructDataChunk(_chunks[_end.first + _end.second], *cit);
+					_constructDataChunk(_chunks[_end.first], _end.second, *cit);
 					++_end.second;
 					if (_end.second == _chunkSize)
 					{
@@ -619,7 +619,7 @@ namespace ft
 				{
 					if (_end.second == 0)
 						_chunks[_end.first] = _getNewChunk();
-					_constructDataChunk(_chunks[_end.first + _end.second], *first);
+					_constructDataChunk(_chunks[_end.first], _end.second, *first);
 					++_end.second;
 					if (_end.second == _chunkSize)
 					{
