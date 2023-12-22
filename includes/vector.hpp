@@ -219,8 +219,6 @@ class vector
 
                 virtual pointer base()	const	{return (_p);}
 
-				difference_type ptrDiff() const { return (reinterpret_cast<difference_type>(_p)); }
-
 			private :
 
 				value_type		*_p;

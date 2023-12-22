@@ -134,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="includes\algorithm.hpp" />
     <ClInclude Include="includes\deque.hpp" />
+    <ClInclude Include="includes\dequeV1Fail.hpp" />
     <ClInclude Include="includes\enable_if.hpp" />
     <ClInclude Include="includes\equal.hpp" />
     <ClInclude Include="includes\exception.hpp" />

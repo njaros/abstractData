@@ -130,8 +130,6 @@ namespace ft {
 
 			node<value_type> *base()	const {return (_p);}
 
-            difference_type ptrDiff() const { return 0; }
-
         };
 
 		class MyConstIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type> {

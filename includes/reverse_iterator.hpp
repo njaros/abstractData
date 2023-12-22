@@ -63,8 +63,6 @@ namespace ft {
             return (base()[-n - 1]);
         }
 
-        difference_type ptrDiff() const { return -(base().ptrDiff()); }
-
     private :
 
         iterator_type _revIt;

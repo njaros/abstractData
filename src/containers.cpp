@@ -235,13 +235,19 @@ int main()
 	}
 	std::cout << "\n\n-----deque tests-----\n\n\n";
 	{
-
+/*
 		ft::deque<int> a(4, 13);
 		ft::deque<int> b(8, 8);
 
 		displayData(b, "b");
-		b.assign(a.end(), a.begin());
-		displayData(b, "b");
+		try {
+			b.assign(a.end(), a.begin());
+		}
+		catch (ft::exception& e)
+		{
+			std::cout << e.what() << std::endl;
+		}
+		displayData(b, "b");*/
 	}
 
 	return 0;

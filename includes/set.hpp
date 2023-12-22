@@ -107,7 +107,6 @@ namespace ft {
 
 			node<value_type> *base()	const	{return (_p);}
 
-            difference_type ptrDiff() const     { return 0; }
         };
 
         typedef MyIterator									iterator;
