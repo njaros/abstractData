@@ -40,10 +40,10 @@ namespace ft
 
 		typedef T			value_type;
 		typedef Alloc		allocator_type;
-		typedef T&			reference;
-		typedef const T&	const_reference;
-		typedef T*			pointer;
-		typedef const T*	const_pointer;
+		typedef T& reference;
+		typedef const T& const_reference;
+		typedef T* pointer;
+		typedef const T* const_pointer;
 		typedef ptrdiff_t	difference_type;
 		typedef size_t		size_type;
 
@@ -516,6 +516,23 @@ namespace ft
 			return !_isRightSide(it);
 		}
 
+		_edge	_edgeCastFromIterator(iterator it) const
+		{
+			difference_type	dist;
+			_edge			result;
+
+			dist = it - begin();
+			result = _begin;
+			result.first += dist / _chunkSize;
+			result.second += dist % _chunkSize;
+			if (result.second >= _chunkSize)
+			{
+				++result.first;
+				result.second -= _chunkSize;
+			}
+			return result;
+		}
+
 		//CHUNK HANDLER FUNCTIONS
 
 		_chunk _getNewChunk()
@@ -542,6 +559,58 @@ namespace ft
 		void	_deleteChunk(_chunk chunk)
 		{
 			_alloc.deallocate(chunk, _chunkSize);
+		}
+
+		void	_clearBase(_base& base)
+		{
+			for (_baseIterator it = base.begin(); it != base.end(); ++it)
+				_deleteChunk(*it);
+			base.clear();
+		}
+
+		iterator	_reallocBase(_baseSizeType holeSize, iterator holeStart)
+		{
+			_baseSizeType	sizeNeed = holeSize + (_end.first - _begin.first + 1);
+			_base			newBase(3 * sizeNeed, nullptr);
+			_baseSizeType	idx = 0;
+			_edge			edgeHole = _edgeCastFromIterator(holeStart);
+			iterator		toReturn;
+
+			while (idx < newBase.size())
+			{
+				if (idx < _begin.first + sizeNeed || idx > _end.first + sizeNeed)
+					newBase[idx] = _getNewChunk();
+				else
+				{
+					if (idx < edgeHole.first + sizeNeed)
+						newBase[idx] = _chunk[idx - sizeNeed];
+					else if (idx > edgeHole.first + sizeNeed + holeSize)
+						newBase[idx] = _chunk[idx - sizeNeed - holeSize];
+					else
+					{
+						if (idx == edgeHole.first + sizeNeed)
+						{
+							newBase[idx] = _getNewChunk();
+							for (int i = 0; i < edgeHole.second; ++i)
+								_constructDataChunk(newBase[idx], i, _chunks[edgeHole.first][i]);
+							toReturn = iterator(newBase.begin() + idx, edgeHole.second);
+						}
+						else if (idx == edgeHole.first + sizeNeed + holeSize)
+						{
+							newBase[idx] = _chunk[edgeHole.first];
+							_destroyDataChunk(newBase[idx], 0, edgeHole.second);
+						}
+						else
+							newBase[idx] = _getNewChunk();
+					}
+				}
+				++idx;
+			}
+			newBase.swap(_chunks);
+			_clearBase(newBase);
+			_begin.first += sizeNeed;
+			_end.first += sizeNeed + holeSize;
+			return toReturn;
 		}
 
 		iterator	_moveChunkLeft(iterator position, _baseSizeType holeChunkSize)
@@ -572,7 +641,7 @@ namespace ft
 			chunkAvailable = _chunks.size() - (_end.first + 1);
 			if (chunkAvailable < holeChunkSize)
 			{
-				return _reallocBase(_size + holeChunkSize)
+				return _reallocBase(holeChunkSize, position);
 			}
 		}
 
@@ -585,7 +654,7 @@ namespace ft
 			{
 				chunkNeed = holeSize / _chunkSize;
 				modulo = holeSize % _chunkSize;
-				if (modulo + _end.second >= _chunkSize)
+				if (modulo > _begin.second)
 					++chunkNeed;
 				position = _moveChunkRight(position, chunkNeed);
 				return _moveModuloRight(position, modulo);
@@ -696,7 +765,7 @@ namespace ft
 			}
 
 		}
-		
+
 		//DESTRUCTOR
 
 		~deque()
@@ -705,13 +774,9 @@ namespace ft
 			{
 				_alloc.destroy(&(*it));
 			}
-			for (_baseIterator it = _chunks.begin(); it != _chunks.end(); ++it)
-			{
-				_deleteChunk(*it);
-				*it = nullptr;
-			}
+			_clearBase(_chunks);
 		}
-		
+
 		//BEGIN END ITERATORS REVERSE_ITERATORS
 
 		iterator	begin() {
@@ -733,9 +798,9 @@ namespace ft
 
 		//CAPACITY
 
-		size_type	size() const		{ return _size; }
-		bool		empty() const		{ return !_size; }
-		size_type	max_size() const	{ return _alloc.max_size(); }
+		size_type	size() const { return _size; }
+		bool		empty() const { return !_size; }
+		size_type	max_size() const { return _alloc.max_size(); }
 		void		resize(size_type n, const value_type& val = value_type())
 		{
 			iterator it;
@@ -759,14 +824,14 @@ namespace ft
 		{
 			if (it < begin() || it > end())
 				throw(ft::out_of_range("ft::deque::insert : iterator is out of range");
-			
+
 			if (_isRightSide(it))
 				it = _moveDataRight(it, n);
 			else
 				it = _moveDataLeft(it, n);
 
-			//at this point, it is where the first element is constructed
-		
+			//at this point, iterator it is where the first element is constructed
+
 			while (n--)
 				_alloc.construct(&(*(it++)), val);
 		}
