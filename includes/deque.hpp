@@ -12,11 +12,14 @@
 # include "vector.hpp"
 
 /*
-* Documentation source : https://stackoverflow.com/questions/6292332/what-really-is-a-deque-in-stl
+* Documentation sources :
+* - https://stackoverflow.com/questions/6292332/what-really-is-a-deque-in-stl
+* - https://cplusplus.com/reference/deque/deque/
 * idees :
-* - la base est un vecteur de value_type[8] malloquées
-* - le vecteur contient autant de chunk vide (pointer = 0) avant et apres l'array de chunk pas vide
+* - la base est un vecteur de chunk = value_type[n] malloquées, n dependant du sizeof(value_type)
+* - le vecteur contient autant de chunk vide (chunk malloqué mais non construit) avant et apres l'array de chunk pas vide
 * apres chaque agrandissement du vecteur
+* - tout element de chunk en dehors de begin() et end() doit etre detruit ou non construit (mais pas desalloué)
 * - établir une base saine d'allocation et desallocation mémoire de chunk
 */
 
@@ -37,10 +40,10 @@ namespace ft
 
 		typedef T			value_type;
 		typedef Alloc		allocator_type;
-		typedef T& reference;
-		typedef const T& const_reference;
-		typedef T* pointer;
-		typedef const T* const_pointer;
+		typedef T&			reference;
+		typedef const T&	const_reference;
+		typedef T*			pointer;
+		typedef const T*	const_pointer;
 		typedef ptrdiff_t	difference_type;
 		typedef size_t		size_type;
 
@@ -61,9 +64,17 @@ namespace ft
 		_base							_chunks;
 		Alloc							_alloc;
 		size_type						_size;
-		static const difference_type	_chunkSize = 8;
+		static const size_type			_valueTypeSize = sizeof(value_type);
+		static const difference_type	_chunkSize
+			= _valueTypeSize <= 1 ? 16
+			: _valueTypeSize <= 2 ? 8
+			: _valueTypeSize <= 4 ? 4
+			: _valueTypeSize <= 8 ? 2
+			: 1;
 		//_chunkSize is difference_type for signed operations later,
-		//so I'll not need to recast it for any signed results
+		//so I'll not need to recast it for any signed results.
+		//The size depends of how it is worth to copy the element adress unstead of the element himself
+		//when the data needs to move.
 		_edge							_begin;
 		_edge							_end;
 
@@ -471,6 +482,40 @@ namespace ft
 
 	private:
 
+		//UTILITIES
+
+		_edge& _edgeAdd(_edge& e, difference_type d)
+		{
+			e.first += d / _chunkSize;
+			e.second += d % _chunkSize;
+			if (e.second < 0)
+			{
+				--e.first;
+				e.second += _chunkSize;
+			}
+			else if (e.second >= _chunkSize)
+			{
+				++e.first;
+				e.second -= _chunkSize;
+			}
+			return e;
+		}
+
+		_edge& _edgeSub(_edge& e, difference_type d)
+		{
+			return _edgeAdd(e, -d);
+		}
+
+		bool	_isRightSide(const_iterator it) const
+		{
+			return ((it - begin()) >= (end() - it));
+		}
+
+		bool	_isLeftSide(const_iterator it) const
+		{
+			return !_isRightSide(it);
+		}
+
 		//CHUNK HANDLER FUNCTIONS
 
 		_chunk _getNewChunk()
@@ -499,31 +544,52 @@ namespace ft
 			_alloc.deallocate(chunk, _chunkSize);
 		}
 
-		void	_moveChunkLeft(iterator position, _baseSizeType holeChunkSize)
+		iterator	_moveChunkLeft(iterator position, _baseSizeType holeChunkSize)
 		{
 
 		}
 
-		void	_moveDataLeft(iterator position, size_type holeSize) //insert BEFORE position
+		iterator	_moveDataLeft(iterator position, size_type holeSize) //insert hole BEFORE position
 		{
-			size_type chunkNeed;
+			size_type	chunkNeed;
+			size_type	modulo;
 
 			if (holeSize)
 			{
 				chunkNeed = holeSize / _chunkSize;
-				if (holeSize % _chunkSize)
+				modulo = holeSize % _chunkSize;
+				if (modulo + _end.second >= _chunkSize)
 					++chunkNeed;
-				else
-				{
-					_moveChunkLeft(position, chunkNeed);
-					return;
-				}
+				position = _moveChunkLeft(position, chunkNeed);
+				return _moveModuloLeft(position, modulo);
 			}
 		}
 
-		void	_moveDataRight(iterator position, size_type holeSize) //insert BEFORE position
+		iterator	_moveChunkRight(iterator position, _baseSizeType holeChunkSize)
 		{
+			_baseSizeType	chunkAvailable;
 
+			chunkAvailable = _chunks.size() - (_end.first + 1);
+			if (chunkAvailable < holeChunkSize)
+			{
+				return _reallocBase(_size + holeChunkSize)
+			}
+		}
+
+		iterator	_moveDataRight(iterator position, size_type holeSize) //insert hole BEFORE position
+		{
+			size_type	chunkNeed;
+			size_type	modulo;
+
+			if (holeSize)
+			{
+				chunkNeed = holeSize / _chunkSize;
+				modulo = holeSize % _chunkSize;
+				if (modulo + _end.second >= _chunkSize)
+					++chunkNeed;
+				position = _moveChunkRight(position, chunkNeed);
+				return _moveModuloRight(position, modulo);
+			}
 		}
 
 	public:
@@ -664,6 +730,47 @@ namespace ft
 		const_reverse_iterator	rbegin() const { return const_reverse_iterator(end()); }
 		reverse_iterator		rend() { return reverse_iterator(begin()); }
 		const_reverse_iterator	rend() const { return const_reverse_iterator(begin()); }
+
+		//CAPACITY
+
+		size_type	size() const		{ return _size; }
+		bool		empty() const		{ return !_size; }
+		size_type	max_size() const	{ return _alloc.max_size(); }
+		void		resize(size_type n, const value_type& val = value_type())
+		{
+			iterator it;
+
+			if (n < _size)
+			{
+				it = end();
+				_edgeSub(_end, (_size - n));
+				while (_size-- > n)
+					_alloc.destroy(&(*(--it)));
+			}
+			else if (n > _size)
+				insert(end(), n - _size, val);
+		}
+
+		//ELEMENT ACCESS
+
+		//MODIFIERS
+
+		void	insert(iterator it, size_type n, const value_type& val)
+		{
+			if (it < begin() || it > end())
+				throw(ft::out_of_range("ft::deque::insert : iterator is out of range");
+			
+			if (_isRightSide(it))
+				it = _moveDataRight(it, n);
+			else
+				it = _moveDataLeft(it, n);
+
+			//at this point, it is where the first element is constructed
+		
+			while (n--)
+				_alloc.construct(&(*(it++)), val);
+		}
+
 	};
 }
 
