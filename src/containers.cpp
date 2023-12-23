@@ -235,21 +235,30 @@ int main()
 	}
 	std::cout << "\n\n-----deque tests-----\n\n\n";
 	{
-/*
+
 		ft::deque<int> a(4, 13);
 		ft::deque<int> b(8, 8);
+		ft::deque<int> c(a);
 
-		displayData(b, "b");
-		try {
+		ft::vector<std::string> v(7, "pouet");
+		v.push_back("pas pouet");
+		ft::deque<std::string> pouet(v.begin(), v.end());
+		ft::deque<std::string> revPouet(v.rbegin(), v.rend());
+		ft::deque<std::string> revPouetFromPouet(pouet.rbegin(), pouet.rend());
+
+		displayData(a, "a");
+		/*try {
 			b.assign(a.end(), a.begin());
 		}
 		catch (ft::exception& e)
 		{
 			std::cout << e.what() << std::endl;
-		}
-		displayData(b, "b");*/
-		int i = -7;
-		std::cout << i % (size_t)4 << std::endl;
+		}*/
+		displayData(b, "b");
+		displayData(c, "c");
+		displayData(pouet, "pouet");
+		displayData(revPouet, "revPouet");
+		displayData(revPouetFromPouet, "revPouetFromPouet");
 	}
 
 	return 0;

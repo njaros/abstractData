@@ -824,7 +824,6 @@ class vector
 
 	private :
 
-		value_type		_x;
 		allocator_type	_alloc;
 		pointer			_firstPtr;
 		pointer			_ptr;

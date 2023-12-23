@@ -128,22 +128,22 @@ namespace ft
 				return !(*this == other);
 			}
 
-			bool operator=(const MyIterator& o)
+			MyIterator& operator=(const MyIterator& o)
 			{
 				if (o != *this)
 				{
 					_basePosition = o._basePosition;
-					_chunkPosition = o._basePosition;
+					_chunkPosition = o._chunkPosition;
 				}
 				return *this;
 			}
 
-			bool operator=(const MyConstIterator& o)
+			MyIterator& operator=(const MyConstIterator& o)
 			{
 				if (o != *this)
 				{
 					_basePosition = o._basePosition;
-					_chunkPosition = o._basePosition;
+					_chunkPosition = o._chunkPosition;
 				}
 				return *this;
 			}
@@ -160,12 +160,12 @@ namespace ft
 
 			reference	operator*()
 			{
-				return _basePosition[_chunkPosition];
+				return (*_basePosition)[(int)_chunkPosition];
 			}
 
 			pointer		operator->()
 			{
-				return &_basePosition[_chunkPosition];
+				return &(*(*this));
 			}
 
 			MyIterator& operator++()
@@ -275,10 +275,10 @@ namespace ft
 
 		private:
 
-			_baseIterator	_basePosition;
+			_baseConstIterator	_basePosition;
 			difference_type	_chunkPosition;
 
-			MyConstIterator(const _baseIterator& b, difference_type c) : _basePosition(b), _chunkPosition(c) {}
+			MyConstIterator(const _baseConstIterator& b, difference_type c) : _basePosition(b), _chunkPosition(c) {}
 
 			MyConstIterator& _move(difference_type val)
 			{
@@ -319,22 +319,22 @@ namespace ft
 				return !(*this == other);
 			}
 
-			bool	operator!=(const MyConstIterator& other)	const
+			bool operator!=(const MyConstIterator& other)	const
 			{
 				return !(*this == other);
 			}
 
-			bool operator=(const MyIterator& o)
+			MyConstIterator& operator=(const MyIterator& o)
 			{
 				if (o != *this)
 				{
 					_basePosition = o._basePosition;
-					_chunkPosition = o._basePosition;
+					_chunkPosition = o._chunkPosition;
 				}
 				return *this;
 			}
 
-			bool operator=(const MyConstIterator& o)
+			MyConstIterator& operator=(const MyConstIterator& o)
 			{
 				if (o != *this)
 				{
@@ -356,12 +356,12 @@ namespace ft
 
 			const_reference	operator*()
 			{
-				return _basePosition[_chunkPosition];
+				return (*_basePosition)[_chunkPosition];
 			}
 
 			const_pointer		operator->()
 			{
-				return &_basePosition[_chunkPosition];
+				return &(*(*this));
 			}
 
 			MyConstIterator& operator++()
@@ -483,21 +483,20 @@ namespace ft
 			return toRet;
 		}
 
-		void	_constructDataChunk(_chunk, size_t pos, const value_type& data = value_type())
+		void	_constructDataChunk(_chunk chunk, size_t pos, const value_type& data = value_type())
 		{
-			_alloc.construct(_chunk + pos, data);
+			_alloc.construct(chunk + pos, data);
 		}
 
-		void	_destroyDataChunk(_chunk, size_t start, size_t lenght)
+		void	_destroyDataChunk(_chunk chunk, size_t start, size_t lenght)
 		{
 			while (lenght--)
-				_alloc.destroy(_chunk + start++);
+				_alloc.destroy(chunk + start++);
 		}
 
-		void	_deleteChunk(_chunk& chunk)
+		void	_deleteChunk(_chunk chunk)
 		{
 			_alloc.deallocate(chunk, _chunkSize);
-			chunk = 0;
 		}
 
 		void	_moveChunkLeft(iterator position, _baseSizeType holeChunkSize)
@@ -580,7 +579,7 @@ namespace ft
 				if (_size % _chunkSize)
 					++size;
 				_chunks.assign(size, nullptr);
-				for (const_iterator cit = o._begin(); cit != o._end(); ++cit)
+				for (const_iterator cit = o.begin(); cit != o.end(); ++cit)
 				{
 					if (_end.second == 0)
 						_chunks[_end.first] = _getNewChunk();
@@ -642,28 +641,29 @@ namespace ft
 			}
 			for (_baseIterator it = _chunks.begin(); it != _chunks.end(); ++it)
 			{
-				_deleteChunk(&(*it));
+				_deleteChunk(*it);
+				*it = nullptr;
 			}
 		}
 		
 		//BEGIN END ITERATORS REVERSE_ITERATORS
 
 		iterator	begin() {
-			return iterator(_base.begin() + _begin.first, _begin.second);
+			return iterator(_chunks.begin() + _begin.first, _begin.second);
 		}
-		const_iterator begin() {
-			return const_iterator(_base.begin() + _begin.first, _begin.second);
+		const_iterator begin() const {
+			return const_iterator(_chunks.begin() + _begin.first, _begin.second);
 		}
 		iterator	end() {
-			return iterator(_base.begin() + _end.first, _end.second);
+			return iterator(_chunks.begin() + _end.first, _end.second);
 		}
-		const_iterator	end() {
-			return const_iterator(_base.begin() + _end.first, _end.second);
+		const_iterator	end() const {
+			return const_iterator(_chunks.begin() + _end.first, _end.second);
 		}
 		reverse_iterator		rbegin() { return reverse_iterator(end()); }
-		const_reverse_iterator	rbegin() { return const_reverse_iterator(end()); }
+		const_reverse_iterator	rbegin() const { return const_reverse_iterator(end()); }
 		reverse_iterator		rend() { return reverse_iterator(begin()); }
-		const_reverse_iterator	rend() { return const_reverse_iterator(begin()); }
+		const_reverse_iterator	rend() const { return const_reverse_iterator(begin()); }
 	};
 }
 
