@@ -568,13 +568,13 @@ namespace ft
 			base.clear();
 		}
 
-		iterator	_reallocBase(_baseSizeType holeSize, iterator holeStart)
+		std::pair<iterator, iterator>	_reallocBase(_baseSizeType holeSize, iterator holeStart)
 		{
 			_baseSizeType	sizeNeed = holeSize + (_end.first - _begin.first + 1);
 			_base			newBase(3 * sizeNeed, nullptr);
 			_baseSizeType	idx = 0;
 			_edge			edgeHole = _edgeCastFromIterator(holeStart);
-			iterator		toReturn;
+			std::pair<iterator, iterator>		toReturn;
 
 			while (idx < newBase.size())
 			{
@@ -593,12 +593,13 @@ namespace ft
 							newBase[idx] = _getNewChunk();
 							for (int i = 0; i < edgeHole.second; ++i)
 								_constructDataChunk(newBase[idx], i, _chunks[edgeHole.first][i]);
-							toReturn = iterator(newBase.begin() + idx, edgeHole.second);
+							toReturn.first = iterator(newBase.begin() + idx, edgeHole.second);
 						}
 						else if (idx == edgeHole.first + sizeNeed + holeSize)
 						{
 							newBase[idx] = _chunk[edgeHole.first];
 							_destroyDataChunk(newBase[idx], 0, edgeHole.second);
+							toReturn.second = iterator(newBase.begin() + idx, edgeHole.second);
 						}
 						else
 							newBase[idx] = _getNewChunk();
@@ -627,7 +628,7 @@ namespace ft
 			{
 				chunkNeed = holeSize / _chunkSize;
 				modulo = holeSize % _chunkSize;
-				if (modulo + _end.second >= _chunkSize)
+				if (modulo > _begin.second)
 					++chunkNeed;
 				position = _moveChunkLeft(position, chunkNeed);
 				return _moveModuloLeft(position, modulo);
@@ -637,27 +638,57 @@ namespace ft
 		iterator	_moveChunkRight(iterator position, _baseSizeType holeChunkSize)
 		{
 			_baseSizeType	chunkAvailable;
+			_baseSizeType	idx;
+			_edge			edgeHole;
+			_chunk			tmp;
 
 			chunkAvailable = _chunks.size() - (_end.first + 1);
 			if (chunkAvailable < holeChunkSize)
 			{
-				return _reallocBase(holeChunkSize, position);
+				return _reallocBase(holeChunkSize, position).second;
 			}
+			edgeHole = _edgeCastFromIterator(position);
+			_end.first += holeChunkSize;
+			idx = _end.first;
+			while (idx >= edgeHole.first + holeChunkSize)
+			{
+				tmp = _chunks[idx];
+				_chunks[idx] = _chunks[idx - holeChunkSize];
+				_chunks[idx - holeChunkSize] = tmp;
+				--idx;
+			}
+			for (int i = 0; i < edgeHole.second; ++i)
+				_constructDataChunk(_chunks[idx + 1 - holeChunkSize], i, _chunks[idx + 1][i]);
+			_destroyDataChunk(_chunks[idx + 1], 0, edgeHole.second);
+			while (idx > edgeHole.first)
+			{
+				_destroyDataChunk(_chunks[idx], 0, 8);
+				--idx;
+			}
+			return position + (_chunkSize * holeChunkSize);
+		}
+
+		iterator	_moveModulo(iterator position, difference_type modulo)
+		{
+
 		}
 
 		iterator	_moveDataRight(iterator position, size_type holeSize) //insert hole BEFORE position
 		{
-			size_type	chunkNeed;
-			size_type	modulo;
+			size_type		chunkNeed;
+			difference_type	modulo;
 
 			if (holeSize)
 			{
 				chunkNeed = holeSize / _chunkSize;
 				modulo = holeSize % _chunkSize;
-				if (modulo > _begin.second)
+				if (modulo + _end.second >= _chunkSize)
+				{
 					++chunkNeed;
+					modulo -= _chunkSize;
+				}
 				position = _moveChunkRight(position, chunkNeed);
-				return _moveModuloRight(position, modulo);
+				return _moveModulo(position, modulo);
 			}
 		}
 
@@ -826,14 +857,17 @@ namespace ft
 				throw(ft::out_of_range("ft::deque::insert : iterator is out of range");
 
 			if (_isRightSide(it))
+			{
 				it = _moveDataRight(it, n);
+				while (n--)
+					_alloc.construct(&(*(--it)), val);
+			}
 			else
+			{
 				it = _moveDataLeft(it, n);
-
-			//at this point, iterator it is where the first element is constructed
-
-			while (n--)
-				_alloc.construct(&(*(it++)), val);
+				while (n--)
+					_alloc.construct(&(*(it++)), val);
+			}
 		}
 
 	};
