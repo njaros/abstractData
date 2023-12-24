@@ -580,13 +580,18 @@ namespace ft
 			_baseSizeType	idx = 0;
 			std::pair<iterator, iterator>		toReturn;
 
+			for (int i = 0; i <= _chunks.size(); ++i)
+			{
+				printf("%x\n", _chunks[i]);
+			}
+
 			while (idx < newBase.size())
 			{
 				if (idx < sizeNeed || idx > 2 * sizeNeed)
 				{
-					if (idx < sizeNeed - preSpace)
+					if (idx < sizeNeed && idx >= sizeNeed - preSpace)
 						newBase[idx] = _chunks[chunksBegin++];
-					else if (idx > (2 * sizeNeed) + afterSpace)
+					else if (idx > 2 * sizeNeed && idx < (2 * sizeNeed) + afterSpace)
 						newBase[idx] = _chunks[chunksEnd++];
 					else
 						newBase[idx] = _getNewChunk();
@@ -924,16 +929,17 @@ namespace ft
 			if (_isRightSide(it))
 			{
 				_moveDataRight(it, n);
+				_size += n;
 				while (n--)
 					_alloc.construct(&(*(--it)), val);
 			}
 			else
 			{
 				_moveDataLeft(it, n);
+				_size += n;
 				while (n--)
 					_alloc.construct(&(*(it++)), val);
 			}
-			_size += n;
 		}
 
 	};
