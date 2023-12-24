@@ -234,13 +234,13 @@ namespace ft
 			bool	operator<(const MyIterator& other)	const
 			{
 				return (_basePosition < other._basePosition ||
-					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+					(_basePosition == other._basePosition && _chunkPosition < other._chunkPosition));
 			}
 
 			bool	operator<(const MyConstIterator& other)	const
 			{
 				return (_basePosition < other._basePosition ||
-					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+					(_basePosition == other._basePosition && _chunkPosition < other._chunkPosition));
 			}
 
 			bool	operator<=(const MyIterator& other)	const
@@ -430,13 +430,13 @@ namespace ft
 			bool	operator<(const MyIterator& other)	const
 			{
 				return (_basePosition < other._basePosition ||
-					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+					(_basePosition == other._basePosition && _chunkPosition < other._chunkPosition));
 			}
 
 			bool	operator<(const MyConstIterator& other)	const
 			{
 				return (_basePosition < other._basePosition ||
-					(_basePosition == other._basePosition && _chunkPosition < other._basePosition));
+					(_basePosition == other._basePosition && _chunkPosition < other._chunkPosition));
 			}
 
 			bool	operator<=(const MyIterator& other)	const
@@ -505,7 +505,7 @@ namespace ft
 		{
 			return _edgeAdd(e, -d);
 		}
-
+		
 		bool	_isRightSide(const_iterator it) const
 		{
 			return ((it - begin()) >= (end() - it));
@@ -568,24 +568,35 @@ namespace ft
 			base.clear();
 		}
 
-		std::pair<iterator, iterator>	_reallocBase(_baseSizeType holeSize, iterator holeStart)
+		std::pair<iterator, iterator>	_reallocBase(_baseSizeType holeSize, _edge& edgeHole)
 		{
+			size_type		distHoleFromBegin = edgeHole.first - _begin.first;
 			_baseSizeType	sizeNeed = holeSize + (_end.first - _begin.first + 1);
+			_baseSizeType	preSpace = _begin.first;
+			_baseSizeType	afterSpace = _chunks.size() - _end.first;
+			_baseSizeType	chunksBegin = 0;
+			_baseSizeType	chunksEnd = _end.first + 1;
 			_base			newBase(3 * sizeNeed, nullptr);
 			_baseSizeType	idx = 0;
-			_edge			edgeHole = _edgeCastFromIterator(holeStart);
 			std::pair<iterator, iterator>		toReturn;
 
 			while (idx < newBase.size())
 			{
-				if (idx < _begin.first + sizeNeed || idx > _end.first + sizeNeed)
-					newBase[idx] = _getNewChunk();
+				if (idx < sizeNeed || idx > 2 * sizeNeed)
+				{
+					if (idx < sizeNeed - preSpace)
+						newBase[idx] = _chunks[chunksBegin++];
+					else if (idx > (2 * sizeNeed) + afterSpace)
+						newBase[idx] = _chunks[chunksEnd++];
+					else
+						newBase[idx] = _getNewChunk();
+				}
 				else
 				{
 					if (idx < edgeHole.first + sizeNeed)
-						newBase[idx] = _chunk[idx - sizeNeed];
+						newBase[idx] = _chunks[idx - sizeNeed];
 					else if (idx > edgeHole.first + sizeNeed + holeSize)
-						newBase[idx] = _chunk[idx - sizeNeed - holeSize];
+						newBase[idx] = _chunks[idx - sizeNeed - holeSize];
 					else
 					{
 						if (idx == edgeHole.first + sizeNeed)
@@ -597,7 +608,7 @@ namespace ft
 						}
 						else if (idx == edgeHole.first + sizeNeed + holeSize)
 						{
-							newBase[idx] = _chunk[edgeHole.first];
+							newBase[idx] = _chunks[edgeHole.first];
 							_destroyDataChunk(newBase[idx], 0, edgeHole.second);
 							toReturn.second = iterator(newBase.begin() + idx, edgeHole.second);
 						}
@@ -608,46 +619,75 @@ namespace ft
 				++idx;
 			}
 			newBase.swap(_chunks);
-			_clearBase(newBase);
-			_begin.first += sizeNeed;
-			_end.first += sizeNeed + holeSize;
+			_begin.first = sizeNeed;
+			_end.first = sizeNeed + holeSize;
+			_edgeAdd(_end, _size);
+			edgeHole.first += sizeNeed + distHoleFromBegin;
 			return toReturn;
 		}
 
-		iterator	_moveChunkLeft(iterator position, _baseSizeType holeChunkSize)
-		{
-
-		}
-
-		iterator	_moveDataLeft(iterator position, size_type holeSize) //insert hole BEFORE position
-		{
-			size_type	chunkNeed;
-			size_type	modulo;
-
-			if (holeSize)
-			{
-				chunkNeed = holeSize / _chunkSize;
-				modulo = holeSize % _chunkSize;
-				if (modulo > _begin.second)
-					++chunkNeed;
-				position = _moveChunkLeft(position, chunkNeed);
-				return _moveModuloLeft(position, modulo);
-			}
-		}
-
-		iterator	_moveChunkRight(iterator position, _baseSizeType holeChunkSize)
+		void	_moveChunkLeft(iterator& position, _edge& edgeHole, _baseSizeType holeChunkSize)
 		{
 			_baseSizeType	chunkAvailable;
 			_baseSizeType	idx;
+			_chunk			tmp;
+
+			chunkAvailable = _begin.first;
+			if (chunkAvailable < holeChunkSize)
+			{
+				position = _reallocBase(holeChunkSize, edgeHole).first;
+				return;
+			}
+			_begin.first -= holeChunkSize;
+			idx = _begin.first;
+			while (idx < _begin.first + holeChunkSize)
+			{
+				tmp = _chunks[idx];
+				_chunks[idx] = _chunks[idx + holeChunkSize];
+				_chunks[idx + holeChunkSize] = tmp;
+				++idx;
+			}
+			for (int i = edgeHole.second - 1; i >= 0; --i)
+				_constructDataChunk(_chunks[idx], i, _chunks[idx + holeChunkSize][i]);
+			_destroyDataChunk(_chunks[idx + holeChunkSize], 0, edgeHole.second);
+			position -= (_chunkSize * holeChunkSize);
+		}
+
+		void	_moveDataLeft(iterator& position, size_type holeSize) //insert hole BEFORE position
+		{
+			_baseSizeType	chunkNeed;
+			difference_type	modulo;
 			_edge			edgeHole;
+
+			if (holeSize)
+			{
+				edgeHole = _edgeCastFromIterator(position);
+				chunkNeed = holeSize / _chunkSize;
+				modulo = holeSize % _chunkSize;
+				if (modulo > _begin.second)
+				{
+					++chunkNeed;
+					modulo -= _chunkSize;
+				}
+				_moveChunkLeft(position, edgeHole, chunkNeed);
+				_moveModulo(position, _begin, edgeHole, -modulo);
+				_begin.second -= modulo;
+			}
+		}
+
+		void	_moveChunkRight(iterator& position, _edge& edgeHole, _baseSizeType holeChunkSize)
+		{
+			_baseSizeType	chunkAvailable;
+			_baseSizeType	idx;
 			_chunk			tmp;
 
 			chunkAvailable = _chunks.size() - (_end.first + 1);
 			if (chunkAvailable < holeChunkSize)
 			{
-				return _reallocBase(holeChunkSize, position).second;
+				position = _reallocBase(holeChunkSize, edgeHole).second;
+				edgeHole.first += holeChunkSize;
+				return;
 			}
-			edgeHole = _edgeCastFromIterator(position);
 			_end.first += holeChunkSize;
 			idx = _end.first;
 			while (idx >= edgeHole.first + holeChunkSize)
@@ -660,26 +700,49 @@ namespace ft
 			for (int i = 0; i < edgeHole.second; ++i)
 				_constructDataChunk(_chunks[idx + 1 - holeChunkSize], i, _chunks[idx + 1][i]);
 			_destroyDataChunk(_chunks[idx + 1], 0, edgeHole.second);
-			while (idx > edgeHole.first)
+			position += (_chunkSize * holeChunkSize);
+		}
+
+		void	_moveModulo(iterator& position, _edge start, _edge end, difference_type modulo)
+		{
+			_edge	here;
+
+			if (modulo > 0)
 			{
-				_destroyDataChunk(_chunks[idx], 0, 8);
-				--idx;
+				here = end;
+				_edgeAdd(here, modulo - 1);
+				while (end != start)
+				{
+					_edgeSub(end, 1);
+					_constructDataChunk(_chunks[here.first], here.second, _chunks[end.first][end.second]);
+					_destroyDataChunk(_chunks[end.first], end.second, 1);
+					_edgeSub(here, 1);
+				}
 			}
-			return position + (_chunkSize * holeChunkSize);
+			else if (modulo < 0)
+			{
+				here = start;
+				_edgeSub(here, modulo);
+				while (start != end)
+				{
+					_constructDataChunk(_chunks[here.first], here.second, _chunks[start.first][start.second]);
+					_destroyDataChunk(_chunks[start.first], start.second, 1);
+					_edgeAdd(start, 1);
+					_edgeAdd(here, 1);
+				}
+			}
+			position += modulo;
 		}
 
-		iterator	_moveModulo(iterator position, difference_type modulo)
+		void	_moveDataRight(iterator& position, size_type holeSize) //insert hole BEFORE position
 		{
-
-		}
-
-		iterator	_moveDataRight(iterator position, size_type holeSize) //insert hole BEFORE position
-		{
-			size_type		chunkNeed;
+			_baseSizeType	chunkNeed;
 			difference_type	modulo;
+			_edge			edgeHole;
 
 			if (holeSize)
 			{
+				edgeHole = _edgeCastFromIterator(position);
 				chunkNeed = holeSize / _chunkSize;
 				modulo = holeSize % _chunkSize;
 				if (modulo + _end.second >= _chunkSize)
@@ -687,8 +750,9 @@ namespace ft
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
-				position = _moveChunkRight(position, chunkNeed);
-				return _moveModulo(position, modulo);
+				_moveChunkRight(position, edgeHole, chunkNeed);
+				_moveModulo(position, edgeHole, _end, modulo);
+				_end.second += modulo;
 			}
 		}
 
@@ -854,20 +918,22 @@ namespace ft
 		void	insert(iterator it, size_type n, const value_type& val)
 		{
 			if (it < begin() || it > end())
-				throw(ft::out_of_range("ft::deque::insert : iterator is out of range");
+				throw(ft::out_of_range("ft::deque::insert : iterator is out of range"));
 
+			std::cout << "_chunkSize = " << _chunkSize << std::endl;
 			if (_isRightSide(it))
 			{
-				it = _moveDataRight(it, n);
+				_moveDataRight(it, n);
 				while (n--)
 					_alloc.construct(&(*(--it)), val);
 			}
 			else
 			{
-				it = _moveDataLeft(it, n);
+				_moveDataLeft(it, n);
 				while (n--)
 					_alloc.construct(&(*(it++)), val);
 			}
+			_size += n;
 		}
 
 	};

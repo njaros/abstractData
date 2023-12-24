@@ -243,17 +243,17 @@ int main()
 		ft::vector<std::string> v(7, "pouet");
 		v.push_back("pas pouet");
 		ft::deque<std::string> pouet(v.begin(), v.end());
-		std::deque<std::string> revPouet(v.rbegin(), v.rend());
+		ft::deque<std::string> revPouet(v.rbegin(), v.rend());
 		ft::deque<std::string> revPouetFromPouet(pouet.rbegin(), pouet.rend());
 
 		displayData(a, "a");
-		/*try {
-			b.assign(a.end(), a.begin());
+		try {
+			b.insert(b.begin(), 4, 55);
 		}
 		catch (ft::exception& e)
 		{
 			std::cout << e.what() << std::endl;
-		}*/
+		}
 		displayData(b, "b");
 		displayData(c, "c");
 		displayData(pouet, "pouet");
