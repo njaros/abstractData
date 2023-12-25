@@ -563,8 +563,12 @@ namespace ft
 
 		void	_clearBase(_base& base)
 		{
+			int loop = 0;
 			for (_baseIterator it = base.begin(); it != base.end(); ++it)
+			{
 				_deleteChunk(*it);
+				loop++;
+			}
 			base.clear();
 		}
 
@@ -580,19 +584,19 @@ namespace ft
 			_baseSizeType	idx = 0;
 			std::pair<iterator, iterator>		toReturn;
 
-			for (int i = 0; i <= _chunks.size(); ++i)
-			{
-				printf("%x\n", _chunks[i]);
-			}
-
 			while (idx < newBase.size())
 			{
-				if (idx < sizeNeed || idx > 2 * sizeNeed)
+				if (idx < sizeNeed || idx > 2 * sizeNeed - 2)
 				{
-					if (idx < sizeNeed && idx >= sizeNeed - preSpace)
+					if (idx < sizeNeed && idx >= sizeNeed - preSpace) {
+						printf("idx = %u | chunksBegin = %u | chunksBeginAddr = %x\n", idx, chunksBegin, _chunks[chunksBegin]);
 						newBase[idx] = _chunks[chunksBegin++];
-					else if (idx > 2 * sizeNeed && idx < (2 * sizeNeed) + afterSpace)
+					}
+					else if (idx > 2 * sizeNeed - 2 && idx < (2 * sizeNeed) + afterSpace - 2)
+					{
+						printf("idx = %u | chunksEnd = %u | chunksEndAddr = %x\n", idx, chunksEnd, _chunks[chunksEnd]);
 						newBase[idx] = _chunks[chunksEnd++];
+					}
 					else
 						newBase[idx] = _getNewChunk();
 				}
@@ -601,7 +605,11 @@ namespace ft
 					if (idx < edgeHole.first + sizeNeed)
 						newBase[idx] = _chunks[idx - sizeNeed];
 					else if (idx > edgeHole.first + sizeNeed + holeSize)
+					{
+						printf("idx = %u | sizeNeed = %u | holeSize = %u | newBase[idx] = %x | _chunks[idx - sizeNeed - holeSize] = %x\n", idx, sizeNeed,
+							holeSize, newBase[idx], _chunks[idx - sizeNeed - holeSize]);
 						newBase[idx] = _chunks[idx - sizeNeed - holeSize];
+					}
 					else
 					{
 						if (idx == edgeHole.first + sizeNeed)
@@ -644,9 +652,13 @@ namespace ft
 				return;
 			}
 			_begin.first -= holeChunkSize;
-			idx = _begin.first;
-			while (idx < _begin.first + holeChunkSize)
+			idx = chunkAvailable - holeChunkSize;
+			std::cout << "BEFORE : _chunks adresses : \n";
+			for (int i = 0; i != _chunks.size(); ++i)
+				printf("_chunks[%d] = %x\n", i, _chunks[i]);
+			while (idx < chunkAvailable - edgeHole.first)
 			{
+				printf("idx = %u | holeSize = %u | _chunks[idx] = %x | _chunks[idx + holeChunkSize] = %x\n", idx, holeChunkSize, _chunks[idx], _chunks[idx + holeChunkSize]);
 				tmp = _chunks[idx];
 				_chunks[idx] = _chunks[idx + holeChunkSize];
 				_chunks[idx + holeChunkSize] = tmp;
@@ -656,6 +668,9 @@ namespace ft
 				_constructDataChunk(_chunks[idx], i, _chunks[idx + holeChunkSize][i]);
 			_destroyDataChunk(_chunks[idx + holeChunkSize], 0, edgeHole.second);
 			position -= (_chunkSize * holeChunkSize);
+			std::cout << "AFTER : _chunks adresses : \n";
+			for (int i = 0; i != _chunks.size(); ++i)
+				printf("_chunks[%d] = %x\n", i, _chunks[i]);
 		}
 
 		void	_moveDataLeft(iterator& position, size_type holeSize) //insert hole BEFORE position

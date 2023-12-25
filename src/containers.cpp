@@ -249,6 +249,11 @@ int main()
 		displayData(a, "a");
 		try {
 			b.insert(b.begin(), 4, 55);
+			b.insert(b.begin(), 4, 54);
+			b.insert(b.begin(), 4, 53);
+			b.insert(b.begin(), 4, 52);
+			b.insert(b.begin(), 4, 51);
+			b.insert(b.begin(), 4, 50);
 		}
 		catch (ft::exception& e)
 		{
