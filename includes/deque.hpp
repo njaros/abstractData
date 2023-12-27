@@ -849,6 +849,10 @@ namespace ft
 				position = _manageBase(holeChunkSize, edgeHole).first;
 				return;
 			}
+			/*
+			* cas general
+			* |~~~~~~~~||~~oooooo||oovoooooo||oooooooo||oo~~~~~~||~~~~~~~~|
+			*/
 			idx = chunkAvailable - holeChunkSize;
 			_printMemory("BEFORE : _chunks adresses : ");
 			while (idx < edgeHole.first - holeChunkSize)
@@ -884,7 +888,8 @@ namespace ft
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
-				_moveChunkLeft(position, edgeHole, chunkNeed);
+				if (chunkNeed)
+					_moveChunkLeft(position, edgeHole, chunkNeed);
 				_moveModulo(position, _begin, edgeHole, -modulo);
 				_begin.second -= modulo;
 			}
@@ -969,7 +974,8 @@ namespace ft
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
-				_moveChunkRight(position, edgeHole, chunkNeed);
+				if (chunkNeed)
+					_moveChunkRight(position, edgeHole, chunkNeed);
 				_moveModulo(position, edgeHole, _end, modulo);
 				_end.second += modulo;
 			}
