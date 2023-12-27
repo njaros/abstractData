@@ -207,7 +207,7 @@ namespace ft
 
 			MyIterator	operator+(difference_type val)	const
 			{
-				MyIterator	newIt;
+				MyIterator	newIt(*this);
 
 				newIt += val;
 				return (newIt);
@@ -215,7 +215,7 @@ namespace ft
 
 			MyIterator	operator-(difference_type val)	const
 			{
-				MyIterator	newIt;
+				MyIterator	newIt(*this);
 
 				newIt -= val;
 				return (newIt);
@@ -403,7 +403,7 @@ namespace ft
 
 			MyConstIterator	operator+(difference_type val)	const
 			{
-				MyConstIterator	newIt;
+				MyConstIterator	newIt(*this);
 
 				newIt += val;
 				return (newIt);
@@ -411,7 +411,7 @@ namespace ft
 
 			MyConstIterator	operator-(difference_type val)	const
 			{
-				MyConstIterator	newIt;
+				MyConstIterator	newIt(*this);
 
 				newIt -= val;
 				return (newIt);
@@ -505,7 +505,7 @@ namespace ft
 		{
 			return _edgeAdd(e, -d);
 		}
-		
+
 		bool	_isRightSide(const_iterator it) const
 		{
 			return ((it - begin()) >= (end() - it));
@@ -531,6 +531,33 @@ namespace ft
 				result.second -= _chunkSize;
 			}
 			return result;
+		}
+
+		//DEBUG UTILITIES
+
+		void	_printMemory(const char* str = 0) const
+		{
+			std::cout << std::endl << "DEBUG---- start of printMemory ----DEBUG";
+			if (str)
+				std::cout << std::endl << str;
+			std::cout << std::endl << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << std::endl;
+			for (int i = 0; i != _chunks.size(); ++i)
+			{
+				printf("_chunks[%d] = %x", i, _chunks[i]);
+				std::cout << " : vals = (";
+				for (int j = 0; j < _chunkSize; ++j)
+				{
+					std::cout << _chunks[i][j];
+					if (j != _chunkSize - 1)
+						std::cout << ", ";
+					else
+						std::cout << ")" << std::endl;
+				}
+			}
+			std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
+			if (str)
+				std::cout << std::endl << str;
+			std::cout << std::endl << "DEBUG---- end of printMemory -----DEBUG" << std::endl << std::endl;
 		}
 
 		//CHUNK HANDLER FUNCTIONS
@@ -561,6 +588,13 @@ namespace ft
 			_alloc.deallocate(chunk, _chunkSize);
 		}
 
+		void	_swapChunk(_baseSizeType idxA, _baseSizeType idxB)
+		{
+			_chunk tmp = _chunks[idxA];
+			_chunks[idxA] = _chunks[idxB];
+			_chunks[idxB] = tmp;
+		}
+
 		void	_clearBase(_base& base)
 		{
 			int loop = 0;
@@ -572,33 +606,193 @@ namespace ft
 			base.clear();
 		}
 
-		std::pair<iterator, iterator>	_reallocBase(_baseSizeType holeSize, _edge& edgeHole)
+		std::pair<iterator, iterator>	_manageBase(_baseSizeType holeSize, _edge& edgeHole)
 		{
-			size_type		distHoleFromBegin = edgeHole.first - _begin.first;
-			_baseSizeType	sizeNeed = holeSize + (_end.first - _begin.first + 1);
+			_baseSizeType	endAlone = _end != _begin && _end.second == 0 ? 1 : 0;
+			_baseSizeType	sizeNeed = holeSize + (_end.first - _begin.first) + !endAlone;
+
+			if (_chunks.capacity() >= 3 * sizeNeed)
+				return _reorderBase(holeSize, edgeHole, sizeNeed);
+			return _reallocBase(holeSize, edgeHole, sizeNeed);
+		}
+
+		std::pair<iterator, iterator>	_reorderBase(_baseSizeType holeSize, _edge& edgeHole, _baseSizeType sizeNeed)
+		{
+			/*
+			* 0     1      2     3     4     5     6     7     8     9     10
+			|~~oo||oooo||ovooo||~~~~||~~~~||~~~~||~~~~||~~~~||~~~~||~~~~||~~~~|
+			   ^begin           ^end
+			o = element construit entre [begin et end[ (end non compris)
+			~ = element non construit ou detruit exterieur a ]begin et end] (end compris)
+			v : n elements a inserer a la position edgeHole
+			pour inserer ses n elements, il faut holesize block disponibles
+
+			ici on a 11 bloc
+			le bloc 0 contient le begin
+			le bloc 3 contient le end
+			on veut inserer holesize bloc vide |~~~~| quelque part entre begin et end
+			on veut autant de bloc vide avant le begin qu apres le end apres le rangement
+			on ne veut jamais allouer de la memoire, ni en liberer
+			on ne veut pas toucher l'interieur des blocs sauf celui dans lequel on insere :
+
+			|ovooo| => |o~~~| holesize x |~~~~||~ooo|
+
+			on doit calculer le nbr de bloc utiliser avant insertion :
+			- end.first - begin.first si end.second == 0
+			- end.first - begin.first + 1 sinon
+			puis ajouter le nbr de bloc a inserer holeSize et on obtient le sizeNeed
+
+			determiner le sens de copie pour eviter le chevauchement :
+			pas de chevauchement possible dans tout les cas dans ce contexte.
+
+			position de debut de copie : _chunks.size() / 2 - sizeNeed / 2
+			admettons holeSize vaut 1
+			_chunks.size() / 2 - sizeNeed / 2 = 5 - 2 = 3 on commencera la copie au bloc 3
+			  0     1     2     3     4     5     6     7     8     9     10
+			|~~~~||~~~~||~~~~||~~oo||oooo||o~~~||~~~~||~ooo||~~~~||~~~~||~~~~|
+								 ^begin                      ^end
+			*/
+			_baseSizeType	idx = _begin.first;
+			_chunk			tmp;
+			_baseSizeType	copyStart = (_chunks.size() / 2) - (sizeNeed / 2);
+			int				distHoleFromBegin = edgeHole.first - _begin.first;
+			int				constructStartL = edgeHole.first == _begin.first ? _begin.second : 0;
+			int				constructEndR = edgeHole.first == _end.first ? _end.second : _chunkSize;
+			_edge			nextBegin = ft::make_pair(copyStart, _begin.second);
+			_edge			nextEnd;
+			std::pair<iterator, iterator>		toReturn;
+
+			nextEnd.first = nextBegin.first + sizeNeed;
+			nextEnd.second = _end.second;
+
+			if (_begin == _end)
+			{
+				_end = nextEnd;
+				_begin = nextBegin;
+				toReturn.first = iterator(_chunks.begin() + _begin.first, _begin.second);
+				toReturn.second = iterator(_chunks.begin() + _end.first, _end.second);
+				return toReturn;
+			}
+
+			while (idx != edgeHole.first)
+				_swapChunk(copyStart++, idx++);
+			/*
+			* ici on va devoir construire sur un bloc vide et detruire sur un bloc construit
+			* cas possibles :
+			*
+			* Cas ou edgeHole.first != begin.first != end.first :
+			*
+			*    a                           a
+			* |voooo| => holesize x |~~~~||oooo| pas de construction / destruction et on insere avant
+			*    a
+			* |oooov| => cas impossible
+			*    a          b                             a
+			* |ovooo| => |o~~~| (holesize - 1) x |~~~~||~ooo| il est moins couteux d inserer avant a et de construire 1 seul element dans b : construire entre 0 et edgeHole.second
+			*    a          a                             b
+			* |ooovo| => |ooo~| (holesize - 1) x |~~~~||~~~o| inserer apres a et construire 1 seul element dans b : construire entre edgeHole.second et _chunkSize
+			*    a
+			* |oovoo| => l'un des deux precedents choix, sans preference
+			*
+			* Autres cas :
+			*
+			*    a                           a
+			* |~~~vo| => holesize x |~~~~||~~~o| si edgeHole == begin on insert avant a
+			*    a          b                             a
+			* |~ovoo| => |~o~~| (holesize - 1) x |~~~~||~~oo| insertion dans le bloc de begin. construire entre begin.second et edgeHole.second
+			*    a          a                             b
+			* |~oovo| => |~oo~| (holesize - 1) x |~~~~||~~~o| insertion dans le bloc de begin. meme comportement que le cas lambda
+			*    a          b                             a
+			* |ovoo~| => |o~~~| (holesize - 1) x |~~~~||~oo~| insertion dans le bloc de end. meme comportement que le cas lambda
+			*    a          a
+			* |ooov~| => |ooo~| holesize x |~~~~| insertion dans le bloc de end. edgeHole == end => il ne faut rien faire
+			*    a          b                             a
+			* |~ovo~| => |~o~~| (holesize - 1) x |~~~~||~~o~| faire
+			*    a          a
+			* |v~~~~| => |~~~~| holesize x |~~~~| insertion dans le bloc de end. edgeHole == end => il ne faut rien faire
+			*      a             a                                      b
+			* |ooooovoo~| => |ooooo~~~| (holesize - 1) x |~~~~~~~~||~~~~~oo~| construire entre edgeHole.second et end.second
+			*/
+			if (!edgeHole.second || edgeHole == _begin)
+			{
+				copyStart += holeSize;
+				_swapChunk(idx++, copyStart++);
+			}
+			else if (edgeHole == _end)
+			{
+				if (_end.second)
+					_swapChunk(idx, copyStart);
+				_end = nextEnd;
+				_begin = nextBegin;
+				toReturn.first = iterator(_chunks.begin() + (_begin.first + distHoleFromBegin), edgeHole.second);
+				toReturn.second = iterator(_chunks.begin() + _end.first, _end.second);
+				return toReturn;
+			}
+			else if (edgeHole.second <= _chunkSize / 2)
+			{
+				for (int i = constructStartL; i < edgeHole.second; ++i)
+					_constructDataChunk(_chunks[copyStart], i, _chunks[idx][i]);
+				_destroyDataChunk(_chunks[idx], constructStartL, edgeHole.second);
+				copyStart += holeSize;
+				_swapChunk(idx++, copyStart++);
+			}
+			else
+			{
+				tmp = _chunks[copyStart];
+				_chunks[copyStart] = _chunks[idx];
+				_chunks[idx] = tmp;
+				tmp = _chunks[copyStart];
+				copyStart += holeSize;
+				for (int i = edgeHole.second; i < constructEndR; ++i)
+					_constructDataChunk(_chunks[copyStart], i, tmp[i]);
+				_destroyDataChunk(tmp, edgeHole.second, constructEndR - edgeHole.second);
+				++idx;
+				++copyStart;
+			}
+			while (idx <= _end.second)
+				_swapChunk(idx++, copyStart++);
+			_end = nextEnd;
+			_begin = nextBegin;
+			toReturn.first = iterator(_chunks.begin() + (_begin.first + distHoleFromBegin), edgeHole.second);
+			nextEnd.first = _begin.first + distHoleFromBegin + holeSize;
+			nextEnd.second = edgeHole.second;
+			_edgeAdd(nextEnd, 1);
+			toReturn.second = iterator(_chunks.begin() + nextEnd.first, nextEnd.second);
+			return toReturn;
+		}
+
+		std::pair<iterator, iterator>	_reallocBase(_baseSizeType holeSize, _edge& edgeHole, _baseSizeType sizeNeed)
+		{
+			_baseSizeType	endAlone = _end.second == 0 && _end != _begin ? 1 : 0;
+			_baseSizeType	distHoleFromBegin = edgeHole.first - _begin.first;
 			_baseSizeType	preSpace = _begin.first;
-			_baseSizeType	afterSpace = _chunks.size() - _end.first;
+			_baseSizeType	afterSpace = _chunks.size() - _end.first - endAlone;
 			_baseSizeType	chunksBegin = 0;
 			_baseSizeType	chunksEnd = _end.first + 1;
 			_base			newBase(3 * sizeNeed, nullptr);
 			_baseSizeType	idx = 0;
 			std::pair<iterator, iterator>		toReturn;
 
+			std::cout << "_begin = (" << _begin.first << ", " << _begin.second << ")\n";
+			std::cout << "_end = (" << _end.first << ", " << _end.second << ")\n";
+
+			_printMemory("Before reallocBase");
 			while (idx < newBase.size())
 			{
-				if (idx < sizeNeed || idx > 2 * sizeNeed - 2)
+				if (idx < sizeNeed || idx >= 2 * sizeNeed)
 				{
 					if (idx < sizeNeed && idx >= sizeNeed - preSpace) {
 						printf("idx = %u | chunksBegin = %u | chunksBeginAddr = %x\n", idx, chunksBegin, _chunks[chunksBegin]);
 						newBase[idx] = _chunks[chunksBegin++];
 					}
-					else if (idx > 2 * sizeNeed - 2 && idx < (2 * sizeNeed) + afterSpace - 2)
+					else if (idx > 2 * sizeNeed && idx < (2 * sizeNeed) + afterSpace)
 					{
 						printf("idx = %u | chunksEnd = %u | chunksEndAddr = %x\n", idx, chunksEnd, _chunks[chunksEnd]);
 						newBase[idx] = _chunks[chunksEnd++];
 					}
 					else
+					{
 						newBase[idx] = _getNewChunk();
+					}
 				}
 				else
 				{
@@ -617,13 +811,11 @@ namespace ft
 							newBase[idx] = _getNewChunk();
 							for (int i = 0; i < edgeHole.second; ++i)
 								_constructDataChunk(newBase[idx], i, _chunks[edgeHole.first][i]);
-							toReturn.first = iterator(newBase.begin() + idx, edgeHole.second);
 						}
 						else if (idx == edgeHole.first + sizeNeed + holeSize)
 						{
 							newBase[idx] = _chunks[edgeHole.first];
 							_destroyDataChunk(newBase[idx], 0, edgeHole.second);
-							toReturn.second = iterator(newBase.begin() + idx, edgeHole.second);
 						}
 						else
 							newBase[idx] = _getNewChunk();
@@ -632,10 +824,16 @@ namespace ft
 				++idx;
 			}
 			newBase.swap(_chunks);
+			toReturn.first = iterator(_chunks.begin() + sizeNeed + edgeHole.first, edgeHole.second);
+			toReturn.second = iterator(_chunks.begin() + sizeNeed + edgeHole.first + holeSize, edgeHole.second);
+			_edge debugFirst = _edgeCastFromIterator(toReturn.first);
+			_edge debugSecond = _edgeCastFromIterator(toReturn.second);
 			_begin.first = sizeNeed;
 			_end.first = sizeNeed + holeSize;
+			_end.second = 0;
 			_edgeAdd(_end, _size);
 			edgeHole.first += sizeNeed + distHoleFromBegin;
+			_printMemory("After reallocBase");
 			return toReturn;
 		}
 
@@ -646,17 +844,14 @@ namespace ft
 			_chunk			tmp;
 
 			chunkAvailable = _begin.first;
-			if (chunkAvailable < holeChunkSize)
+			if (_chunks.empty() || chunkAvailable < holeChunkSize)
 			{
-				position = _reallocBase(holeChunkSize, edgeHole).first;
+				position = _manageBase(holeChunkSize, edgeHole).first;
 				return;
 			}
-			_begin.first -= holeChunkSize;
 			idx = chunkAvailable - holeChunkSize;
-			std::cout << "BEFORE : _chunks adresses : \n";
-			for (int i = 0; i != _chunks.size(); ++i)
-				printf("_chunks[%d] = %x\n", i, _chunks[i]);
-			while (idx < chunkAvailable - edgeHole.first)
+			_printMemory("BEFORE : _chunks adresses : ");
+			while (idx < edgeHole.first - holeChunkSize)
 			{
 				printf("idx = %u | holeSize = %u | _chunks[idx] = %x | _chunks[idx + holeChunkSize] = %x\n", idx, holeChunkSize, _chunks[idx], _chunks[idx + holeChunkSize]);
 				tmp = _chunks[idx];
@@ -664,13 +859,13 @@ namespace ft
 				_chunks[idx + holeChunkSize] = tmp;
 				++idx;
 			}
-			for (int i = edgeHole.second - 1; i >= 0; --i)
+			for (int i = edgeHole.second - 1; i >= 0 && !(edgeHole.first == _begin.first && i < _begin.second); --i)
 				_constructDataChunk(_chunks[idx], i, _chunks[idx + holeChunkSize][i]);
 			_destroyDataChunk(_chunks[idx + holeChunkSize], 0, edgeHole.second);
+			_begin.first -= holeChunkSize;
 			position -= (_chunkSize * holeChunkSize);
-			std::cout << "AFTER : _chunks adresses : \n";
-			for (int i = 0; i != _chunks.size(); ++i)
-				printf("_chunks[%d] = %x\n", i, _chunks[i]);
+			edgeHole.first -= holeChunkSize;
+			_printMemory("AFTER : _chunks adresses : ");
 		}
 
 		void	_moveDataLeft(iterator& position, size_type holeSize) //insert hole BEFORE position
@@ -701,10 +896,10 @@ namespace ft
 			_baseSizeType	idx;
 			_chunk			tmp;
 
-			chunkAvailable = _chunks.size() - (_end.first + 1);
-			if (chunkAvailable < holeChunkSize)
+			chunkAvailable = _chunks.size() - _end.first;
+			if (_chunks.empty() || chunkAvailable < holeChunkSize)
 			{
-				position = _reallocBase(holeChunkSize, edgeHole).second;
+				position = _manageBase(holeChunkSize, edgeHole).second;
 				edgeHole.first += holeChunkSize;
 				return;
 			}
@@ -729,6 +924,7 @@ namespace ft
 
 			if (modulo > 0)
 			{
+				_printMemory("Before MoveModulo with modulo > 0");
 				here = end;
 				_edgeAdd(here, modulo - 1);
 				while (end != start)
@@ -738,9 +934,11 @@ namespace ft
 					_destroyDataChunk(_chunks[end.first], end.second, 1);
 					_edgeSub(here, 1);
 				}
+				_printMemory("After MoveModulo with modulo > 0");
 			}
 			else if (modulo < 0)
 			{
+				_printMemory("Before MoveModulo with modulo < 0");
 				here = start;
 				_edgeSub(here, modulo);
 				while (start != end)
@@ -750,6 +948,7 @@ namespace ft
 					_edgeAdd(start, 1);
 					_edgeAdd(here, 1);
 				}
+				_printMemory("After MoveModulo with modulo < 0");
 			}
 			position += modulo;
 		}
@@ -765,7 +964,7 @@ namespace ft
 				edgeHole = _edgeCastFromIterator(position);
 				chunkNeed = holeSize / _chunkSize;
 				modulo = holeSize % _chunkSize;
-				if (modulo + _end.second >= _chunkSize)
+				if (modulo + _end.second > _chunkSize)
 				{
 					++chunkNeed;
 					modulo -= _chunkSize;

@@ -73,8 +73,35 @@ struct Buffer
 	char buff[4096];
 };
 
+class intDebug
+{
+public:
+	int i;
+
+	intDebug() : i(0) {}
+	intDebug(int nb) : i(nb) {}
+	intDebug(const intDebug& o) : i(o.i) {}
+	~intDebug()
+	{
+		i = -1;
+	}
+
+	intDebug& operator=(const intDebug& o)
+	{
+		i = o.i;
+		return *this;
+	}
+};
+
+std::ostream& operator<<(std::ostream& o, const intDebug& i)
+{
+	o << i.i;
+	return o;
+}
+
 int main()
 {
+	/*
 	std::cout << "------exceptions tests------\n\n\n";
 	{
 		ft::vector<int> lolo(2);
@@ -232,13 +259,14 @@ int main()
 		b.assign(a.begin() + 500, a.begin() + 600);
 
 		std::cout << b.size() << " " << b[50];
-	}
+	}*/
+
 	std::cout << "\n\n-----deque tests-----\n\n\n";
 	{
 
-		ft::deque<int> a(4, 13);
-		ft::deque<int> b(8, 8);
-		ft::deque<int> c(a);
+		ft::deque<intDebug> a(4, 13);
+		ft::deque<intDebug> b;
+		ft::deque<intDebug> c(a);
 
 		ft::vector<std::string> v(7, "pouet");
 		v.push_back("pas pouet");
@@ -248,12 +276,8 @@ int main()
 
 		displayData(a, "a");
 		try {
-			b.insert(b.begin(), 4, 55);
-			b.insert(b.begin(), 4, 54);
-			b.insert(b.begin(), 4, 53);
-			b.insert(b.begin(), 4, 52);
-			b.insert(b.begin(), 4, 51);
-			b.insert(b.begin(), 4, 50);
+			b.insert(b.begin(), 1, 1);
+			b.insert(b.begin(), 1, 2);
 		}
 		catch (ft::exception& e)
 		{
