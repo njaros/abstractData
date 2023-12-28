@@ -501,9 +501,33 @@ namespace ft
 			return e;
 		}
 
+		_edge& _edgeAdd(_edge& lhs, const _edge& rhs)
+		{
+			lhs.first += rhs.first;
+			lhs.second += rhs.second;
+			if (lhs.second >= _chunkSize)
+			{
+				++lhs.first;
+				lhs.second -= _chunkSize;
+			}
+			return lhs;
+		}
+
 		_edge& _edgeSub(_edge& e, difference_type d)
 		{
 			return _edgeAdd(e, -d);
+		}
+
+		_edge& _edgeSub(_edge& lhs, const _edge& rhs)
+		{
+			lhs.first -= rhs.first;
+			lhs.second -= rhs.second;
+			if (lhs.second < 0)
+			{
+				--lhs.first;
+				lhs.second += _chunkSize;
+			}
+			return lhs;
 		}
 
 		bool	_isRightSide(const_iterator it) const
@@ -608,7 +632,7 @@ namespace ft
 
 		std::pair<iterator, iterator>	_manageBase(_baseSizeType holeSize, _edge& edgeHole)
 		{
-			_baseSizeType	endAlone = _end != _begin && _end.second == 0 ? 1 : 0;
+			_baseSizeType	endAlone = _end.second == 0 && _end != _begin ? 1 : 0;
 			_baseSizeType	sizeNeed = holeSize + (_end.first - _begin.first) + !endAlone;
 
 			if (_chunks.capacity() >= 3 * sizeNeed)
@@ -784,7 +808,7 @@ namespace ft
 						printf("idx = %u | chunksBegin = %u | chunksBeginAddr = %x\n", idx, chunksBegin, _chunks[chunksBegin]);
 						newBase[idx] = _chunks[chunksBegin++];
 					}
-					else if (idx > 2 * sizeNeed && idx < (2 * sizeNeed) + afterSpace)
+					else if (idx >= 2 * sizeNeed && idx < (2 * sizeNeed) + afterSpace)
 					{
 						printf("idx = %u | chunksEnd = %u | chunksEndAddr = %x\n", idx, chunksEnd, _chunks[chunksEnd]);
 						newBase[idx] = _chunks[chunksEnd++];
@@ -842,6 +866,7 @@ namespace ft
 			_baseSizeType	chunkAvailable;
 			_baseSizeType	idx;
 			_chunk			tmp;
+			int				endOfCopy = edgeHole.first == _begin.first ? _begin.second : 0;
 
 			chunkAvailable = _begin.first;
 			if (_chunks.empty() || chunkAvailable < holeChunkSize)
@@ -858,14 +883,12 @@ namespace ft
 			while (idx < edgeHole.first - holeChunkSize)
 			{
 				printf("idx = %u | holeSize = %u | _chunks[idx] = %x | _chunks[idx + holeChunkSize] = %x\n", idx, holeChunkSize, _chunks[idx], _chunks[idx + holeChunkSize]);
-				tmp = _chunks[idx];
-				_chunks[idx] = _chunks[idx + holeChunkSize];
-				_chunks[idx + holeChunkSize] = tmp;
+				_swapChunk(idx, idx + holeChunkSize);
 				++idx;
 			}
-			for (int i = edgeHole.second - 1; i >= 0 && !(edgeHole.first == _begin.first && i < _begin.second); --i)
+			for (int i = edgeHole.second - 1; i >= endOfCopy; --i)
 				_constructDataChunk(_chunks[idx], i, _chunks[idx + holeChunkSize][i]);
-			_destroyDataChunk(_chunks[idx + holeChunkSize], 0, edgeHole.second);
+			_destroyDataChunk(_chunks[idx + holeChunkSize], endOfCopy, edgeHole.second - endOfCopy);
 			_begin.first -= holeChunkSize;
 			position -= (_chunkSize * holeChunkSize);
 			edgeHole.first -= holeChunkSize;
@@ -888,8 +911,7 @@ namespace ft
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
-				if (chunkNeed)
-					_moveChunkLeft(position, edgeHole, chunkNeed);
+				_moveChunkLeft(position, edgeHole, chunkNeed);
 				_moveModulo(position, _begin, edgeHole, -modulo);
 				_begin.second -= modulo;
 			}
@@ -900,6 +922,7 @@ namespace ft
 			_baseSizeType	chunkAvailable;
 			_baseSizeType	idx;
 			_chunk			tmp;
+			int				startOfCopy = edgeHole.first == _end.first ? _end.second : _chunkSize;
 
 			chunkAvailable = _chunks.size() - _end.first;
 			if (_chunks.empty() || chunkAvailable < holeChunkSize)
@@ -908,19 +931,31 @@ namespace ft
 				edgeHole.first += holeChunkSize;
 				return;
 			}
+			if (!holeChunkSize)
+				return;
+			_printMemory("Before moveChunkRight");
 			_end.first += holeChunkSize;
 			idx = _end.first;
-			while (idx >= edgeHole.first + holeChunkSize)
+			while (idx > edgeHole.first + holeChunkSize)
 			{
-				tmp = _chunks[idx];
-				_chunks[idx] = _chunks[idx - holeChunkSize];
-				_chunks[idx - holeChunkSize] = tmp;
+				_swapChunk(idx, idx - holeChunkSize);
 				--idx;
 			}
-			for (int i = 0; i < edgeHole.second; ++i)
-				_constructDataChunk(_chunks[idx + 1 - holeChunkSize], i, _chunks[idx + 1][i]);
-			_destroyDataChunk(_chunks[idx + 1], 0, edgeHole.second);
+			/*
+			* Cas general
+			* |oooooooo||oooooooo||oooovoooo||ooo~~~~~||~~~~~~~~|
+			* |oooovoooo| => |oooo~~~~||...||~~~~oooo|
+			* 
+			* mon cas
+			* |oooooooo||oooooooo||v~~~~~~~~|
+			* |v~~~~~~~~| => |~~~~~~~~|
+			*/
+			for (int i = startOfCopy - 1; i >= edgeHole.second; --i)
+				_constructDataChunk(_chunks[idx], i, _chunks[idx - holeChunkSize][i]);
+			_destroyDataChunk(_chunks[idx - holeChunkSize], startOfCopy, startOfCopy - edgeHole.second);
 			position += (_chunkSize * holeChunkSize);
+			edgeHole.first += holeChunkSize;
+			_printMemory("After moveChunkRight");
 		}
 
 		void	_moveModulo(iterator& position, _edge start, _edge end, difference_type modulo)
@@ -969,13 +1004,14 @@ namespace ft
 				edgeHole = _edgeCastFromIterator(position);
 				chunkNeed = holeSize / _chunkSize;
 				modulo = holeSize % _chunkSize;
-				if (modulo + _end.second > _chunkSize)
+				if (!_end.second && _end != _begin && modulo)
+					++chunkNeed;
+				else if (modulo + _end.second >= _chunkSize)
 				{
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
-				if (chunkNeed)
-					_moveChunkRight(position, edgeHole, chunkNeed);
+				_moveChunkRight(position, edgeHole, chunkNeed);
 				_moveModulo(position, edgeHole, _end, modulo);
 				_end.second += modulo;
 			}

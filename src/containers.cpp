@@ -275,13 +275,9 @@ int main()
 		ft::deque<std::string> revPouetFromPouet(pouet.rbegin(), pouet.rend());
 
 		displayData(a, "a");
-		try {
-			b.insert(b.begin(), 1, 1);
-			b.insert(b.begin(), 1, 2);
-		}
-		catch (ft::exception& e)
+		for (int i = 1; i < 25; ++i)
 		{
-			std::cout << e.what() << std::endl;
+			b.insert(b.end(), 1, i);
 		}
 		displayData(b, "b");
 		displayData(c, "c");
