@@ -862,6 +862,8 @@ namespace ft
 				}
 				++idx;
 			}
+			if (chunksBegin != _chunks.size())
+				throw (ft::logic_error("LEAKS"));
 			newBase.swap(_chunks);
 			toReturn.first = iterator(_chunks.begin() + sizeNeed + distHoleFromBegin, edgeHole.second);
 			toReturn.second = iterator(_chunks.begin() + sizeNeed + distHoleFromBegin + holeSize, edgeHole.second);
