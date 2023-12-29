@@ -12,6 +12,7 @@
 #include <string>
 #include <set>
 #include <stack>
+#include <windows.h>
 
 template < typename T >
 void	displayInfo(T& container, const char* name)
@@ -93,10 +94,119 @@ public:
 	}
 };
 
+class debug
+{
+public:
+	short a;
+	short b;
+
+	debug() : a(0), b(0) {}
+	debug(short nb) : a(nb), b(0) {}
+	debug(const debug& o)
+	{
+		if (o.b != 0)
+			throw (ft::logic_error("debug::copyConstructor : called with a not constructed debug object"));
+		a = o.a;
+		b = o.b;
+	}
+	~debug()
+	{
+		if (b != 0)
+			throw (ft::logic_error("debug::Destructor : called for a not constructed object"));
+		a = -1;
+		b = -1;
+	}
+
+	debug& operator=(const debug& o)
+	{
+		if (b != 0)
+			throw (ft::logic_error("debug::operator= : not constructed"));
+		if (o.b != 0)
+			throw (ft::logic_error("debug::operator= : other not constructed"));
+		a = o.a;
+		b = o.b;
+		return *this;
+	}
+};
+
+class heavyDebug
+{
+public:
+	int i;
+	int a;
+	int b;
+	int c;
+
+	heavyDebug() : i(0), a(0), b(0), c(0) {}
+	heavyDebug(int nb) : i(nb), a(0), b(0), c(0) {}
+	heavyDebug(const heavyDebug& o) : i(o.i), a(0), b(0), c(0) {}
+	~heavyDebug()
+	{
+		i = -1;
+	}
+
+	heavyDebug& operator=(const heavyDebug& o)
+	{
+		i = o.i;
+		return *this;
+	}
+};
+
+class littleDebug
+{
+public:
+	char i;
+
+	littleDebug() : i(0) {}
+	littleDebug(int nb) : i(nb) {}
+	littleDebug(const littleDebug& o) : i(o.i) {}
+	~littleDebug()
+	{
+		i = -1;
+	}
+
+	littleDebug& operator=(const littleDebug& o)
+	{
+		i = o.i;
+		return *this;
+	}
+};
+
 std::ostream& operator<<(std::ostream& o, const intDebug& i)
 {
 	o << i.i;
 	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const heavyDebug& i)
+{
+	o << i.i;
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const littleDebug& i)
+{
+	o << (int)i.i;
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const debug& i)
+{
+	o << i.a;
+	return o;
+}
+
+void	setRandom(unsigned short& s, size_t pouet = 0)
+{
+	SYSTEMTIME seed;
+
+	if (!s || pouet > s)
+	{
+		GetSystemTime(&seed);
+		s = seed.wMilliseconds;
+	}
+	else
+		s -= pouet;
 }
 
 int main()
@@ -263,27 +373,30 @@ int main()
 
 	std::cout << "\n\n-----deque tests-----\n\n\n";
 	{
+		unsigned short random;
+		//ft::deque<intDebug> a(4, 13);
+		ft::deque<debug> b;
+		//ft::deque<intDebug> c(a);
+		//ft::vector<std::string> v(7, "pouet");
+		//v.push_back("pas pouet");
+		//ft::deque<std::string> pouet(v.begin(), v.end());
+		//ft::deque<std::string> revPouet(v.rbegin(), v.rend());
+		//ft::deque<std::string> revPouetFromPouet(pouet.rbegin(), pouet.rend());
 
-		ft::deque<intDebug> a(4, 13);
-		ft::deque<intDebug> b;
-		ft::deque<intDebug> c(a);
+		//displayData(a, "a");
 
-		ft::vector<std::string> v(7, "pouet");
-		v.push_back("pas pouet");
-		ft::deque<std::string> pouet(v.begin(), v.end());
-		ft::deque<std::string> revPouet(v.rbegin(), v.rend());
-		ft::deque<std::string> revPouetFromPouet(pouet.rbegin(), pouet.rend());
-
-		displayData(a, "a");
-		for (int i = 1; i < 25; ++i)
+		random = 0;
+		setRandom(random);
+		for (int i = 1; i < 16; ++i)
 		{
-			b.insert(b.end(), 1, i);
+			b.insert(b.begin() + (random % (b.size() + 1)), 1, i);
+			setRandom(random, b.size());
 		}
 		displayData(b, "b");
-		displayData(c, "c");
-		displayData(pouet, "pouet");
-		displayData(revPouet, "revPouet");
-		displayData(revPouetFromPouet, "revPouetFromPouet");
+		//displayData(c, "c");
+		//displayData(pouet, "pouet");
+		//displayData(revPouet, "revPouet");
+		//displayData(revPouetFromPouet, "revPouetFromPouet");
 	}
 
 	return 0;
