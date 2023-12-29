@@ -846,13 +846,15 @@ namespace ft
 						if (idx == distHoleFromBegin + sizeNeed)
 						{
 							newBase[idx] = _getNewChunk();
+							std::cout << "idx == distHoleFromBegin + sizeNeed, idx = " << idx << " | copyConstructStart = " <<
+								copyConstructStart << "edgeHole = {" << edgeHole.first << ", " << edgeHole.second << "}\n";
 							for (int i = copyConstructStart; i < edgeHole.second; ++i)
 								_constructDataChunk(newBase[idx], i, _chunks[chunksBegin][i]);
 						}
 						else if (idx == distHoleFromBegin + sizeNeed + holeSize && chunksBegin < _chunks.size())
 						{
 							newBase[idx] = _chunks[chunksBegin++];
-							_destroyDataChunk(newBase[idx], copyConstructStart, edgeHole.second);
+							_destroyDataChunk(newBase[idx], copyConstructStart, edgeHole.second - copyConstructStart);
 						}
 						else
 							newBase[idx] = _getNewChunk();
@@ -885,6 +887,8 @@ namespace ft
 				position = _manageBase(holeChunkSize, edgeHole).first;
 				return;
 			}
+			if (!holeChunkSize)
+				return;
 			/*
 			* cas general
 			* |~~~~~~~~||~~oooooo||oovoooooo||oooooooo||oo~~~~~~||~~~~~~~~|
@@ -897,9 +901,12 @@ namespace ft
 				_swapChunk(idx, idx + holeChunkSize);
 				++idx;
 			}
-			for (int i = edgeHole.second - 1; i >= endOfCopy; --i)
-				_constructDataChunk(_chunks[idx], i, _chunks[idx + holeChunkSize][i]);
-			_destroyDataChunk(_chunks[idx + holeChunkSize], endOfCopy, edgeHole.second - endOfCopy);
+			if (holeChunkSize)
+			{
+				for (int i = edgeHole.second - 1; i >= endOfCopy; --i)
+					_constructDataChunk(_chunks[idx], i, _chunks[idx + holeChunkSize][i]);
+				_destroyDataChunk(_chunks[idx + holeChunkSize], endOfCopy, edgeHole.second - endOfCopy);
+			}
 			_begin.first -= holeChunkSize;
 			position -= (_chunkSize * holeChunkSize);
 			edgeHole.first -= holeChunkSize;
@@ -936,7 +943,7 @@ namespace ft
 			int				startOfCopy = edgeHole.first == _end.first ? _end.second : _chunkSize;
 
 			chunkAvailable = _chunks.size() - _end.first;
-			if (_chunks.empty() || !chunkAvailable || chunkAvailable < holeChunkSize)
+			if (_chunks.empty() || !chunkAvailable || chunkAvailable < holeChunkSize + 1)
 			{
 				position = _manageBase(holeChunkSize, edgeHole, true).second;
 				edgeHole.first += holeChunkSize;
@@ -949,7 +956,8 @@ namespace ft
 			idx = _end.first;
 			while (idx > edgeHole.first + holeChunkSize)
 			{
-				_swapChunk(idx, idx - holeChunkSize);
+				if (idx < _chunks.size())
+					_swapChunk(idx, idx - holeChunkSize);
 				--idx;
 			}
 			/*
@@ -963,7 +971,7 @@ namespace ft
 			*/
 			for (int i = startOfCopy - 1; i >= edgeHole.second; --i)
 				_constructDataChunk(_chunks[idx], i, _chunks[idx - holeChunkSize][i]);
-			_destroyDataChunk(_chunks[idx - holeChunkSize], startOfCopy, startOfCopy - edgeHole.second);
+			_destroyDataChunk(_chunks[idx - holeChunkSize], edgeHole.second, startOfCopy - edgeHole.second);
 			position += (_chunkSize * holeChunkSize);
 			edgeHole.first += holeChunkSize;
 			_printMemory("After moveChunkRight");
@@ -1015,14 +1023,14 @@ namespace ft
 				edgeHole = _edgeCastFromIterator(position);
 				chunkNeed = holeSize / _chunkSize;
 				modulo = holeSize % _chunkSize;
-				if (modulo + _end.second > _chunkSize)
+				if (modulo + _end.second || (modulo && !_end.second) > _chunkSize)
 				{
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
 				_moveChunkRight(position, edgeHole, chunkNeed);
 				_moveModulo(position, edgeHole, _end, modulo);
-				_end.second += modulo;
+				_edgeAdd(_end, modulo);
 			}
 		}
 

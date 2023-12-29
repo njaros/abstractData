@@ -127,6 +127,12 @@ public:
 		b = o.b;
 		return *this;
 	}
+
+	bool operator!=(const debug& o) const
+	{
+		return a != o.a;
+	}
+
 };
 
 class heavyDebug
@@ -169,6 +175,11 @@ public:
 	{
 		i = o.i;
 		return *this;
+	}
+
+	bool operator!=(const littleDebug& o) const
+	{
+		return i != o.i;
 	}
 };
 
@@ -375,7 +386,8 @@ int main()
 	{
 		unsigned short random;
 		//ft::deque<intDebug> a(4, 13);
-		ft::deque<debug> b;
+		ft::deque<littleDebug> b;
+		std::deque<littleDebug> stdB;
 		//ft::deque<intDebug> c(a);
 		//ft::vector<std::string> v(7, "pouet");
 		//v.push_back("pas pouet");
@@ -387,12 +399,23 @@ int main()
 
 		random = 0;
 		setRandom(random);
-		for (int i = 1; i < 16; ++i)
+		for (int i = 1; i < 40; ++i)
 		{
-			b.insert(b.begin() + (random % (b.size() + 1)), 1, i);
+			b.insert(b.begin() + (random % (b.size() + 1)), 7, 'A' + i);
+			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 7, 'A' + i);
 			setRandom(random, b.size());
 		}
 		displayData(b, "b");
+		std::deque<littleDebug>::const_iterator cmp = stdB.begin();
+		for (ft::deque<littleDebug>::const_iterator it = b.begin(); it != b.end(); ++it)
+		{
+			if (*it != *cmp)
+			{
+				std::cout << "bad order\n";
+				break;
+			}
+			++cmp;
+		}
 		//displayData(c, "c");
 		//displayData(pouet, "pouet");
 		//displayData(revPouet, "revPouet");
