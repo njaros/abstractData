@@ -386,8 +386,8 @@ int main()
 	{
 		unsigned short random;
 		//ft::deque<intDebug> a(4, 13);
-		ft::deque<littleDebug> b;
-		std::deque<littleDebug> stdB;
+		ft::deque<debug> b;
+		std::deque<debug> stdB;
 		//ft::deque<intDebug> c(a);
 		//ft::vector<std::string> v(7, "pouet");
 		//v.push_back("pas pouet");
@@ -406,8 +406,8 @@ int main()
 			setRandom(random, b.size());
 		}
 		displayData(b, "b");
-		std::deque<littleDebug>::const_iterator cmp = stdB.begin();
-		for (ft::deque<littleDebug>::const_iterator it = b.begin(); it != b.end(); ++it)
+		std::deque<debug>::const_iterator cmp = stdB.begin();
+		for (ft::deque<debug>::const_iterator it = b.begin(); it != b.end(); ++it)
 		{
 			if (*it != *cmp)
 			{
