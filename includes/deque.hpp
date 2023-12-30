@@ -1044,10 +1044,44 @@ namespace ft
 				if (first.second > (copyEnd - copyStart) / 2)
 					joinWay = true;
 			}
-			if (!haveToJoin)
+			if (!joinWay)
 			{
+				if (haveToJoin)
+				{
+					//  first           last
+					//[ooo~~~~~][...][~~~ooooo]
+					//  last            ?
+					//[oooooooo][...][????????]
+					for (int i = copyStart; i < last.second; ++i)
+						_constructDataChunk(_chunks[last.first], i, *(_chunks[first.first][i]));
+					_destroyDataChunk(_chunks[first.first], copyStart, last.second - copyStart);
+				}
 				while (last != _end)
-					_swap(first++, last++);
+				{
+					_swap(first, last);
+					_edgeAdd(first, 1);
+					_edgeAdd(last, 1);
+				}
+				if (_end.second)
+					_swap(first, last);
+			}
+			else
+			{
+				//  first           last
+				//[ooooo~~~][...][~~~~~ooo]
+				//  first           ?
+				//[oooooooo][...][????????]
+				for (int i = last.second; i < copyEnd; ++i)
+					_constructDataChunk(_chunks[first.first], i, *(_chunks[last.first][i]));
+				_destroyDataChunk(_chunks[last.first], last.second, copyEnd - last.second);
+				_edgeAdd(first, 1);
+				_edgeAdd(last, 1);
+				while (last != end)
+				{
+					_swap(first, last);
+					_edgeAdd(first, 1);
+					_edgeAdd(last, 1);
+				}
 				if (_end.second)
 					_swap(first, last);
 			}
@@ -1087,11 +1121,79 @@ namespace ft
 
 		void	_joinChunksLeftToRight(_edge first, _edge last, difference_type range)
 		{
+			//TRAVAUX ICI
+			bool	haveToJoin(false);
+			bool	joinWay(false);
+			int		copyStart(0);
+			int		copyEnd(_chunkSize);
 			/*
 			* [left] [~~~~] [right]
 			*    =======>
 			*        [left] [right]
+			*
+			*  leftside     first          last   rightside
+			* [oooooooo][oo~~~~~~][...][~~oooooo][oooooooo]
+			*
+			*
+			* steps:
+			* if first == begin() just return
+			* if first.second, set the indexes to join the chunk first and last to one later
 			*/
+
+			if (first == _begin)
+				return;
+
+			if (first.second)
+			{
+				haveToJoin = true;
+				if (first.first == _begin.first)
+					copyStart = _begin.second;
+				if (last.first == _end.first)
+					copyEnd = _end.second;
+				if (first.second > (copyEnd - copyStart) / 2)
+					joinWay = true;
+			}
+			if (!joinWay)
+			{
+				if (haveToJoin)
+				{
+					//  first           last
+					//[ooo~~~~~][...][~~~ooooo]
+					//  last            ?
+					//[oooooooo][...][????????]
+					for (int i = copyStart; i < last.second; ++i)
+						_constructDataChunk(_chunks[last.first], i, *(_chunks[first.first][i]));
+					_destroyDataChunk(_chunks[first.first], copyStart, last.second - copyStart);
+				}
+				while (last != _end)
+				{
+					_swap(first, last);
+					_edgeAdd(first, 1);
+					_edgeAdd(last, 1);
+				}
+				if (_end.second)
+					_swap(first, last);
+			}
+			else
+			{
+				//  first           last
+				//[ooooo~~~][...][~~~~~ooo]
+				//  first           ?
+				//[oooooooo][...][????????]
+				for (int i = last.second; i < copyEnd; ++i)
+					_constructDataChunk(_chunks[first.first], i, *(_chunks[last.first][i]));
+				_destroyDataChunk(_chunks[last.first], last.second, copyEnd - last.second);
+				_edgeAdd(first, 1);
+				_edgeAdd(last, 1);
+				while (last != end)
+				{
+					_swap(first, last);
+					_edgeAdd(first, 1);
+					_edgeAdd(last, 1);
+				}
+				if (_end.second)
+					_swap(first, last);
+			}
 		}
 
 		void	_joinLeftToRight(_edge first, _edge last, difference_type range)
