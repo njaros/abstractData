@@ -737,8 +737,8 @@ namespace ft
 			}
 
 			// Here I set the empty chunks I'll swap with chunks that I have to right shift
-			src = _end.first;
-			dest = _end.first + jump;
+			src = _end.first - 1;
+			dest = _end.first + jump - 1;
 			if (_end.second)
 			{
 				++src;
@@ -794,7 +794,7 @@ namespace ft
 
 			if (holeSize)
 			{
-				chunkNeed = holeSize / 4;
+				chunkNeed = holeSize / _chunkSize;
 				available = _chunkSize * (_chunks.size() - _end.first) - _end.second;
 				if (available < holeSize)
 				{
@@ -969,7 +969,7 @@ namespace ft
 
 			if (holeSize)
 			{
-				chunkNeed = holeSize / 4;
+				chunkNeed = holeSize / _chunkSize;
 				available = _chunkSize * (_begin.first) + _begin.second;
 				if (available < holeSize)
 				{
@@ -1150,56 +1150,47 @@ namespace ft
 
 		//MODIFIERS
 
-		void	insert1(iterator it, size_type n, const value_type& val)
+		void	insert(iterator position, size_type n, const value_type& val)
 		{
-			_printMemory("Before insert");
-			if (it < begin() || it > end())
-				throw(ft::out_of_range("ft::deque::insert : iterator is out of range"));
+			_edge	ePosition;
 
-			std::cout << "_chunkSize = " << _chunkSize << std::endl;
-			if (_isRightSide(it))
-			{
-				_moveDataRight1(it, n);
-				_size += n;
-				while (n--)
-					_alloc.construct(&(*(--it)), val);
-			}
-			else
-			{
-				_moveDataLeft1(it, n);
-				_size += n;
-				while (n--)
-					_alloc.construct(&(*(it++)), val);
-			}
-			_printMemory("After insert");
-		}
-
-		void	insert(iterator it, size_type n, const value_type& val)
-		{
-			_edge	position;
-
-			_printMemory("Before insert");
-			if (it < begin() || it > end())
+			if (position < begin() || position > end())
 				throw(ft::out_of_range("ft::deque::insert : iterator is out of range"));
 
 			if (!n)
 				return;
 
-			position = _edgeCastFromIterator(it);
-			std::cout << "_chunkSize = " << _chunkSize << std::endl;
-			if (_isRightSide(it))
-				_moveRight(position, n);
+			_printMemory("Before insert");
+			ePosition = _edgeCastFromIterator(position);
+			if (_isRightSide(position))
+				_moveRight(ePosition, n);
 			else
-				_moveLeft(position, n);
+				_moveLeft(ePosition, n);
 			_size += n;
 			while (n--)
 			{
-				_alloc.construct(_chunks[position.first] + position.second, val);
-				_edgeAdd(position, 1);
+				_alloc.construct(_chunks[ePosition.first] + ePosition.second, val);
+				_edgeAdd(ePosition, 1);
 			}
 			_printMemory("After insert");
 		}
 
+		iterator	insert(iterator position, const value_type& val)
+		{
+			_edge	ePosition;
+
+			if (position < begin() || position > end())
+				throw(ft::out_of_range("ft::deque::insert : iterator is out of range"));
+
+			ePosition = _edgeCastFromIterator(position);
+			if (_isRightSide(position))
+				_moveRight(ePosition, 1);
+			else
+				_moveLeft(ePosition, 1);
+			++_size;
+			_alloc.construct(_chunks[ePosition.first] + ePosition.second, val);
+			return iterator(_chunks.begin() + ePosition.first, ePosition.second);
+		}
 	};
 }
 

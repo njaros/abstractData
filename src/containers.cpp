@@ -156,6 +156,11 @@ public:
 		i = o.i;
 		return *this;
 	}
+
+	bool operator!=(const heavyDebug& o) const
+	{
+		return i != o.i;
+	}
 };
 
 class littleDebug
@@ -386,8 +391,8 @@ int main()
 	{
 		unsigned short random;
 		//ft::deque<intDebug> a(4, 13);
-		ft::deque<debug> b;
-		std::deque<debug> stdB;
+		ft::deque<char> b;
+		std::deque<char> stdB;
 		//ft::deque<intDebug> c(a);
 		//ft::vector<std::string> v(7, "pouet");
 		//v.push_back("pas pouet");
@@ -401,13 +406,13 @@ int main()
 		setRandom(random);
 		for (int i = 1; i < 40; ++i)
 		{
-			b.insert(b.begin() + (random % (b.size() + 1)), 7, 'A' + i);
-			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 7, 'A' + i);
+			b.insert(b.begin() + (random % (b.size() + 1)), 1, 'A' + i);
+			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 1, 'A' + i);
 			setRandom(random, b.size());
 		}
 		displayData(b, "b");
-		std::deque<debug>::const_iterator cmp = stdB.begin();
-		for (ft::deque<debug>::const_iterator it = b.begin(); it != b.end(); ++it)
+		std::deque<char>::const_iterator cmp = stdB.begin();
+		for (ft::deque<char>::const_iterator it = b.begin(); it != b.end(); ++it)
 		{
 			if (*it != *cmp)
 			{
