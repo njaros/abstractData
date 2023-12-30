@@ -1124,7 +1124,7 @@ namespace ft
 			*   [ooovooooo] => [ooo~~~~~] + (jump - 1) * [~~~~~~~~] + [~~~ooooo]
 			* if true :
 			*        a              a                                     cpy
-			*   [ooooovooo] => [ooooo~~~] + (jump - 1) * [~~~~~~~~] + [ooo~~~~~]
+			*   [ooooovooo] => [ooooo~~~] + (jump - 1) * [~~~~~~~~] + [~~~~~ooo]
 			*/
 
 			// For cases I need to copy value_types, I set indexes to copy as less as possible datas
@@ -1207,7 +1207,10 @@ namespace ft
 						_reallocBaseRight(chunkNeed + 1, position.first); //Allocate bigger _base, copy _chunks, repositionning _begin and _end
 				}
 				if (position == _end)
+				{
+					_edgeAdd(_end, holeSize);
 					return;
+				}
 				if (holesize % _chunkSize)
 					_moveDataRight(position, holeSize);
 				else
@@ -1268,23 +1271,97 @@ namespace ft
 			_end.first = newBeginFirst + distBetweenBeginAndEnd;
 			insertPos = newBeginFirst + distBetweenBeginAndInsertPos;
 		}
-		
+
 		void	_moveDataLeft(const _edge& position, size_type holeSize)
 		{
 			//EN COURS
 			_edge	src = _begin;
 			_edge	dest = _begin;
 
-			_edgeAdd(dest, holeSize - 1);
-			while (src >= position)
+			_edgeSub(dest, holeSize);
+			while (src < position)
 			{
 				_alloc.construct(_chunks[dest.first] + dest.second, *(_chunks[src.first] + src.second));
 				_alloc.destroy(_chunks[src.first] + src.second);
-				_edgeSub(dest, 1);
-				_edgeSub(src, 1);
+				_edgeAdd(dest, 1);
+				_edgeAdd(src, 1);
+			}
+			_edgeSub(_begin, holeSize);
+			_edgeSub(position, holeSize);
+		}
+
+		void	_moveChunksLeft(const _edge& position, _baseSizeType jump)
+		{
+			int		copyStart(0);
+			int		copyEnd(_chunkSize);
+			bool	needToCopy(false);
+			bool	copyWay(false);
+			_baseSizeType	dest;
+			_baseSizeType	src;
+
+			/*
+			* copyWay :
+			* if false :
+			*       cpy                                     a             a
+			*   [ooo~~~~~] + (jump - 1) * [~~~~~~~~] + [~~~ooooo] <= [ooovooooo]
+			* if true :
+			*        a                                     cpy            a
+			*   [ooooo~~~] + (jump - 1) * [~~~~~~~~] + [~~~~~ooo] <= [ooooovooo]
+			*/
+
+			// For cases I need to copy value_types, I set indexes to copy as less as possible datas
+			if (position.second)
+			{
+				needToCopy = true;
+				if (position.first == _end.first)
+					copyEnd = _end.second;
+				if (position.first == _begin.first)
+					copyStart = _begin.second;
+				if (position.second >= (copyEnd - copyStart) / 2)
+					copyWay = true;
 			}
 
-			_edgeAdd(_end, holeSize);
+			// Here I set the empty chunks I'll swap with chunks that I have to left shift
+			src = _begin.first;
+			dest = _begin.first - jump;
+			// I have 3 possibles cases which each needs a proper algorythm
+			// case 1 : needToCopy == false
+			if (!copyWay)
+			{
+				while (src < position.first)
+					_swapChunk(_chunks[src++], _chunks[dest++]);
+				if (needToCopy)
+				{
+					/* here we are
+					*       cpy                                     a
+					*	[~~~~~~~~] + (jump - 1) * [~~~~~~~~] + [ooovooooo]
+					* that we want
+					*       cpy                                     a             a
+					*   [ooo~~~~~] + (jump - 1) * [~~~~~~~~] + [~~~ooooo] <= [ooovooooo]
+					* steps :
+					* 1 - find cpy and a indexes
+					* 2 - do the constructs and destroys
+					* I'll reuse dest for cpy and dest for a
+					*/
+					src = position.first;
+					dest = dest - jump;
+					for (int i = copyStart; i < position.second; ++i)
+						_constructDataChunk(_chunks[dest], i, _chunks[src][i]);
+					_destroyDataChunk(_chunks, copyStart, position.second - copyStart);
+				}
+			}
+			else
+			{
+				while (src >= position.first)
+					_swapChunk(_chunks[src--], _chunks[dest--]);
+				dest = position.first;
+				src = src - jump;
+				for (int i = position.second, i < copyEnd; ++i)
+					_constructDataChunk(_chunks[dest], i, _chunks[src][i]);
+				_destroyDataChunk(_chunks, copyStart, copyEnd - position.second);
+			}
+			_begin.first -= jump;
+			position.first -= jump;
 		}
 
 		void	_moveLeft(_edge& position, size_type holeSize)
@@ -1304,7 +1381,11 @@ namespace ft
 						_reallocBaseLeft(chunkNeed + 1, position.first); //Allocate bigger _base, copy _chunks, repositionning _begin and _end
 				}
 				if (position == _begin)
+				{
+					_edgeSub(_begin, holeSize);
+					_edgeSub(_position, holeSize);
 					return;
+				}
 				if (holesize % _chunkSize)
 					_moveDataLeft(position, holeSize);
 				else
@@ -1509,24 +1590,14 @@ namespace ft
 			position = _edgeCastFromIterator(it);
 			std::cout << "_chunkSize = " << _chunkSize << std::endl;
 			if (_isRightSide(it))
-			{
 				_moveRight(position, n);
-				_size += n;
-				while (n--)
-				{
-					_edgeSub(position, 1);
-					_alloc.construct(_chunks[position.first] + position.second, val);
-				}
-			}
 			else
-			{
 				_moveLeft(position, n);
-				_size += n;
-				while (n--)
-				{
-					_alloc.construct(_chunks[position.first] + position.second, val);
-					_edgeAdd(position, 1);
-				}
+			_size += n;
+			while (n--)
+			{
+				_alloc.construct(_chunks[position.first] + position.second, val);
+				_edgeAdd(position, 1);
 			}
 			_printMemory("After insert");
 		}
