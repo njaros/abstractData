@@ -100,10 +100,22 @@ public:
 	short a;
 	short b;
 
-	debug() : a(0), b(0) {}
-	debug(short nb) : a(nb), b(0) {}
+	debug() : a(0) {
+		if (!b)
+			throw (ft::logic_error("debug::copyConstructor : you construct on an instancied slot, you forgot to destroy"));
+		b = 0;
+	}
+	debug(short nb) : a(nb) {
+		if (!b)
+			throw (ft::logic_error("debug::copyConstructor : you construct on an instancied slot, you forgot to destroy"));
+		b = 0;
+	}
 	debug(const debug& o)
 	{
+		if (!b && o.b != 0)
+			throw (ft::logic_error("debug::copyConstructor : you try to copy a not constructed object on an instancied slot."));
+		if (!b)
+			throw (ft::logic_error("debug::copyConstructor : you construct on an instancied slot, you forgot to destroy"));
 		if (o.b != 0)
 			throw (ft::logic_error("debug::copyConstructor : called with a not constructed debug object"));
 		a = o.a;

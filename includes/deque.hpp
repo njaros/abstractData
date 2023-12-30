@@ -991,6 +991,118 @@ namespace ft
 			}
 		}
 
+		void	_joinDatasRightToLeft(_edge first, difference_type range)
+		{
+			/*
+			* [left] [~~~~] [right]
+			*          <======
+			* [left] [right]
+			*/
+			_edge	src;
+
+			src = first;
+			_edgeAdd(src, range);
+			while (src < _end)
+			{
+				_constructDataChunk(_chunks[first.first], first.second, _chunks[src.first][src.second]);
+				_destroyDataChunk(_chunks[src.first], src.second, 1);
+				_edgeAdd(first, 1);
+				_edgeAdd(src, 1);
+			}
+		}
+
+		void	_joinChunksRightToLeft(_edge first, _edge last, difference_type range)
+		{
+			bool	haveToJoin(false);
+			bool	joinWay(false);
+			int		copyStart(0);
+			int		copyEnd(_chunkSize);
+			/*
+			* [left] [~~~~] [right]
+			*          <======
+			* [left] [right]
+			* 
+			*  leftside     first          last   rightside
+			* [oooooooo][oo~~~~~~][...][~~oooooo][oooooooo]
+			* 
+			* 
+			* steps:
+			* if last == end() just return
+			* if first.second, set the indexes to join the chunk first and last to one later
+			*/
+
+			if (last == _end)
+				return;
+
+			if (first.second)
+			{
+				haveToJoin = true;
+				if (first.first == _begin.first)
+					copyStart = _begin.second;
+				if (last.first == _end.first)
+					copyEnd = _end.second;
+				if (first.second > (copyEnd - copyStart) / 2)
+					joinWay = true;
+			}
+			if (!haveToJoin)
+			{
+				while (last != _end)
+					_swap(first++, last++);
+				if (_end.second)
+					_swap(first, last);
+			}
+		}
+
+		void	_joinRightToLeft(_edge first, _edge last, difference_type range)
+		{
+			if (range % _chunkSize)
+				_joinDatasRightToLeft(first, range);
+			else
+				_joinChunksRightToLeft(first, last, range);
+			_edgeSub(_end, range);
+		}
+
+		void	_joinDatasLeftToRight(_edge first, _edge last, difference_type range)
+		{
+			/*
+			* [left] [~~~~] [right]
+			*    =======>
+			*        [left] [right]
+			*/
+			_edge	src;
+			_edge	dest;
+
+			src = first;
+			dest = last;
+			_edgeSub(src, 1);
+			_edgeSub(dest, 1);
+			while (src >= _begin)
+			{
+				_constructDataChunk(_chunks[dest.first], dest.second, _chunks[src.first][src.second]);
+				_destroyDataChunk(_chunks[src.first], src.second, 1);
+				_edgeSub(first, 1);
+				_edgeSub(src, 1);
+			}
+		}
+
+		void	_joinChunksLeftToRight(_edge first, _edge last, difference_type range)
+		{
+			/*
+			* [left] [~~~~] [right]
+			*    =======>
+			*        [left] [right]
+			*/
+		}
+
+		void	_joinLeftToRight(_edge first, _edge last, difference_type range)
+		{
+			if (range % _chunkSize)
+				_joinDatasLeftToRight(first, last, range);
+			else
+				_joinChunksLeftToRight(first, last, range);
+			_edgeAdd(_begin, range);
+		}
+
 	public:
 
 		//CONSTRUCTORS
@@ -1190,6 +1302,77 @@ namespace ft
 			++_size;
 			_alloc.construct(_chunks[ePosition.first] + ePosition.second, val);
 			return iterator(_chunks.begin() + ePosition.first, ePosition.second);
+		}
+
+		template <class InputIterator>
+		void	insert(iterator position, InputIterator first, InputIterator last,
+			typename enable_if<!ft::is_integral< InputIterator >::value >::type* = 0)
+		{
+			_edge ePosition;
+			difference_type	dist;
+
+			if (position < begin() || position > end())
+				throw(ft::out_of_range("ft::deque::insert : iterator is out of range."));
+
+			dist = ft::distance<InputIterator>(first, last);
+			if (dist < 0)
+				throw(ft::length_error("ft::deque::insert : inputIterator \"first\" can't be higher than \"last\"."));
+			if (!dist)
+				return;
+
+			ePosition = _edgeCastFromIterator(position);
+			if (_isRightSide(position))
+				_moveRight(ePosition, dist);
+			else
+				_moveLeft(ePosition, dist);
+			_size += dist;
+			while (first != last)
+			{
+				_alloc.construct(_chunks[ePosition.first] + ePosition.second, *first);
+				++first;
+				_edgeAdd(ePosition, 1);
+			}
+		}
+
+		iterator	erase(iterator first, iterator last)
+		{
+			_edge			ePositionFirst;
+			_edge			ePositionLast;
+			difference_type	rangeDeleted;
+
+			if (first < begin() || last > end() || last < first)
+				throw(ft::out_of_range("ft::deque::erase : bad iterator ranges"));
+			
+			rangeDeleted = last - first;
+			if (!rangeDeleted)
+				return;
+
+			ePositionFirst = _edgeCastFromIterator(first);
+			ePositionLast = _edgeCastFromIterator(last);
+			for (iterator it = first; it != last; ++it)
+				_alloc.destroy(&(*(it++)));
+
+			if (first - begin() < end() - last)
+				_joinLeftToRight(ePositionFirst, ePositionLast, rangeDeleted);
+			else
+			{
+				_joinRightToLeft(ePositionFirst, ePositionLast, rangeDeleted);
+				first += rangeDeleted;
+			}
+
+			_size -= rangeDeleted;
+			if (!_size)
+			{
+				_begin.first = _chunks.size() / 2;
+				_begin.second = 0;
+				_end = _begin;
+			}
+			return first;
+		}
+
+		iterator	erase(iterator position)
+		{
+			return erase(position, position + 1);
 		}
 	};
 }
