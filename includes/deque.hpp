@@ -632,7 +632,7 @@ namespace ft
 			base.clear();
 		}
 
-		std::pair<iterator, iterator>	_manageBase(_baseSizeType holeSize, _edge& edgeHole, bool rightInsert = false)
+		std::pair<iterator, iterator>	_manageBase1(_baseSizeType holeSize, _edge& edgeHole, bool rightInsert = false)
 		{
 			_baseSizeType	endAlone = (_end.second == 0 && _end != _begin) || _chunkSize == 1 ? 1 : 0;
 			if (endAlone && rightInsert && !holeSize)
@@ -640,11 +640,11 @@ namespace ft
 			_baseSizeType	sizeNeed = holeSize + (_end.first - _begin.first) + !endAlone;
 
 			if (_chunks.capacity() >= 3 * sizeNeed)
-				return _reorderBase(holeSize, edgeHole, sizeNeed);
-			return _reallocBase(holeSize, edgeHole, sizeNeed);
+				return _reorderBase1(holeSize, edgeHole, sizeNeed);
+			return _reallocBase1(holeSize, edgeHole, sizeNeed);
 		}
 
-		std::pair<iterator, iterator>	_reorderBase(_baseSizeType holeSize, _edge& edgeHole, _baseSizeType sizeNeed)
+		std::pair<iterator, iterator>	_reorderBase1(_baseSizeType holeSize, _edge& edgeHole, _baseSizeType sizeNeed)
 		{
 			/*
 			* 0     1      2     3     4     5     6     7     8     9     10
@@ -788,7 +788,7 @@ namespace ft
 			return toReturn;
 		}
 
-		std::pair<iterator, iterator>	_reallocBase(_baseSizeType holeSize, _edge& edgeHole, _baseSizeType sizeNeed)
+		std::pair<iterator, iterator>	_reallocBase1(_baseSizeType holeSize, _edge& edgeHole, _baseSizeType sizeNeed)
 		{
 			_baseSizeType	endAlone = _end.second == 0 && _end != _begin ? 1 : 0;
 			if (endAlone && _end.first == _chunks.size())
@@ -876,7 +876,7 @@ namespace ft
 			return toReturn;
 		}
 
-		void	_moveChunkLeft(iterator& position, _edge& edgeHole, _baseSizeType holeChunkSize)
+		void	_moveChunkLeft1(iterator& position, _edge& edgeHole, _baseSizeType holeChunkSize)
 		{
 			_baseSizeType	chunkAvailable;
 			_baseSizeType	idx;
@@ -886,7 +886,7 @@ namespace ft
 			chunkAvailable = _begin.first;
 			if (_chunks.empty() || chunkAvailable < holeChunkSize)
 			{
-				position = _manageBase(holeChunkSize, edgeHole).first;
+				position = _manageBase1(holeChunkSize, edgeHole).first;
 				return;
 			}
 			if (!holeChunkSize)
@@ -915,7 +915,7 @@ namespace ft
 			_printMemory("AFTER : _chunks adresses : ");
 		}
 
-		void	_moveDataLeft(iterator& position, size_type holeSize) //insert hole BEFORE position
+		void	_moveDataLeft1(iterator& position, size_type holeSize) //insert hole BEFORE position
 		{
 			_baseSizeType	chunkNeed;
 			difference_type	modulo;
@@ -931,13 +931,13 @@ namespace ft
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
-				_moveChunkLeft(position, edgeHole, chunkNeed);
-				_moveModulo(position, _begin, edgeHole, -modulo);
+				_moveChunkLeft1(position, edgeHole, chunkNeed);
+				_moveModulo1(position, _begin, edgeHole, -modulo);
 				_begin.second -= modulo;
 			}
 		}
 
-		void	_moveChunkRight(iterator& position, _edge& edgeHole, _baseSizeType holeChunkSize)
+		void	_moveChunkRight1(iterator& position, _edge& edgeHole, _baseSizeType holeChunkSize)
 		{
 			_baseSizeType	chunkAvailable;
 			_baseSizeType	idx;
@@ -947,7 +947,7 @@ namespace ft
 			chunkAvailable = _chunks.size() - _end.first;
 			if (_chunks.empty() || !chunkAvailable || chunkAvailable < holeChunkSize + 1)
 			{
-				position = _manageBase(holeChunkSize, edgeHole, true).second;
+				position = _manageBase1(holeChunkSize, edgeHole, true).second;
 				edgeHole.first += holeChunkSize;
 				return;
 			}
@@ -979,7 +979,7 @@ namespace ft
 			_printMemory("After moveChunkRight");
 		}
 
-		void	_moveModulo(iterator& position, _edge start, _edge end, difference_type modulo)
+		void	_moveModulo1(iterator& position, _edge start, _edge end, difference_type modulo)
 		{
 			_edge	here;
 
@@ -1014,7 +1014,7 @@ namespace ft
 			position += modulo;
 		}
 
-		void	_moveDataRight(iterator& position, size_type holeSize) //insert hole BEFORE position
+		void	_moveDataRight1(iterator& position, size_type holeSize) //insert hole BEFORE position
 		{
 			_baseSizeType	chunkNeed;
 			difference_type	modulo;
@@ -1030,9 +1030,285 @@ namespace ft
 					++chunkNeed;
 					modulo -= _chunkSize;
 				}
-				_moveChunkRight(position, edgeHole, chunkNeed);
-				_moveModulo(position, edgeHole, _end, modulo);
+				_moveChunkRight1(position, edgeHole, chunkNeed);
+				_moveModulo1(position, edgeHole, _end, modulo);
 				_edgeAdd(_end, modulo);
+			}
+		}
+
+		void	_reorderBaseRight(_baseSizeType lenToAdd, _baseSizeType& insertPos)
+		{
+			_baseSizeType	distBetweenBeginAndEnd;
+			_baseSizeType	distBetweenBeginAndInsertPos;
+			_baseSizeType	newBeginFirst;
+			_baseSizeType	copyIdx;
+			bool			countEnd;
+
+			countEnd = _end.second != 0;
+			distBetweenBeginAndEnd = _end.first - _begin.first;
+			distBetweenBeginAndInsertPos = insertPos - _begin.first;
+			newBeginFirst = distBetweenBeginAndEnd + countEnd + lenToAdd;
+			destIdx = newBeginFirst;
+
+			for (_baseSizeType srcIdx = _begin.first; srcIdx < _end.first; ++srcIdx)
+				_swapChunk(_chunks[destIdx++], _chunks[srcIdx]);
+			if (_end.second)
+				_swapChunk(_chunks[destIdx], _chunks[_end.first]);
+
+			_begin.first = newBeginFirst;
+			_end.first = newBeginFirst + distBetweenBeginAndEnd;
+			insertPos = newBeginFirst + distBetweenBeginAndInsertPos;
+		}
+
+		void	_reallocBaseRight(_baseSizeType lenToAdd, _baseSizeType& insertPos)
+		{
+			_baseSizeType	idxNew;
+			_baseSizeType	newLen;
+			_baseSizeType	distBetweenBeginAndEnd;
+			_baseSizeType	distBetweenBeginAndInsertPos;
+			_baseSizeType	copyStart;
+			_base			newBase;
+			bool			countEnd;
+
+			countEnd = _end.second != 0;
+			distBetweenBeginAndEnd = _end.first - _begin.first;
+			distBetweenBeginAndInsertPos = insertPos - _begin.first;
+			newLen = distBetweenBeginAndEnd + countEnd + lenToAdd;
+			copyStart = newLen - _begin.first;
+			newBase.assign(3 * newLen, nullptr);
+			idxNew = 0;
+
+			while (idxNew < copyStart)
+				newBase[idxNew++] = _getNewChunk();
+			for (typename _base::const_iterator cit = _chunks.begin(); cit != _chunks.end(); ++cit)
+				newBase[idxNew++] = *cit;
+			while (idxNew < newBase.size())
+				newBase[idxNew++] = _getNewChunk();
+
+			_begin.first = newLen;
+			_end.first = newLen + distBetweenBeginAndEnd;
+			insertPos = newLen + distBetweenBeginAndInsertPos;
+		}
+
+		void	_moveDataRight(const _edge& position, size_type holeSize)
+		{
+			_edge	src = _end;
+			_edge	dest = _end;
+
+			_edgeSub(src, 1);
+			_edgeAdd(dest, holeSize - 1);
+			while (src >= position)
+			{
+				_alloc.construct(_chunks[dest.first] + dest.second, *(_chunks[src.first] + src.second));
+				_alloc.destroy(_chunks[src.first] + src.second);
+				_edgeSub(dest, 1);
+				_edgeSub(src, 1);
+			}
+
+			_edgeAdd(_end, holeSize);
+		}
+
+		void	_moveChunksRight(const _edge& position, _baseSizeType jump)
+		{
+			int		copyStart(0);
+			int		copyEnd(_chunkSize);
+			bool	needToCopy(false);
+			bool	copyWay(false);
+			_baseSizeType	dest;
+			_baseSizeType	src;
+
+			/*
+			* copyWay :
+			* if false :
+			*        a             cpy                                     a
+			*   [ooovooooo] => [ooo~~~~~] + (jump - 1) * [~~~~~~~~] + [~~~ooooo]
+			* if true :
+			*        a              a                                     cpy
+			*   [ooooovooo] => [ooooo~~~] + (jump - 1) * [~~~~~~~~] + [ooo~~~~~]
+			*/
+
+			// For cases I need to copy value_types, I set indexes to copy as less as possible datas
+			if (position.second)
+			{
+				needToCopy = true;
+				if (position.first == _end.first)
+					copyEnd = _end.second;
+				if (position.first == _begin.first)
+					copyStart = _begin.second;
+				if (position.second >= (copyEnd - copyStart) / 2)
+					copyWay = true;
+			}
+
+			// Here I set the empty chunks I'll swap with chunks that I have to right shift
+			src = _end.first;
+			dest = _end.first + jump;
+			if (_end.second)
+			{
+				++src;
+				++dest;
+			}
+			// I have 3 possibles cases which each needs a proper algorythm
+			// case 1 : needToCopy == false
+			if (!copyWay)
+			{
+				while (src >= position.first)
+					_swapChunk(_chunks[src--], _chunks[dest--]);
+				if (needToCopy)
+				{
+					/* here we are
+					*       cpy                                    a
+					*	[~~~~~~~~] + (jump - 1) * [~~~~~~~~] + [oooooooo]
+					* that we want
+					*       cpy                                    a
+					*   [ooo~~~~~] + (jump - 1) * [~~~~~~~~] + [~~~ooooo]
+					* steps :
+					* 1 - find cpy and a indexes
+					* 2 - do the constructs and destroys
+					* I'll reuse dest for cpy and dest for a
+					*/
+					dest = position.first;
+					src = dest + jump;
+					for (int i = copyStart; i < position.second; ++i)
+						_constructDataChunk(_chunks[dest], i, _chunks[src][i]);
+					_destroyDataChunk(_chunks, copyStart, position.second - copyStart);
+				}
+			}
+			else
+			{
+				/*
+				*        a              a                                     cpy
+				*   [ooooovooo] => [ooooo~~~] + (jump - 1) * [~~~~~~~~] + [~~~~~ooo]
+				*/
+				while (src > position.first)
+					_swapChunk(_chunks[src--], _chunks[dest--]);
+				src = position.first;
+				dest = src + jump;
+				for (int i = position.second, i < copyEnd; ++i)
+					_constructDataChunk(_chunks[dest], i, _chunks[src][i]);
+				_destroyDataChunk(_chunks, copyStart, copyEnd - position.second);
+			}
+			_end.first += jump;
+		}
+
+		void	_moveRight(_edge& position, size_type holeSize)
+		{
+			_baseSizeType	chunkNeed;
+			size_type		available;
+
+			if (holeSize)
+			{
+				chunkNeed = holesize / 4;
+				available = _chunkSize * (_chunks.size() - _end.first) - _end.second;
+				if (available < holeSize)
+				{
+					if (_chunks.capacity() * _chunkSize > 3 * (_size + holeSize))
+						_reorderBaseRight(chunkNeed + 1, position.first); //Only repositionning the chunks, _begin and _end
+					else
+						_reallocBaseRight(chunkNeed + 1, position.first); //Allocate bigger _base, copy _chunks, repositionning _begin and _end
+				}
+				if (position == _end)
+					return;
+				if (holesize % _chunkSize)
+					_moveDataRight(position, holeSize);
+				else
+					_moveChunksRight(position, chunkNeed);
+			}
+		}
+
+		void	_reallocBaseLeft(_baseSizeType lenToAdd, _baseSizeType& insertPos)
+		{
+			_baseSizeType	idxNew;
+			_baseSizeType	newLen;
+			_baseSizeType	distBetweenBeginAndEnd;
+			_baseSizeType	distBetweenBeginAndInsertPos;
+			_baseSizeType	copyStart;
+			_base			newBase;
+			bool			countEnd;
+
+			countEnd = _end.second != 0;
+			distBetweenBeginAndEnd = _end.first - _begin.first;
+			distBetweenBeginAndInsertPos = insertPos - _begin.first;
+			newLen = distBetweenBeginAndEnd + countEnd + lenToAdd;
+			copyStart = newLen - _begin.first + lenToAdd;
+			newBase.assign(3 * newLen, nullptr);
+			idxNew = 0;
+
+			while (idxNew < copyStart)
+				newBase[idxNew++] = _getNewChunk();
+			for (typename _base::const_iterator cit = _chunks.begin(); cit != _chunks.end(); ++cit)
+				newBase[idxNew++] = *cit;
+			while (idxNew < newBase.size())
+				newBase[idxNew++] = _getNewChunk();
+
+			_begin.first = newLen + lenToAdd;
+			_end.first = _begin.first + distBetweenBeginAndEnd;
+			insertPos = _begin.first + distBetweenBeginAndInsertPos;
+		}
+
+		void	_reorderBaseLeft(_baseSizeType lenToAdd, _baseSizeType& insertPos)
+		{
+			_baseSizeType	distBetweenBeginAndEnd;
+			_baseSizeType	distBetweenBeginAndInsertPos;
+			_baseSizeType	newBeginFirst;
+			_baseSizeType	copyIdx;
+			bool			countEnd;
+
+			countEnd = _end.second != 0;
+			distBetweenBeginAndEnd = _end.first - _begin.first;
+			distBetweenBeginAndInsertPos = insertPos - _begin.first;
+			newBeginFirst = distBetweenBeginAndEnd + countEnd + (2 * lenToAdd);
+			destIdx = newBeginFirst + distBetweenBeginAndEnd + countEnd;
+
+			if (_end.second)
+				_swapChunk(_chunks[destIdx--], _chunks[_end.first]);
+			for (_baseSizeType srcIdx = _end.first - 1; srcIdx >= _begin.first; --srcIdx)
+				_swapChunk(_chunks[destIdx--], _chunks[srcIdx]);
+
+			_begin.first = newBeginFirst;
+			_end.first = newBeginFirst + distBetweenBeginAndEnd;
+			insertPos = newBeginFirst + distBetweenBeginAndInsertPos;
+		}
+		
+		void	_moveDataLeft(const _edge& position, size_type holeSize)
+		{
+			//EN COURS
+			_edge	src = _begin;
+			_edge	dest = _begin;
+
+			_edgeAdd(dest, holeSize - 1);
+			while (src >= position)
+			{
+				_alloc.construct(_chunks[dest.first] + dest.second, *(_chunks[src.first] + src.second));
+				_alloc.destroy(_chunks[src.first] + src.second);
+				_edgeSub(dest, 1);
+				_edgeSub(src, 1);
+			}
+
+			_edgeAdd(_end, holeSize);
+		}
+
+		void	_moveLeft(_edge& position, size_type holeSize)
+		{
+			_baseSizeType	chunkNeed;
+			size_type		available;
+
+			if (holeSize)
+			{
+				chunkNeed = holesize / 4;
+				available = _chunkSize * (_begin.first) + _end.second;
+				if (available < holeSize)
+				{
+					if (_chunks.capacity() * _chunkSize > 3 * (_size + holeSize))
+						_reorderBaseLeft(chunkNeed + 1, position.first); //Only repositionning the chunks, _begin and _end
+					else
+						_reallocBaseLeft(chunkNeed + 1, position.first); //Allocate bigger _base, copy _chunks, repositionning _begin and _end
+				}
+				if (position == _begin)
+					return;
+				if (holesize % _chunkSize)
+					_moveDataLeft(position, holeSize);
+				else
+					_moveChunksLeft(position, chunkNeed);
 			}
 		}
 
@@ -1195,7 +1471,7 @@ namespace ft
 
 		//MODIFIERS
 
-		void	insert(iterator it, size_type n, const value_type& val)
+		void	insert1(iterator it, size_type n, const value_type& val)
 		{
 			_printMemory("Before insert");
 			if (it < begin() || it > end())
@@ -1204,17 +1480,53 @@ namespace ft
 			std::cout << "_chunkSize = " << _chunkSize << std::endl;
 			if (_isRightSide(it))
 			{
-				_moveDataRight(it, n);
+				_moveDataRight1(it, n);
 				_size += n;
 				while (n--)
 					_alloc.construct(&(*(--it)), val);
 			}
 			else
 			{
-				_moveDataLeft(it, n);
+				_moveDataLeft1(it, n);
 				_size += n;
 				while (n--)
 					_alloc.construct(&(*(it++)), val);
+			}
+			_printMemory("After insert");
+		}
+
+		void	insert(iterator it, size_type n, const value_type& val)
+		{
+			_edge	position;
+
+			_printMemory("Before insert");
+			if (it < begin() || it > end())
+				throw(ft::out_of_range("ft::deque::insert : iterator is out of range"));
+
+			if (!n)
+				return;
+
+			position = _edgeCastFromIterator(it);
+			std::cout << "_chunkSize = " << _chunkSize << std::endl;
+			if (_isRightSide(it))
+			{
+				_moveRight(position, n);
+				_size += n;
+				while (n--)
+				{
+					_edgeSub(position, 1);
+					_alloc.construct(_chunks[position.first] + position.second, val);
+				}
+			}
+			else
+			{
+				_moveLeft(position, n);
+				_size += n;
+				while (n--)
+				{
+					_alloc.construct(_chunks[position.first] + position.second, val);
+					_edgeAdd(position, 1);
+				}
 			}
 			_printMemory("After insert");
 		}
