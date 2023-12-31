@@ -406,7 +406,7 @@ int main()
 		//ft::deque<littleDebug> a(31, 5);
 		ft::deque<debug> b;
 		std::deque<debug> stdB;
-		//ft::deque<intDebug> c(a);
+		ft::deque<debug> c(4, 100);
 		//ft::vector<std::string> v(7, "pouet");
 		//v.push_back("pas pouet");
 		//ft::deque<std::string> pouet(v.begin(), v.end());
@@ -423,6 +423,8 @@ int main()
 			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 2, 'A' + i);
 			setRandom(random, b.size());
 		}
+		c.insert(c.end(), b.rbegin() + 7, b.rend() - 4);
+		displayData(c, "c");
 		displayData(b, "b");
 		std::deque<debug>::const_iterator cmp = stdB.begin();
 		for (ft::deque<debug>::const_iterator it = b.begin(); it != b.end(); ++it)
@@ -436,9 +438,25 @@ int main()
 		}
 		for (int i = 0; i < 150; ++i)
 		{
+			stdB.erase(stdB.end() - 9, stdB.end());
+			stdB.insert(stdB.begin(), 11, debug(i, true));
 			b.erase(b.end() - 9, b.end());
 			b.insert(b.begin(), 11, debug(i, true));
 		}
+		cmp = stdB.begin();
+		for (ft::deque<debug>::const_iterator it = b.begin(); it != b.end(); ++it)
+		{
+			if (*it != *cmp)
+			{
+				std::cout << "bad order\n";
+				break;
+			}
+			++cmp;
+		}
+		b.clear();
+		displayData(b, "b");
+		b.insert(b.begin(), 51, debug(4, true));
+		displayData(b, "b");
 		//displayData(c, "c");
 		//displayData(pouet, "pouet");
 		//displayData(revPouet, "revPouet");

@@ -1374,6 +1374,24 @@ namespace ft
 
 		//ELEMENT ACCESS
 
+		reference		front()							{ return _chunks[_begin.first][_begin.second]; }
+		const_reference	front()	const					{ return _chunks[_begin.first][_begin.second]; }
+		reference		back()							{ return *(end() - 1); }
+		const_reference	back()	const					{ return *(end() - 1); }
+		reference		operator[](size_type n)			{ return *(begin() + n); }
+		const_reference	operator[](size_type n)	const	{ return *(begin() + n); }
+		reference		at(size_type n)
+		{
+			if (n >= _size)
+				throw(ft::out_of_range("this element is out of range"));
+			return *(begin() + n);
+		}
+		const_reference		at(size_type n)	const
+		{
+			if (n >= _size)
+				throw(ft::out_of_range("this element is out of range"));
+			return *(begin() + n);
+		}
 		//MODIFIERS
 
 		void	insert(iterator position, size_type n, const value_type& val)
@@ -1494,7 +1512,109 @@ namespace ft
 		{
 			return erase(position, position + 1);
 		}
+
+		void clear()
+		{
+			erase(begin(), end());
+		}
+
+		template < class InputIterator >
+		void		assign(InputIterator first, InputIterator last, \
+			typename ft::enable_if< !ft::is_integral< InputIterator >::value >::type* = 0)
+		{
+			clear();
+			insert(end(), first, last);
+		}
+
+		void	assign(size_type n, const value_type& val)
+		{
+			clear();
+			insert(end(), n, val);
+		}
+
+		void	push_back(const value_type& val)
+		{
+			insert(end(), val);
+		}
+
+		void	push_front(const value_type& val)
+		{
+			insert(begin(), val);
+		}
+
+		void	pop_back()
+		{
+			erase(end() - 1);
+		}
+
+		void	pop_front()
+		{
+			erase(begin());
+		}
+
+		void	swap(deque& other)
+		{
+			_edge		beginTmp;
+			_edge		endTmp;
+			size_type	sizeTmp;
+
+			beginTmp = _begin;
+			endTmp = _end;
+			sizeTmp = _size;
+
+			_begin = other._begin;
+			_end = other._end;
+			_size = other._size;
+
+			other._begin = beginTmp;
+			other._end = endTmp;
+			other._size = sizeTmp;
+
+			_chunks.swap(other._chunks);
+		}
+
+		//ALLOCATOR
+
+		allocator_type	get_allocator()	const { return _alloc; }
 	};
+
+	//NON_MEMBER OVERLOADS
+
+	template <class T, class Alloc>  bool operator==(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs)
+	{
+		if (lhs.size() != rhs.size())
+			return false;
+		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+	}
+
+	template <class T, class Alloc>  bool operator!=(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template <class T, class Alloc>  bool operator<(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs)
+	{
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	}
+
+	template <class T, class Alloc>  bool operator>(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs)
+	{
+		return (rhs < lhs);
+	}
+
+	template <class T, class Alloc>  bool operator<=(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs)
+	{
+		return !(rhs < lhs);
+	}
+
+
+	template <class T, class Alloc>  bool operator>=(const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs)
+	{
+		return !(lhs < rhs);
+	}
+
+	template <class T, class Alloc>  void swap(deque<T, Alloc>& x, deque<T, Alloc>& y) { x.swap(y); }
+
 }
 
 #endif
