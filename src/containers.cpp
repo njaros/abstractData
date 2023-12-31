@@ -417,10 +417,10 @@ int main()
 
 		random = 0;
 		setRandom(random);
-		for (int i = 1; i < 5; ++i)
+		for (int i = 1; i < 15; ++i)
 		{
-			b.insert(b.begin() + (random % (b.size() + 1)), 4, 'A' + i);
-			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 4, 'A' + i);
+			b.insert(b.begin() + (random % (b.size() + 1)), 2, 'A' + i);
+			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 2, 'A' + i);
 			setRandom(random, b.size());
 		}
 		displayData(b, "b");
@@ -436,8 +436,8 @@ int main()
 		}
 		for (int i = 0; i < 150; ++i)
 		{
-			b.erase(b.end() - 1);
-			b.insert(b.begin(), debug(i, true));
+			b.erase(b.end() - 9, b.end());
+			b.insert(b.begin(), 11, debug(i, true));
 		}
 		//displayData(c, "c");
 		//displayData(pouet, "pouet");

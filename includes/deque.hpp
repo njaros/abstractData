@@ -670,6 +670,8 @@ namespace ft
 			distBetweenBeginAndEnd = _end.first - _begin.first;
 			distBetweenBeginAndInsertPos = insertPos - _begin.first;
 			newLen = distBetweenBeginAndEnd + countEnd + lenToAdd;
+			if (_begin.first > newLen)
+				newLen = _begin.first;
 			copyStart = newLen - _begin.first;
 			newBase.assign(3 * newLen, nullptr);
 			idxNew = 0;
@@ -829,6 +831,8 @@ namespace ft
 			distBetweenBeginAndEnd = _end.first - _begin.first;
 			distBetweenBeginAndInsertPos = insertPos - _begin.first;
 			newLen = distBetweenBeginAndEnd + countEnd + lenToAdd;
+			if (_chunks.size() - _end.first >= newLen)
+				newLen = _chunks.size() - _end.first;
 			copyStart = newLen - _begin.first + lenToAdd;
 			newBase.assign(3 * newLen, nullptr);
 			idxNew = 0;
@@ -859,7 +863,7 @@ namespace ft
 			distBetweenBeginAndEnd = _end.first - _begin.first;
 			distBetweenBeginAndInsertPos = insertPos - _begin.first;
 			newBeginFirst = distBetweenBeginAndEnd + countEnd + (2 * lenToAdd);
-			destIdx = newBeginFirst + distBetweenBeginAndEnd;
+			destIdx = newBeginFirst + distBetweenBeginAndEnd - !countEnd;
 
 			if (_end.second)
 				_swapChunk(destIdx--, _end.first);
@@ -1464,9 +1468,6 @@ namespace ft
 
 			ePositionFirst = _edgeCastFromIterator(first);
 			ePositionLast = _edgeCastFromIterator(last);
-			std::cout << "delete call with ePosfirst = (" << ePositionFirst.first << " ," << ePositionFirst.second << ")"
-				<< " | ePositionLast = (" << ePositionLast.first << ", " << ePositionLast.second << ")" << std::endl;
-			_printMemory("before delete");
 			for (iterator it = first; it != last; ++it)
 				_alloc.destroy(&(*(it)));
 
@@ -1486,7 +1487,6 @@ namespace ft
 				_end = _begin;
 				first = iterator(_chunks.begin() + _end.first, _end.second);
 			}
-			_printMemory("after delete");
 			return first;
 		}
 
