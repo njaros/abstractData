@@ -110,6 +110,7 @@ public:
 			throw (ft::logic_error("debug::copyConstructor : you construct on an instancied slot, you forgot to destroy"));
 		b = 0;
 	}
+	debug(short nb, bool imi) : a(nb), b(0) {}
 	debug(const debug& o)
 	{
 		if (!b && o.b != 0)
@@ -402,9 +403,9 @@ int main()
 	std::cout << "\n\n-----deque tests-----\n\n\n";
 	{
 		unsigned short random;
-		//ft::deque<intDebug> a(4, 13);
-		ft::deque<char> b;
-		std::deque<char> stdB;
+		//ft::deque<littleDebug> a(31, 5);
+		ft::deque<debug> b;
+		std::deque<debug> stdB;
 		//ft::deque<intDebug> c(a);
 		//ft::vector<std::string> v(7, "pouet");
 		//v.push_back("pas pouet");
@@ -416,15 +417,15 @@ int main()
 
 		random = 0;
 		setRandom(random);
-		for (int i = 1; i < 40; ++i)
+		for (int i = 1; i < 5; ++i)
 		{
-			b.insert(b.begin() + (random % (b.size() + 1)), 1, 'A' + i);
-			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 1, 'A' + i);
+			b.insert(b.begin() + (random % (b.size() + 1)), 4, 'A' + i);
+			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 4, 'A' + i);
 			setRandom(random, b.size());
 		}
 		displayData(b, "b");
-		std::deque<char>::const_iterator cmp = stdB.begin();
-		for (ft::deque<char>::const_iterator it = b.begin(); it != b.end(); ++it)
+		std::deque<debug>::const_iterator cmp = stdB.begin();
+		for (ft::deque<debug>::const_iterator it = b.begin(); it != b.end(); ++it)
 		{
 			if (*it != *cmp)
 			{
@@ -432,6 +433,11 @@ int main()
 				break;
 			}
 			++cmp;
+		}
+		for (int i = 0; i < 150; ++i)
+		{
+			b.erase(b.end() - 1);
+			b.insert(b.begin(), debug(i, true));
 		}
 		//displayData(c, "c");
 		//displayData(pouet, "pouet");

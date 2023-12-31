@@ -782,7 +782,7 @@ namespace ft
 				dest = src + jump;
 				for (int i = position.second; i < copyEnd; ++i)
 					_constructDataChunk(_chunks[dest], i, _chunks[src][i]);
-				_destroyDataChunk(_chunks[src], copyStart, copyEnd - position.second);
+				_destroyDataChunk(_chunks[src], position.second, copyEnd - position.second);
 			}
 			_end.first += jump;
 		}
@@ -851,6 +851,7 @@ namespace ft
 			_baseSizeType	distBetweenBeginAndEnd;
 			_baseSizeType	distBetweenBeginAndInsertPos;
 			_baseSizeType	newBeginFirst;
+			_baseSizeType	srcIdx;
 			_baseSizeType	destIdx;
 			bool			countEnd;
 
@@ -858,12 +859,17 @@ namespace ft
 			distBetweenBeginAndEnd = _end.first - _begin.first;
 			distBetweenBeginAndInsertPos = insertPos - _begin.first;
 			newBeginFirst = distBetweenBeginAndEnd + countEnd + (2 * lenToAdd);
-			destIdx = newBeginFirst + distBetweenBeginAndEnd + countEnd;
+			destIdx = newBeginFirst + distBetweenBeginAndEnd;
 
 			if (_end.second)
 				_swapChunk(destIdx--, _end.first);
-			for (_baseSizeType srcIdx = _end.first - 1; srcIdx >= _begin.first; --srcIdx)
+			srcIdx = _end.first - 1;
+			while (srcIdx > _begin.first)
+			{
 				_swapChunk(destIdx--, srcIdx);
+				--srcIdx;
+			}
+			_swapChunk(destIdx, srcIdx);
 
 			_begin.first = newBeginFirst;
 			_end.first = newBeginFirst + distBetweenBeginAndEnd;
@@ -915,7 +921,7 @@ namespace ft
 					copyEnd = _end.second;
 				if (position.first == _begin.first)
 					copyStart = _begin.second;
-				if (position.second >= (copyEnd - copyStart) / 2)
+				if (position.second > (copyEnd - copyStart) / 2)
 					copyWay = true;
 			}
 
@@ -942,7 +948,7 @@ namespace ft
 					* I'll reuse dest for cpy and dest for a
 					*/
 					src = position.first;
-					dest = dest - jump;
+					dest = src - jump;
 					for (int i = copyStart; i < position.second; ++i)
 						_constructDataChunk(_chunks[dest], i, _chunks[src][i]);
 					_destroyDataChunk(_chunks[src], copyStart, position.second - copyStart);
@@ -950,13 +956,13 @@ namespace ft
 			}
 			else
 			{
-				while (src >= position.first)
-					_swapChunk(src--, dest--);
+				while (src <= position.first)
+					_swapChunk(src++, dest++);
 				dest = position.first;
-				src = src - jump;
+				src = dest - jump;
 				for (int i = position.second; i < copyEnd; ++i)
 					_constructDataChunk(_chunks[dest], i, _chunks[src][i]);
-				_destroyDataChunk(_chunks[src], copyStart, copyEnd - position.second);
+				_destroyDataChunk(_chunks[src], position.second, copyEnd - position.second);
 			}
 			_begin.first -= jump;
 			position.first -= jump;
@@ -1053,17 +1059,17 @@ namespace ft
 					//  last            ?
 					//[oooooooo][...][????????]
 					for (int i = copyStart; i < last.second; ++i)
-						_constructDataChunk(_chunks[last.first], i, *(_chunks[first.first][i]));
+						_constructDataChunk(_chunks[last.first], i, _chunks[first.first][i]);
 					_destroyDataChunk(_chunks[first.first], copyStart, last.second - copyStart);
 				}
-				while (last != _end)
+				while (last.first < _end.first)
 				{
-					_swap(first, last);
-					_edgeAdd(first, 1);
-					_edgeAdd(last, 1);
+					_swapChunk(first.first, last.first);
+					++first.first;
+					++last.first;
 				}
 				if (_end.second)
-					_swap(first, last);
+					_swapChunk(first.first, last.first);
 			}
 			else
 			{
@@ -1072,18 +1078,20 @@ namespace ft
 				//  first           ?
 				//[oooooooo][...][????????]
 				for (int i = last.second; i < copyEnd; ++i)
-					_constructDataChunk(_chunks[first.first], i, *(_chunks[last.first][i]));
+					_constructDataChunk(_chunks[first.first], i, _chunks[last.first][i]);
 				_destroyDataChunk(_chunks[last.first], last.second, copyEnd - last.second);
-				_edgeAdd(first, 1);
-				_edgeAdd(last, 1);
-				while (last != end)
+				if (last.first == _end.first)
+					return;
+				++first.first;
+				++last.first;
+				while (last.first < _end.first)
 				{
-					_swap(first, last);
-					_edgeAdd(first, 1);
-					_edgeAdd(last, 1);
+					_swapChunk(first.first, last.first);
+					++first.first;
+					++last.first;
 				}
 				if (_end.second)
-					_swap(first, last);
+					_swapChunk(first.first, last.first);
 			}
 		}
 
@@ -1106,17 +1114,22 @@ namespace ft
 			_edge	src;
 			_edge	dest;
 
+			_printMemory("before joindataLeftToRight");
+			if (first == _begin)
+				return;
 			src = first;
 			dest = last;
 			_edgeSub(src, 1);
 			_edgeSub(dest, 1);
-			while (src >= _begin)
+			while (src > _begin)
 			{
 				_constructDataChunk(_chunks[dest.first], dest.second, _chunks[src.first][src.second]);
 				_destroyDataChunk(_chunks[src.first], src.second, 1);
-				_edgeSub(first, 1);
+				_edgeSub(dest, 1);
 				_edgeSub(src, 1);
 			}
+			_constructDataChunk(_chunks[dest.first], dest.second, _chunks[src.first][src.second]);
+			_destroyDataChunk(_chunks[src.first], src.second, 1);
 		}
 
 		void	_joinChunksLeftToRight(_edge first, _edge last, difference_type range)
@@ -1161,16 +1174,16 @@ namespace ft
 					//  first           last
 					//[~~~~~~~~][...][oooooooo]
 					for (int i = copyStart; i < last.second; ++i)
-						_constructDataChunk(_chunks[last.first], i, *(_chunks[first.first][i]));
+						_constructDataChunk(_chunks[last.first], i, _chunks[first.first][i]);
 					_destroyDataChunk(_chunks[first.first], copyStart, last.second - copyStart);
 				}
-				_edgeSub(first, 1);
-				_edgeSub(last, 1);
-				while (last >= _begin)
+				--first.first;
+				--last.first;
+				while (last.first > _begin.first)
 				{
-					_swap(first, last);
-					_edgeSub(first, 1);
-					_edgeSub(last, 1);
+					_swapChunk(first.first, last.first);
+					--first.first;
+					--last.first;
 				}
 			}
 			else
@@ -1180,13 +1193,13 @@ namespace ft
 				//  last            first
 				//[~~~~~~~~][...][oooooooo]
 				for (int i = last.second; i < copyEnd; ++i)
-					_constructDataChunk(_chunks[first.first], i, *(_chunks[last.first][i]));
+					_constructDataChunk(_chunks[first.first], i, _chunks[last.first][i]);
 				_destroyDataChunk(_chunks[last.first], last.second, copyEnd - last.second);
-				while (last >= _begin)
+				while (last.first > _begin.first)
 				{
-					_swap(first, last);
-					_edgeSub(first, 1);
-					_edgeSub(last, 1);
+					_swapChunk(first.first, last.first);
+					--first.first;
+					--last.first;
 				}
 			}
 		}
@@ -1369,8 +1382,14 @@ namespace ft
 			if (!n)
 				return;
 
-			_printMemory("Before insert");
 			ePosition = _edgeCastFromIterator(position);
+			/*std::string printmsg = "Before insert Insertpos = (";
+			printmsg += std::to_string(ePosition.first);
+			printmsg += ", ";
+			printmsg += std::to_string(ePosition.second);
+			printmsg += ") , n = ";
+			printmsg += std::to_string(n);
+			_printMemory(printmsg.c_str());*/
 			if (_isRightSide(position))
 				_moveRight(ePosition, n);
 			else
@@ -1381,7 +1400,6 @@ namespace ft
 				_alloc.construct(_chunks[ePosition.first] + ePosition.second, val);
 				_edgeAdd(ePosition, 1);
 			}
-			_printMemory("After insert");
 		}
 
 		iterator	insert(iterator position, const value_type& val)
@@ -1442,28 +1460,33 @@ namespace ft
 			
 			rangeDeleted = last - first;
 			if (!rangeDeleted)
-				return;
+				return first;
 
 			ePositionFirst = _edgeCastFromIterator(first);
 			ePositionLast = _edgeCastFromIterator(last);
+			std::cout << "delete call with ePosfirst = (" << ePositionFirst.first << " ," << ePositionFirst.second << ")"
+				<< " | ePositionLast = (" << ePositionLast.first << ", " << ePositionLast.second << ")" << std::endl;
+			_printMemory("before delete");
 			for (iterator it = first; it != last; ++it)
-				_alloc.destroy(&(*(it++)));
+				_alloc.destroy(&(*(it)));
 
 			if (first - begin() < end() - last)
-				_joinLeftToRight(ePositionFirst, ePositionLast, rangeDeleted);
-			else
 			{
-				_joinRightToLeft(ePositionFirst, ePositionLast, rangeDeleted);
+				_joinLeftToRight(ePositionFirst, ePositionLast, rangeDeleted);
 				first += rangeDeleted;
 			}
+			else
+				_joinRightToLeft(ePositionFirst, ePositionLast, rangeDeleted);
 
 			_size -= rangeDeleted;
 			if (!_size)
 			{
 				_begin.first = _chunks.size() / 2;
-				_begin.second = 0;
+				_begin.second = _chunks.size() % 2 ? _chunkSize / 2 : 0;
 				_end = _begin;
+				first = iterator(_chunks.begin() + _end.first, _end.second);
 			}
+			_printMemory("after delete");
 			return first;
 		}
 
