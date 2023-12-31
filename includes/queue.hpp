@@ -22,12 +22,17 @@ namespace ft
 		template <class TN, class ContainerN>
 		friend bool operator<=(const deque<TN, ContainerN>& lsh, const deque<TN, ContainerN>& rhs);
 
-		container_type		_base;
-
 	public:
+
 		typedef				T							value_type;
 		typedef				Container					container_type;
 		typedef typename	container_type::size_type	size_type;
+
+	protected:
+
+		container_type		_base;
+
+	public:
 
 		explicit queue(const container_type& ctnr = container_type()) : _base(ctnr) {}
 
