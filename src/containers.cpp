@@ -13,6 +13,7 @@
 #include <set>
 #include <stack>
 #include <windows.h>
+#include <algorithm>
 
 template < typename T >
 void	displayInfo(T& container, const char* name)
@@ -414,7 +415,6 @@ int main()
 		//ft::deque<std::string> revPouetFromPouet(pouet.rbegin(), pouet.rend());
 
 		//displayData(a, "a");
-
 		random = 0;
 		setRandom(random);
 		for (int i = 1; i < 15; ++i)
