@@ -19,15 +19,15 @@ namespace ft
 
 		struct Node
 		{
-			Node* p; //previous
-			Node* n; //next
-			T*	content;
+			Node*	p; //previous
+			Node*	n; //next
+			pointer content; // this is a pointer because that is easier to swap nodes with swapping pointer content than relink the Node* p and n
 		};
 
 		class MyCIt;
 		class MyIt : ft::iterator<ft::bidirectional_iterator_tag, value_type>
 		{
-			Node*	_n;
+			Node* _n;
 
 		public:
 
@@ -36,6 +36,8 @@ namespace ft
 			MyIt(const MyIt& o) : _n(o._n) {}
 			MyIt(const MyCIt& o) : _n(o._n) {}
 			~MyIt() {}
+
+			Node* _base() { return _n; }
 
 			MyIt& operator=(const MyIt& o)
 			{
@@ -196,20 +198,32 @@ namespace ft
 
 		typedef typename allocator_type::template rebind<Node>::other	_nodeAllocator_type;
 
-		Node*				_end;
+		Node* _end;
 		size_type			_size;
 		allocator_type		_alloc;
 		_nodeAllocator_type	_allocN;
 
+		//JUST TO DEFINE MAX_SIZE
+
+		struct _maxSizeElt
+		{
+			Node* a;
+			Node* b;
+			value_type c;
+			pointer d;
+		};
+
+		std::allocator<_maxSizeElt>	_allocMaxSize;
+
 		//UTILITIES
 
-		Node*	_getNewNullNode()
+		Node* _getNewNullNode()
 		{
 			Node* nullNode;
-			
-			nullNode = _allocN.alloc(1);
-			nullNode->n = nullptr;
-			nullNode->p = nullptr;
+
+			nullNode = _allocN.allocate(1);
+			nullNode->n = nullNode;
+			nullNode->p = nullNode;
 			nullNode->content = nullptr;
 			return nullNode;
 		}
@@ -217,16 +231,34 @@ namespace ft
 		Node* _getNewNode(Node* parent, Node* next, const value_type& val = value_type())
 		{
 			Node* newNode;
-			
-			newNode = _allocN.alloc(1);
+
+			newNode = _allocN.allocate(1);
 			newNode->n = next;
 			newNode->p = parent;
-			newNode->content = _alloc.alloc(1);
+			newNode->content = _alloc.allocate(1);
 			_alloc.construct(newNode->content, val);
 			return newNode;
 		}
 
+		void	_deleteNode(Node* toDel)
+		{
+			_alloc.destroy(toDel->content);
+			_alloc.deallocate(toDel->content, 1);
+			_allocN.deallocate(toDel, 1);
+		}
+
+		void	_swapNode(Node* a, Node* b)
+		{
+			pointer tmp;
+
+			tmp = a->content;
+			a->content = b->content;
+			b->content = tmp;
+		}
+
 	public:
+
+		//CONSTRUCTORS DESTRUCTOR OPERATOR=
 
 		explicit list(const allocator_type& alloc = allocator_type()) : _end(_getNewNullNode()), _size(0), _alloc(alloc) {}
 		list(const list& o) : _end(_getNewNullNode), _size(o._size), _alloc(o._alloc)
@@ -242,6 +274,7 @@ namespace ft
 				first = newNode;
 			}
 			first->n = _end;
+			_end->p = first;
 		}
 		explicit list(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
 			: _end(_getNewNullNode()), _size(n), _alloc(alloc)
@@ -249,6 +282,8 @@ namespace ft
 			Node* newNode;
 			Node* first;
 
+			if (n >= _allocMaxSize.max_size())
+				throw (ft::length_error("ft::list::fillConstructor : they're is too much elements"));
 			first = _end;
 			while (n--)
 			{
@@ -257,22 +292,24 @@ namespace ft
 				first = newNode;
 			}
 			first->n = _end;
+			_end->p = first;
 		}
 		template < typename InputIterator >
 		list(InputIterator first, InputIterator last,
 			typename ft::enable_if< !ft::isIntegral< InputIterator >::value >::type* = 0)
 		{
 			difference_type	dist;
-			Node*			newNode;
-			Node*			firstNode;
+			Node* newNode;
+			Node* firstNode;
 
 			if (ft::is_pointer<value_type, InputIterator>::value)
 				dist = last - first;
 			else
 				dist = ft::distance(first, last);
 			if (dist < 0)
-				throw (ft::length_error("list::rangeConstructor: Input last must be greater then first"));
-
+				throw (ft::length_error("ft::list::rangeConstructor: Input last must be greater then first"));
+			if (dist >= _allocMaxSize.max_size())
+				throw (ft::length_error("ft::list::rangeConstructor: they're is too much elements"));
 			_size = dist;
 			firstNode = _end;
 			while (first != last)
@@ -283,9 +320,453 @@ namespace ft
 				firstNode = newNode;
 			}
 			firstNode->n = _end;
+			_end->p = firstNode;
+		}
+		~list()
+		{
+			clear();
+			_allocN.deallocate(_end, 1);
+		}
+		list& operator=(const list& other)
+		{
+			Node* tmp;
+			Node* first;
+
+			if (&other == this)
+				return *this;
+
+			if (other.empty())
+			{
+				clear();
+				return *this;
+			}
+
+			first = _end;
+			for (const_iterator cit = other.begin(); cit != other.end(); ++cit)
+			{
+				if (first->n && first->n != _end)
+				{
+					first = first->n;
+					_alloc.destroy(first->content);
+					_alloc.construct(first->content, *cit);
+				}
+				else
+				{
+					tmp = _getNewNode(first, nullptr, *cit);
+					first->n = tmp;
+					first = tmp;
+				}
+			}
+			if (first->n)
+			{
+				while (first->n != _end)
+				{
+					tmp = first->n;
+					first->n = first->n->n;
+					_deleteNode(tmp);
+				}
+			}
+			else
+				first->n = _end;
+			_end->p = first;
+			return *this;
+		}
+
+		//ITERATORS
+
+		iterator				begin() { return iterator(_end->n); }
+		iterator				end() { return iterator(_end); }
+		const_iterator			begin()		const { return const_iterator(_end->n); }
+		const_iterator			end()		const { return const_iterator(_end); }
+		reverse_iterator		rbegin() { return reverse_iterator(end()); }
+		reverse_iterator		rend() { return reverse_iterator(begin()); }
+		const_reverse_iterator	rbegin()	const { return const_reverse_iterator(end()); }
+		const_reverse_iterator	rend()		const { return const_reverse_iterator(begin()); }
+
+		//CAPACITY
+
+		bool		empty()		const { return !_size; }
+		size_type	size()		const { return _size; }
+		size_type	max_size()	const { return _allocMaxSize.max_size(); }
+
+		//ELEMENTS ACCESS
+
+		reference		front() { return *(_end->n->content); }
+		const_reference	front()	const { return *(_end->n->content); }
+		reference		back() { return *(_end->p->content); }
+		const_reference	back()	const { return *(_end->p->content); }
+
+		//MODIFIERS
+
+		template < class InputIterator >
+		void	assign(InputIterator first, InputIterator last,
+			typename ft::enable_if< !ft::isIntegral< InputIterator >::value >::type* = 0)
+		{
+			Node* tmp;
+			Node* firstNode;
+			difference_type dist;
+
+			if (ft::is_pointer<value_type, InputIterator>::value)
+				dist = last - first;
+			else
+				dist = ft::distance(first, last);
+			if (dist < 0)
+				throw (ft::length_error("ft::list::assign : last input must be greater than first input"));
+			if (dist >= _allocMaxSize.max_size())
+				throw (ft::length_error("ft::list::assign : they're is too much elements"));
+
+			_size = (size_type)dist;
+			if (!_size)
+			{
+				clear();
+				return;
+			}
+			firstNode = _end;
+			while (first != last)
+			{
+				if (firstNode->n && firstNode->n != _end)
+				{
+					firstNode = firstNode->n;
+					_alloc.destroy(firstNode->content);
+					_alloc.construct(firstNode->content, *first);
+				}
+				else
+				{
+					tmp = _getNewNode(firstNode, nullptr, *first);
+					firstNode->n = tmp;
+					firstNode = tmp;
+				}
+				++first;
+			}
+			if (firstNode->n)
+			{
+				while (firstNode->n != _end)
+				{
+					tmp = firstNode->n;
+					firstNode->n = firstNode->n->n;
+					_deleteNode(tmp);
+				}
+			}
+			else
+				firstNode->n = _end;
+			_end->p = firstNode;
+		}
+		void	assign(size_type n, const value_type& val)
+		{
+			Node* tmp;
+			Node* firstNode;
+
+			if (n >= _allocMaxSize.max_size())
+				throw (ft::length_error("ft::list::assign : they're is too much elements"));
+
+			_size = n;
+			if (!_size)
+			{
+				clear();
+				return;
+			}
+			firstNode = _end;
+			while (n--)
+			{
+				if (firstNode->n && firstNode->n != _end)
+				{
+					firstNode = firstNode->n;
+					_alloc.destroy(firstNode->content);
+					_alloc.construct(firstNode->content, val);
+				}
+				else
+				{
+					tmp = _getNewNode(firstNode, nullptr, val);
+					firstNode->n = tmp;
+					firstNode = tmp;
+				}
+				++first;
+			}
+			if (firstNode->n)
+			{
+				while (firstNode->n != _end)
+				{
+					tmp = firstNode->n;
+					firstNode->n = firstNode->n->n;
+					_deleteNode(tmp);
+				}
+			}
+			else
+				firstNode->n = _end;
+			_end->p = firstNode;
 		}
 		
+		void	clear()
+		{
+			Node* tmp;
 
+			while (_end->n != _end)
+			{
+				tmp = _end->n;
+				_end->n = _end->n->n;
+				_deleteNode(tmp);
+			}
+			_end->p = _end;
+			_size = 0;
+		}
+
+		iterator	insert(iterator position, const value_type& val)
+		{
+			Node* newNode;
+
+			newNode = _getNewNode(position._base()->p, position._base(), val);
+			position._base()->p->n = newNode;
+			position._base()->p = newNode;
+			++_size;
+			return iterator(newNode);
+		}
+		void	insert(iterator position, size_type n, const value_type& val)
+		{
+			if (n + _size >= _allocMaxSize.max_size())
+				throw (ft::length_error("ft::list::insert : too much element to insert."));
+
+			while (n--)
+				insert(position, val);
+		}
+		template < class InputIterator >
+		void	insert(iterator position, InputIterator first, InputIterator last,
+			typename ft::enable_if< !ft::isIntegral< InputIterator >::value >::type* = 0)
+		{
+			difference_type	dist;
+
+			if (ft::is_pointer<value_type, pointer>::value)
+				dist = last - first;
+			else
+				dist = ft::distance(first, last);
+			if (dist < 0)
+				throw (ft::length_error("ft::list::insert : last input must be greater than first input"));
+			if (_size + dist >= _allocMaxSize.max_size())
+				throw (ft::length_error("ft::list::insert : too much element to insert."));
+
+			while (first != last)
+			{
+				insert(position, *first);
+				++first;
+			}
+		}
+
+		iterator	erase(iterator position)
+		{
+			Node* toDel;
+			Node* toReturn;
+
+			if (position == end())
+				return position;
+			toDel = position._base();
+			toDel->p->n = toDel->n;
+			toDel->n->p = toDel->p;
+			toReturn = toDel->n;
+			_deleteNode(toDel);
+			--_size;
+			return iterator(toReturn);
+		}
+		iterator	erase(iterator first, iterator last) //naive implementation
+		{
+			while (first != last)
+				erase(first++);
+			return last;
+		}
+
+		void	pop_back()
+		{
+			if (_size)
+				erase(--end());
+		}
+
+		void	pop_front()
+		{
+			if (_size)
+				erase(begin());
+		}
+
+		void	push_back(const value_type& val)
+		{
+			insert(end(), val);
+		}
+
+		void	push_front(const value_type& val)
+		{
+			insert(begin(), val);
+		}
+
+		void	resize(size_type n, const value_type& val)
+		{
+			if (n >= _allocMaxSize.max_size())
+				throw (ft::length_error("ft::list::resize : size too high.");
+			if (n < _size)
+			{
+				while (n++ < _size)
+					pop_back();
+			}
+			else if (n > _size)
+				insert(end(), n - _size, val);
+		}
+
+		void	swap(list& o)
+		{
+			Node*			nodeTmp;
+			size_type		sizeTmp;
+			allocator_type	allocTmp;
+
+			nodeTmp = _end;
+			sizeTmp = _size;
+			allocTmp = _alloc;
+
+			_end = o._end;
+			_size = o._size;
+			_alloc = o._alloc;
+
+			o._end = nodeTmp;
+			o._size = sizeTmp;
+			o._alloc = allocTmp;
+		}
+
+		//LIST OPERATIONS
+
+		void	splice(iterator position, list& x)
+		{
+			Node* first;
+			Node* last;
+			Node* beforeInsert;
+			Node* afterInsert;
+
+			//Extraction from x
+			first = x._end->n;
+			last = x._end->p;
+			_size += x._size;
+			x._size = 0;
+			x._end->n = x._end;
+			x._end->p = x._end;
+
+			//Insertion to self
+			beforeInsert = position->_base()->p;
+			afterInsert = position->_base();
+			beforeInsert->n = first;
+			first->p = beforeInsert;
+			afterInsert->p = last;
+			last->n = afterInsert;
+			return position;
+		}
+
+		void	splice(iterator position, list& x, iterator i)
+		{
+			Node* toInsert;
+			Node* beforeInsert;
+			Node* afterInsert;
+
+			//Extraction from x
+			--(x._size);
+			toInsert = i._base();
+			toInsert->p->n = toInsert->n;
+			toInsert->n->p = toInsert->p;
+			beforeInsert = position->_base()->p;
+			afterInsert = position->_base();
+
+			//Insertion to self
+			beforeInsert->n = toInsert;
+			toInsert->p = beforeInsert;
+			afterInsert->p = toInsert;
+			toInsert->n = afterInsert;
+			++_size;
+			return position;
+		}
+
+		void	splice(iterator position, list& x, iterator start, iterator end)
+		{
+			Node* first;
+			Node* last;
+			Node* beforeInsert;
+			Node* afterInsert;
+			difference_type	dist;
+
+			//Extraction from x
+			first = start->_base();
+			last = end->_base()->p;
+			dist = ft::distance(start, end);
+			x._size -= dist;
+			first->p->n = last->n;
+			last->n->p = first->p;
+
+			//Insertion to self
+			_size += dist;
+			beforeInsert = position->_base()->p;
+			afterInsert = position->_base();
+			beforeInsert->n = first;
+			first->p = beforeInsert;
+			afterInsert->p = last;
+			last->n = afterInsert;
+			return position;
+		}
+
+		void	remove(const value_type& val)
+		{
+			iterator current;
+
+			current = begin();
+			while (current != end())
+			{
+				if (*current == val)
+					current = erase(current);
+				else
+					++current;
+			}
+		}
+
+		template < class Predicate >
+		void	remove_if(Predicate pred)
+		{
+			iterator current;
+
+			current = begin();
+			while (current != end())
+			{
+				if (pred(*current))
+					current = erase(current);
+				else
+					++current;
+			}
+		}
+
+		void	unique()
+		{
+			iterator current;
+			iterator nexts;
+
+			current = begin();
+			while (current != end())
+			{
+				nexts = current;
+				++nexts;
+				while (nexts != end())
+				{
+					if (*nexts = *current)
+						nexts = erase(nexts);
+					else
+						++nexts;
+				}
+				++current;
+			}
+		}
+
+		template < class BinaryPredicate >
+		void	unique(BinaryPredicate binary_pred)
+		{
+			iterator current;
+			iterator others;
+
+			current = begin();
+			++current;
+			while (current != end())
+			{
+				others = begin();
+				while (others != end())
+			}
+		}
 	};
 }
 
