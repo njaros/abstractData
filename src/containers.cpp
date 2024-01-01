@@ -17,6 +17,7 @@
 #include <stack>
 #include <windows.h>
 #include <algorithm>
+#include <queue>
 
 template < typename T >
 void	displayInfo(T& container, const char* name)
@@ -466,16 +467,31 @@ int main()
 		//displayData(revPouetFromPouet, "revPouetFromPouet");
 	}*/
 
+std::priority_queue<int> pouet;
 	std::cout << "======Priority_queue tests========\n\n";
 	{
 		int myInts[] = { 5, 77, 1, 1, 1, 1, 45, 1000, 0 };
-		ft::vector<int> b(myInts, myInts + 9);
+		int myInts2[] = { 12, -1, -2, -1, 458, -4, 75, 45, 22, 4, -45, 1 };
+		ft::vector<int> b;
 		ft::vector<int> c(4, 4);
 		ft::set<int>	s;
-		s.insert(myInts, myInts + 9);
+		for (int i : myInts)
+			b.insert(b.end(), i);
 		displayData(b, "b");
-		b.insert(b.end(), s.begin(), s.end());
-		b.insert(b.end(), c.begin(), c.end());
+		ft::priority_queue<int> p(b.begin(), b.end());
+		for (int i : myInts2)
+		{
+			std::cout << "current top is " << p.top() << '\n';
+			std::cout << "i insert " << i << '\n';
+			p.push(i);
+			std::cout << "now top is " << p.top() << '\n';
+		}
+		while (!p.empty())
+		{
+			std::cout << p.top() << '\n';
+			p.pop();
+		}
+
 	}
 	return 0;
 }

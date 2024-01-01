@@ -32,6 +32,8 @@ struct integral_constant
 typedef integral_constant<bool, true>	true_type;
 typedef integral_constant<bool, false>	false_type;
 
+//IS INTEGRAL SPECIALIZATION
+
 template < typename T >
 struct isIntegral : public false_type							{};
 template <>
@@ -64,8 +66,10 @@ struct isIntegral<unsigned long long int> : public true_type	{};
 template < typename T >
 struct is_integral : public isIntegral<T> {};
 
+//IS POINTER SPECIALIZATION
+
 template < typename T, typename pointer >
-struct isPointer : public false_type;
+struct isPointer : public false_type {};
 
 template < typename T >
 struct isPointer<T, T*> : true_type {};

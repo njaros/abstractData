@@ -6,13 +6,13 @@ namespace ft
 
 	//HEAP
 
-	template <typename RandomAccessIterator, typename size_type = typename RandomAccessIterator::size_type, typename Compare>
-	void	_tasser(RandomAccessIterator first, RandomAccessIterator last, Compare comp, size_type idx)
+	template <typename RandomAccessIterator, typename difference_type = typename RandomAccessIterator::difference_type, typename Compare>
+	void	_tasser(RandomAccessIterator first, RandomAccessIterator last, Compare comp, difference_type idx)
 	{
-		size_type	current;
-		size_type	childL;
-		size_type	childR;
-		size_type	end;
+		difference_type	current;
+		difference_type	childL;
+		difference_type	childR;
+		difference_type	end;
 		typename RandomAccessIterator::value_type	tmp;
 
 		current = idx;
@@ -55,21 +55,20 @@ namespace ft
 	template <typename RandomAccessIterator, typename Compare>
 	void	make_heap(RandomAccessIterator first, RandomAccessIterator last, Compare comp)
 	{
-		typename RandomAccessIterator::size_type	size;
-		typename RandomAccessIterator::value_type	tmp;
+		typename RandomAccessIterator::difference_type	size;
 
 		if (first > last)
 			throw(ft::logic_error("algorithm::push_heap : iterator first must be lower than last"));
 		size = last - first;
-		for (size_t i = size / 2; i != ~0; --i)
+		for (typename RandomAccessIterator::difference_type i = size / 2; i >= 0; --i)
 			_tasser(first, last, comp, i);
 	}
 
 	template <typename RandomAccessIterator, typename Compare>
 	void	push_heap(RandomAccessIterator first, RandomAccessIterator last, Compare comp)
 	{
-		typename RandomAccessIterator::size_type	current;
-		typename RandomAccessIterator::size_type	parent;
+		typename RandomAccessIterator::difference_type	current;
+		typename RandomAccessIterator::difference_type	parent;
 		typename RandomAccessIterator::value_type	tmp;
 
 		if (first >= last)
