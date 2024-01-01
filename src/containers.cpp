@@ -18,6 +18,7 @@
 #include <windows.h>
 #include <algorithm>
 #include <queue>
+#include <list>
 
 template < typename T >
 void	displayInfo(T& container, const char* name)
@@ -491,7 +492,13 @@ std::priority_queue<int> pouet;
 			std::cout << p.top() << '\n';
 			p.pop();
 		}
+	}
 
+	std::cout << "============list tests=========\n\n";
+	{
+		std::list<int> l;
+
+		std::cout << *l.begin();
 	}
 	return 0;
 }
