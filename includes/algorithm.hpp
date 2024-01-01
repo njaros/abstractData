@@ -134,6 +134,4 @@ namespace ft
 	}
 
 }
-
-#include "algorithm.tpp"
 #endif // !ALGORITHM_HPP

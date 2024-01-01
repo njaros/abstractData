@@ -5,6 +5,9 @@
 #include "../includes/iterator.hpp"
 #include "../includes/set.hpp"
 #include "../includes/deque.hpp"
+#include "../includes/queue.hpp"
+#include "../includes/priority_queue.hpp"
+#include "../includes/list.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -399,7 +402,7 @@ int main()
 		b.assign(a.begin() + 500, a.begin() + 600);
 
 		std::cout << b.size() << " " << b[50];
-	}*/
+	}
 
 	std::cout << "\n\n-----deque tests-----\n\n\n";
 	{
@@ -461,7 +464,18 @@ int main()
 		//displayData(pouet, "pouet");
 		//displayData(revPouet, "revPouet");
 		//displayData(revPouetFromPouet, "revPouetFromPouet");
-	}
+	}*/
 
+	std::cout << "======Priority_queue tests========\n\n";
+	{
+		int myInts[] = { 5, 77, 1, 1, 1, 1, 45, 1000, 0 };
+		ft::vector<int> b(myInts, myInts + 9);
+		ft::vector<int> c(4, 4);
+		ft::set<int>	s;
+		s.insert(myInts, myInts + 9);
+		displayData(b, "b");
+		b.insert(b.end(), s.begin(), s.end());
+		b.insert(b.end(), c.begin(), c.end());
+	}
 	return 0;
 }

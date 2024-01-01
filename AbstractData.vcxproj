@@ -134,7 +134,6 @@
   <ItemGroup>
     <ClInclude Include="includes\algorithm.hpp" />
     <ClInclude Include="includes\deque.hpp" />
-    <ClInclude Include="includes\dequeV1Fail.hpp" />
     <ClInclude Include="includes\enable_if.hpp" />
     <ClInclude Include="includes\equal.hpp" />
     <ClInclude Include="includes\exception.hpp" />
@@ -142,8 +141,11 @@
     <ClInclude Include="includes\is_integral.hpp" />
     <ClInclude Include="includes\iterator.hpp" />
     <ClInclude Include="includes\libft.hpp" />
+    <ClInclude Include="includes\list.hpp" />
     <ClInclude Include="includes\map.hpp" />
     <ClInclude Include="includes\pair.hpp" />
+    <ClInclude Include="includes\priority_queue.hpp" />
+    <ClInclude Include="includes\queue.hpp" />
     <ClInclude Include="includes\reverse_iterator.hpp" />
     <ClInclude Include="includes\set.hpp" />
     <ClInclude Include="includes\stack.hpp" />

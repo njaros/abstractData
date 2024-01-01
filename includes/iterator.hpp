@@ -96,6 +96,13 @@ namespace ft
 		}
 		return res;
 	}
+
+	template< typename T, typename pointer >
+	typename long distance(pointer first, pointer last,
+		typename ft::enable_if< ft::is_pointer< T, pointer >::value >::type* = 0)
+	{
+		return last - first;
+	}
 }
 
 #endif

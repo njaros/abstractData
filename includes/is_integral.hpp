@@ -63,6 +63,15 @@ struct isIntegral<unsigned long long int> : public true_type	{};
 
 template < typename T >
 struct is_integral : public isIntegral<T> {};
+
+template < typename T, typename pointer >
+struct isPointer : public false_type;
+
+template < typename T >
+struct isPointer<T, T*> : true_type {};
+
+template < typename T, typename pointer >
+struct is_pointer : public isPointer<T, pointer> {};
 }
 
 #endif
