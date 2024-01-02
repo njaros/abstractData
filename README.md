@@ -2,6 +2,7 @@ Status : Work in progress
 
   #TODOS : 
   - implementer tout les insert, assign, constructeurs prenant en parametre les pointeurs issus d'array
+  - controler tout les types de tout les containers s'ils sont bien issus de allocator
   
 Recoding of iterators, vector, map, set, deque, multimap/set, unordered_map/set/multimap/multiset, list, queue, priority_queue, stack + a bonus personal container  
   
