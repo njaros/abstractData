@@ -468,8 +468,7 @@ int main()
 		//displayData(revPouetFromPouet, "revPouetFromPouet");
 	}*/
 
-std::priority_queue<int> pouet;
-	std::cout << "======Priority_queue tests========\n\n";
+/*	std::cout << "======Priority_queue tests========\n\n";
 	{
 		int myInts[] = { 5, 77, 1, 1, 1, 1, 45, 1000, 0 };
 		int myInts2[] = { 12, -1, -2, -1, 458, -4, 75, 45, 22, 4, -45, 1 };
@@ -493,23 +492,14 @@ std::priority_queue<int> pouet;
 			p.pop();
 		}
 	}
-
+	*/
 	std::cout << "============list tests=========\n\n";
 	{
-		int n[] = { 6, 5, 4, 3, 2 };
-		int n2[] = { 7, 4, 2, 7, 1 };
-		std::list<int> l(n, n + 5);
-
-		std::list<int> l2(n2, n2 + 5);
-		l2.sort();
-		try
-		{
-			l.merge(l2);
-		}
-		catch (std::exception& e)
-		{
-			std::cout << e.what();
-		}
+		int n[] = { 1, 2, 3, 7, 8, 9 };
+		int n2[] = { 1, 3, 5, 6, 6, 11 };
+		ft::list<int> l(n, n + 6);
+		ft::list<int> l2(n2, n2 + 6);
+		l.merge(l2);
 		displayData(l, "l");
 	}
 	return 0;

@@ -3,7 +3,7 @@
 
 namespace ft
 {
-	template< class T, class Alloc >
+	template< class T, class Alloc = std::allocator< T > >
 	class list {
 
 	public:
@@ -14,14 +14,14 @@ namespace ft
 		typedef const reference	const_reference;
 		typedef T* pointer;
 		typedef const pointer	const_pointer;
-		typedef typename ft::iterator_traits<allocator_type>::difference_type	difference_type;
+		typedef typename Alloc::difference_type	difference_type;
 		typedef typename Alloc::size_type	size_type;
 
 		struct Node
 		{
-			Node* p; //previous
-			Node* n; //next
-			pointer content;
+			Node*	p; //previous
+			Node*	n; //next
+			pointer	content;
 		};
 
 		class MyCIt;
@@ -34,10 +34,10 @@ namespace ft
 			MyIt() : _n(nullptr) {}
 			MyIt(Node* n) : _n(n) {}
 			MyIt(const MyIt& o) : _n(o._n) {}
-			MyIt(const MyCIt& o) : _n(o._n) {}
+			MyIt(const MyCIt& o) : _n(o._base()) {}
 			~MyIt() {}
 
-			Node* _base() { return _n; }
+			virtual Node* base()	const { return _n; }
 
 			MyIt& operator=(const MyIt& o)
 			{
@@ -47,28 +47,28 @@ namespace ft
 
 			MyIt& operator=(const MyCIt& o)
 			{
-				_n = o._n;
+				_n = o._base();
 				return *this;
 			}
 
-			bool operator==(const MyIt& o)
+			bool operator==(const MyIt& o)	const
 			{
 				return _n == o._n;
 			}
 
-			bool operator==(const MyCIt& o)
+			bool operator==(const MyCIt& o)	const
 			{
-				return _n == o._n;
+				return _n == o.base();
 			}
 
-			bool operator!=(const MyIt& o)
+			bool operator!=(const MyIt& o)	const
 			{
 				return _n != o._n;
 			}
 
-			bool operator!=(const MyCIt& o)
+			bool operator!=(const MyCIt& o)	const
 			{
-				return _n != o._n;
+				return _n != o.base();
 			}
 
 			reference operator*()
@@ -84,13 +84,13 @@ namespace ft
 			MyIt& operator++()
 			{
 				_n = _n->n;
-				return &this;
+				return *this;
 			}
 
 			MyIt& operator--()
 			{
 				_n = _n->p;
-				return &this;
+				return *this;
 			}
 
 			MyIt operator++(int)
@@ -116,15 +116,11 @@ namespace ft
 
 			MyCIt() : _n(nullptr) {}
 			MyCIt(Node* n) : _n(n) {}
-			MyCIt(const MyIt& o) : _n(o._n) {}
+			MyCIt(const MyIt& o) : _n(o.base()) {}
 			MyCIt(const MyCIt& o) : _n(o._n) {}
 			~MyCIt() {}
 
-			MyCIt& operator=(const MyIt& o)
-			{
-				_n = o._n;
-				return *this;
-			}
+			virtual Node* base()	const { return _n; }
 
 			MyCIt& operator=(const MyCIt& o)
 			{
@@ -132,32 +128,38 @@ namespace ft
 				return *this;
 			}
 
-			bool operator==(const MyIt& o)
+			MyCIt& operator=(const MyIt& o)
+			{
+				_n = o.base();
+				return *this;
+			}
+
+			bool operator==(const MyIt& o)	const
+			{
+				return _n == o._base();
+			}
+
+			bool operator==(const MyCIt& o)	const
 			{
 				return _n == o._n;
 			}
 
-			bool operator==(const MyCIt& o)
+			bool operator!=(const MyIt& o)	const
 			{
-				return _n == o._n;
+				return _n != o.base();
 			}
 
-			bool operator!=(const MyIt& o)
-			{
-				return _n != o._n;
-			}
-
-			bool operator!=(const MyCIt& o)
+			bool operator!=(const MyCIt& o)	const
 			{
 				return _n != o._n;
 			}
 
-			const_reference operator*()
+			const_reference operator*()	const
 			{
 				return *(_n->content);
 			}
 
-			const_pointer operator->()
+			const_pointer operator->()	const
 			{
 				return _n->content;
 			}
@@ -165,13 +167,13 @@ namespace ft
 			MyCIt& operator++()
 			{
 				_n = _n->n;
-				return &this;
+				return *this;
 			}
 
 			MyCIt& operator--()
 			{
 				_n = _n->p;
-				return &this;
+				return *this;
 			}
 
 			MyCIt operator++(int)
@@ -198,7 +200,7 @@ namespace ft
 
 		typedef typename allocator_type::template rebind<Node>::other	_nodeAllocator_type;
 
-		Node* _end;
+		Node*	_end;
 		size_type			_size;
 		allocator_type		_alloc;
 		_nodeAllocator_type	_allocN;
@@ -322,7 +324,7 @@ namespace ft
 			++current;
 			while (current != end())
 			{
-				if (comp(current++, previous++))
+				if (comp(*(current++), *(previous++)))
 					return false;
 			}
 			return true;
@@ -367,17 +369,15 @@ namespace ft
 			_end->p = first;
 		}
 		template < typename InputIterator >
-		list(InputIterator first, InputIterator last,
+		list(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
 			typename ft::enable_if< !ft::isIntegral< InputIterator >::value >::type* = 0)
+			: _end(_getNewNullNode()), _size(0), _alloc(alloc)
 		{
 			difference_type	dist;
 			Node* newNode;
 			Node* firstNode;
 
-			if (ft::is_pointer<value_type, InputIterator>::value)
-				dist = last - first;
-			else
-				dist = ft::distance(first, last);
+			dist = ft::distance(first, last);
 			if (dist < 0)
 				throw (ft::length_error("ft::list::rangeConstructor: Input last must be greater then first"));
 			if (dist >= _allocMaxSize.max_size())
@@ -719,13 +719,12 @@ namespace ft
 			x._end->p = x._end;
 
 			//Insertion to self
-			beforeInsert = position->_base()->p;
-			afterInsert = position->_base();
+			beforeInsert = position.base()->p;
+			afterInsert = position.base();
 			beforeInsert->n = first;
 			first->p = beforeInsert;
 			afterInsert->p = last;
 			last->n = afterInsert;
-			return position;
 		}
 
 		void	splice(iterator position, list& x, iterator i)
@@ -748,7 +747,6 @@ namespace ft
 			afterInsert->p = toInsert;
 			toInsert->n = afterInsert;
 			++_size;
-			return position;
 		}
 
 		void	splice(iterator position, list& x, iterator start, iterator end)
@@ -775,7 +773,6 @@ namespace ft
 			first->p = beforeInsert;
 			afterInsert->p = last;
 			last->n = afterInsert;
-			return position;
 		}
 
 		void	remove(const value_type& val)
@@ -860,7 +857,7 @@ namespace ft
 					while (selfIdx != _end && !comp(*(start->content), *(selfIdx->content)))
 						selfIdx = selfIdx->n;
 					tmp = start;
-					while (start != x._end && (selfIdx == _end || comp(*(start->content), *(selfIdx->content))))
+					while (start != x._end && (selfIdx == _end || comp(*(start->n->content), *(selfIdx->content))))
 						start = start->n;
 
 					selfIdx->p->n = tmp;
@@ -871,7 +868,10 @@ namespace ft
 					if (start != x._end)
 						start = start->n;
 					tmp->n = selfIdx;
-					selfIdx = selfIdx->n;
+					if (selfIdx != _end)
+						selfIdx = selfIdx->n;
+					else
+						std::cout << "pouet\n";
 				}
 				_size += x._size;
 				x._size = 0;
@@ -884,7 +884,7 @@ namespace ft
 
 		void	merge(list& x)
 		{
-			merge(x, ft::less< value_type >);
+			merge(x, ft::less< value_type >());
 		}
 
 		template < class Compare >
@@ -896,7 +896,7 @@ namespace ft
 
 		void	sort()
 		{
-			sort(ft::less< value_type >);
+			sort(ft::less< value_type >());
 		}
 
 		void	reverse()
@@ -965,7 +965,5 @@ namespace ft
 		x.swap(y);
 	}
 
-
 }
-
 #endif
