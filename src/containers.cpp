@@ -495,12 +495,22 @@ int main()
 	*/
 	std::cout << "============list tests=========\n\n";
 	{
-		int n[] = { 1, 2, 3, 7, 8, 9 };
-		int n2[] = { 1, 3, 5, 6, 6, 11 };
-		ft::list<int> l(n, n + 6);
+		int n[] = { 9, 5, 1, 12, 0, 421, 74, -45, 79 };
+		int n2[] = { 1, 3, 5, 6, 8, 6, 11 };
+		ft::list<int> l(n, n + 9);
 		ft::list<int> l2(n2, n2 + 6);
+		l.sort();
+		displayData(l, "l");
 		l.merge(l2);
 		displayData(l, "l");
+		l.sort();
+		displayData(l, "l");
+		ft::list<int> l3(l.begin(), l.end());
+		l3.reverse();
+		displayData(l3, "l3");
+
+		ft::list<int> l4(12, 7);
+		displayData(l4, "l4");
 	}
 	return 0;
 }

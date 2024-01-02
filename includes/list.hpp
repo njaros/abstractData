@@ -25,7 +25,7 @@ namespace ft
 		};
 
 		class MyCIt;
-		class MyIt : ft::iterator<ft::bidirectional_iterator_tag, value_type>
+		class MyIt : public ft::iterator<ft::bidirectional_iterator_tag, value_type>
 		{
 			Node* _n;
 
@@ -108,7 +108,7 @@ namespace ft
 			}
 		};
 
-		class MyCIt : ft::iterator<ft::bidirectional_iterator_tag, const value_type>
+		class MyCIt : public ft::iterator<ft::bidirectional_iterator_tag, const value_type>
 		{
 			Node* _n;
 
@@ -264,36 +264,51 @@ namespace ft
 			/*
 			* I assume that the list is sorted in range [first, middle[ and in range [middle, last[
 			*/
-			Node* nextFirst_ToReturn; //long name to allows me to remember his rule
-			Node* middleRun;//I need this variable to keep in hand the pointer to middle
-			Node* tmp;//Tool to delimits intervals or to do Nodes swaps
+			Node* nextFirst;
+			Node* tmp;
+			Node* lastFirstElt;
 			//Because the two part-lists are sorted, I can already define my nextFirst
-			if (comp(*(middle->content), *(first->content)))
-				nextFirst_ToReturn = middle;
+			if (!comp(*(first->content), *(middle->content)))
+				nextFirst = middle;
 			else
-				nextFirst_ToReturn = first;
+				nextFirst = first;
 
-			middleRun = middle;
-			while (middleRun != last)
+			lastFirstElt = middle->p;
+			while (1)
 			{
-				tmp = middleRun;
-				while (first != middle && !comp(*(middleRun->content), *(first->content)))
+				tmp = middle;
+				//[oaooo][boooo] on avance a tant que b n'est pas inserable, ie b >= a
+				// ->
+				while (first != middle && !comp(*(middle->content), *(first->content))) //!pred(b, a) == b >= a
 					first = first->n;
 				if (first == middle)
-					return nextFirst_ToReturn;
-				while (middleRun != last && !comp(*(first->content), *(middleRun->content)))
-					middleRun = middleRun->n;
-
-				first->p->n = tmp;
+					return nextFirst;
+				//ici je decompte tout les element qui suivent b inserable avant a, ie tant que b->n < a, on avance b
+				while (middle->n != last && comp(*(middle->n->content), *(first->content)))
+					middle = middle->n;
+				//cas 1
+				//si j'ai le dernier element de middle (ie last->p) alors j'insere et on se casse
+				if (middle == last->p)
+				{
+					last->p = lastFirstElt;
+					lastFirstElt->n = last;
+					tmp->p = first->p;
+					first->p->n = tmp;
+					middle->n = first;
+					first->p = middle;
+					return nextFirst;
+				}
+				//cas 2
+				//je n'ai pas le dernier elt de middle, j'insere et j'incremente middle
+				middle->n->p = lastFirstElt;
+				lastFirstElt->n = middle->n;
 				tmp->p = first->p;
-				first->p = middleRun;
-
-				tmp = middleRun;
-				if (middleRun != last)
-					middleRun = middleRun->n;
+				first->p->n = tmp;
+				tmp = middle;
+				middle = middle->n;
 				tmp->n = first;
+				first->p = tmp;
 			}
-			return nextFirst_ToReturn;
 		}
 
 		template < class Compare >
@@ -857,7 +872,7 @@ namespace ft
 					while (selfIdx != _end && !comp(*(start->content), *(selfIdx->content)))
 						selfIdx = selfIdx->n;
 					tmp = start;
-					while (start != x._end && (selfIdx == _end || comp(*(start->n->content), *(selfIdx->content))))
+					while (start->n != x._end && (selfIdx == _end || comp(*(start->n->content), *(selfIdx->content))))
 						start = start->n;
 
 					selfIdx->p->n = tmp;
@@ -868,10 +883,7 @@ namespace ft
 					if (start != x._end)
 						start = start->n;
 					tmp->n = selfIdx;
-					if (selfIdx != _end)
-						selfIdx = selfIdx->n;
-					else
-						std::cout << "pouet\n";
+					selfIdx = selfIdx->n;
 				}
 				_size += x._size;
 				x._size = 0;
