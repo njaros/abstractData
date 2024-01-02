@@ -496,9 +496,21 @@ std::priority_queue<int> pouet;
 
 	std::cout << "============list tests=========\n\n";
 	{
-		std::list<int> l;
+		int n[] = { 6, 5, 4, 3, 2 };
+		int n2[] = { 7, 4, 2, 7, 1 };
+		std::list<int> l(n, n + 5);
 
-		std::cout << *l.begin();
+		std::list<int> l2(n2, n2 + 5);
+		l2.sort();
+		try
+		{
+			l.merge(l2);
+		}
+		catch (std::exception& e)
+		{
+			std::cout << e.what();
+		}
+		displayData(l, "l");
 	}
 	return 0;
 }

@@ -21,7 +21,7 @@ namespace ft
 		{
 			Node*	p; //previous
 			Node*	n; //next
-			pointer content; // this is a pointer because that is easier to swap nodes with swapping pointer content than relink the Node* p and n
+			pointer content;
 		};
 
 		class MyCIt;
@@ -247,13 +247,44 @@ namespace ft
 			_allocN.deallocate(toDel, 1);
 		}
 
-		void	_swapNode(Node* a, Node* b)
+		void	_swapNodeContent(Node* a, Node* b)
 		{
 			pointer tmp;
 
 			tmp = a->content;
 			a->content = b->content;
 			b->content = tmp;
+		}
+
+		template < class Compare >
+		Node* _sort(Node* first, size_type size, Compare comp)
+		{
+			Node* middle;
+			Node* last;
+
+			if (!size)
+				return first;
+			if (size == 1)
+				return first->n;
+
+			middle = _sort(first, )
+		}
+
+		template < class Compare >
+		bool	_isSorted(const list& l, Compare comp)
+		{
+			const_iterator current;
+			const_iterator previous;
+
+			current = begin();
+			previous = begin();
+			++current;
+			while (current != end())
+			{
+				if (comp(current++, previous++))
+					return false;
+			}
+			return true;
 		}
 
 	public:
@@ -480,7 +511,7 @@ namespace ft
 					firstNode->n = tmp;
 					firstNode = tmp;
 				}
-				++first;
+				++firstNode;
 			}
 			if (firstNode->n)
 			{
@@ -597,7 +628,7 @@ namespace ft
 		void	resize(size_type n, const value_type& val)
 		{
 			if (n >= _allocMaxSize.max_size())
-				throw (ft::length_error("ft::list::resize : size too high.");
+				throw (ft::length_error("ft::list::resize : size too high."));
 			if (n < _size)
 			{
 				while (n++ < _size)
@@ -634,6 +665,9 @@ namespace ft
 			Node* last;
 			Node* beforeInsert;
 			Node* afterInsert;
+
+			if (x.empty())
+				return;
 
 			//Extraction from x
 			first = x._end->n;
@@ -735,21 +769,12 @@ namespace ft
 		void	unique()
 		{
 			iterator current;
-			iterator nexts;
 
 			current = begin();
 			while (current != end())
 			{
-				nexts = current;
-				++nexts;
-				while (nexts != end())
-				{
-					if (*nexts = *current)
-						nexts = erase(nexts);
-					else
-						++nexts;
-				}
-				++current;
+				if (*current == ++(*current))
+					current = erase(current);
 			}
 		}
 
@@ -757,15 +782,77 @@ namespace ft
 		void	unique(BinaryPredicate binary_pred)
 		{
 			iterator current;
-			iterator others;
+			iterator previous;
 
 			current = begin();
+			previous = begin();
 			++current;
 			while (current != end())
 			{
-				others = begin();
-				while (others != end())
+				if (binary_pred(*current, *previous))
+					current = erase(current);
+				else
+				{
+					++current;
+					++previous;
+				}
 			}
+		}
+
+		template < class Compare >
+		void	merge(list& x, Compare comp)
+		{
+			Node* start;
+			Node* last;
+			Node* selfIdx;
+			Node* tmp;
+
+			if (x.empty())
+				return;
+
+			if (_isSorted(x, comp))
+			{
+				start = x._end->n;
+				selfIdx = _end->n;
+				while (start != x._end)
+				{
+					while (selfIdx != _end && !comp(*(start->content), *(selfIdx->content)))
+						selfIdx = selfIdx->n;
+					tmp = start;
+					while (start != x._end && (selfIdx == _end || comp(*(start->content), *(selfIdx->content))))
+						start = start->n;
+					selfIdx->p->n = tmp;
+					tmp->p = selfIdx->p;
+					selfIdx->p = start;
+					tmp = start;
+					start = start->n;
+					tmp->n = selfIdx;
+					selfIdx = selfIdx->n;
+				}
+				_size += x._size;
+				x._size = 0;
+				x._end->n = x._end;
+				x._end->p = x._end;
+			}
+			else
+				splice(end(), x);
+		}
+
+		void	merge(list& x)
+		{
+			merge(x, ft::less< value_type >);
+		}
+
+		template < class Compare >
+		void	sort(Compare comp)
+		{
+			//recurrence entrypoint
+			_sort(_end->n, _size, comp);
+		}
+
+		void	sort()
+		{
+			sort(ft::less< value_type >);
 		}
 	};
 }
