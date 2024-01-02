@@ -19,8 +19,8 @@ namespace ft
 
 		struct Node
 		{
-			Node*	p; //previous
-			Node*	n; //next
+			Node* p; //previous
+			Node* n; //next
 			pointer content;
 		};
 
@@ -257,7 +257,45 @@ namespace ft
 		}
 
 		template < class Compare >
-		Node* _sort(Node* first, size_type size, Compare comp)
+		Node* _mergeSelf(Node* first, Node* middle, Node* last, Compare comp)
+		{
+			/*
+			* I assume that the list is sorted in range [first, middle[ and in range [middle, last[
+			*/
+			Node* nextFirst_ToReturn; //long name to allows me to remember his rule
+			Node* middleRun;//I need this variable to keep in hand the pointer to middle
+			Node* tmp;//Tool to delimits intervals or to do Nodes swaps
+			//Because the two part-lists are sorted, I can already define my nextFirst
+			if (comp(*(middle->content), *(first->content)))
+				nextFirst_ToReturn = middle;
+			else
+				nextFirst_ToReturn = first;
+
+			middleRun = middle;
+			while (middleRun != last)
+			{
+				tmp = middleRun;
+				while (first != middle && !comp(*(middleRun->content), *(first->content)))
+					first = first->n;
+				if (first == middle)
+					return nextFirst_ToReturn;
+				while (middleRun != last && !comp(*(first->content), *(middleRun->content)))
+					middleRun = middleRun->n;
+
+				first->p->n = tmp;
+				tmp->p = first->p;
+				first->p = middleRun;
+
+				tmp = middleRun;
+				if (middleRun != last)
+					middleRun = middleRun->n;
+				tmp->n = first;
+			}
+			return nextFirst_ToReturn;
+		}
+
+		template < class Compare >
+		Node* _sort(Node*& first, size_type size, Compare comp)
 		{
 			Node* middle;
 			Node* last;
@@ -267,7 +305,10 @@ namespace ft
 			if (size == 1)
 				return first->n;
 
-			middle = _sort(first, )
+			middle = _sort(first, size / 2, comp);
+			last = _sort(middle, size - (size / 2), comp);
+			first = _mergeSelf(first, middle, last, comp);
+			return last;
 		}
 
 		template < class Compare >
@@ -526,7 +567,7 @@ namespace ft
 				firstNode->n = _end;
 			_end->p = firstNode;
 		}
-		
+
 		void	clear()
 		{
 			Node* tmp;
@@ -640,7 +681,7 @@ namespace ft
 
 		void	swap(list& o)
 		{
-			Node*			nodeTmp;
+			Node* nodeTmp;
 			size_type		sizeTmp;
 			allocator_type	allocTmp;
 
@@ -821,11 +862,14 @@ namespace ft
 					tmp = start;
 					while (start != x._end && (selfIdx == _end || comp(*(start->content), *(selfIdx->content))))
 						start = start->n;
+
 					selfIdx->p->n = tmp;
 					tmp->p = selfIdx->p;
 					selfIdx->p = start;
+
 					tmp = start;
-					start = start->n;
+					if (start != x._end)
+						start = start->n;
 					tmp->n = selfIdx;
 					selfIdx = selfIdx->n;
 				}
@@ -835,7 +879,7 @@ namespace ft
 				x._end->p = x._end;
 			}
 			else
-				splice(end(), x);
+				splice(end(), x); //windows STL behaviour
 		}
 
 		void	merge(list& x)
@@ -854,7 +898,74 @@ namespace ft
 		{
 			sort(ft::less< value_type >);
 		}
+
+		void	reverse()
+		{
+			Node* avance;
+			Node* recule;
+
+			avance = _end->n;
+			recule = _end->p;
+
+			while (avance != recule)
+			{
+				_swapNodeContent(avance, recule);
+				if (avance->n == recule)
+					return;
+				avance = avance->n;
+				recule = recule->p;
+			}
+		}
+
+		//OBSERVERS
+
+		allocator_type	get_allocator() const
+		{
+			return _alloc;
+		}
 	};
+
+	//NON MEMBER OVERLOADS
+
+	template <class T, class Alloc>  bool operator== (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
+	{
+		if (lhs.size() != rhs.size())
+			return false;
+		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+	}
+
+	template <class T, class Alloc>  bool operator!= (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
+	{
+		return !(lhs == rhs);
+	}
+
+	template <class T, class Alloc>  bool operator<  (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
+	{
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	}
+
+	template <class T, class Alloc>  bool operator<= (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
+	{
+		return !(rhs < lhs);
+	}
+
+	template <class T, class Alloc>  bool operator>  (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
+	{
+		return rhs < lhs;
+	}
+
+	template <class T, class Alloc>  bool operator>= (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
+	{
+		return !(lhs < rhs);
+	}
+
+	template <class T, class Alloc>
+	void	swap(list<T, Alloc>& x, list<T, Alloc>& y)
+	{
+		x.swap(y);
+	}
+
+
 }
 
 #endif
