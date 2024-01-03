@@ -8,6 +8,8 @@
 #include "../includes/queue.hpp"
 #include "../includes/priority_queue.hpp"
 #include "../includes/list.hpp"
+#include <unordered_map>
+#include <unordered_set>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -515,26 +517,26 @@ int main()
 
 	std::cout << "=========multimap tests=========\n\n";
 	{
-		std::multimap<int, char> test;
-		std::multimap<int, char>::iterator itLow;
-		std::multimap<int, char>::iterator itUp;
+		ft::multimap<int, char> test;
+		ft::multimap<int, char>::iterator itLow;
+		ft::multimap<int, char>::iterator itUp;
 
-		test.insert(std::make_pair(4, 'a'));
-		test.insert(std::make_pair(4, 'b'));
-		test.insert(std::make_pair(4, 'c'));
-		test.insert(std::make_pair(4, 'd'));
-		test.insert(std::make_pair(4, 'e'));
+		test.insert(ft::make_pair(4, 'a'));
+		test.insert(ft::make_pair(4, 'b'));
+		test.insert(ft::make_pair(4, 'c'));
+		test.insert(ft::make_pair(4, 'd'));
+		test.insert(ft::make_pair(4, 'e'));
 		displayDataMap(test, "test");
 
-		test.insert(std::make_pair(5, 'a'));
-		test.insert(std::make_pair(5, 'b'));
-		test.insert(std::make_pair(5, 'c'));
-		test.insert(std::make_pair(5, 'd'));
-		test.insert(std::make_pair(5, 'e'));
+		test.insert(ft::make_pair(5, 'a'));
+		test.insert(ft::make_pair(5, 'b'));
+		test.insert(ft::make_pair(5, 'c'));
+		test.insert(ft::make_pair(5, 'd'));
+		test.insert(ft::make_pair(5, 'e'));
 
-		test.insert(std::make_pair(6, '6'));
-		test.insert(std::make_pair(6, '7'));
-		test.insert(std::make_pair(6, '8'));
+		test.insert(ft::make_pair(6, '6'));
+		test.insert(ft::make_pair(6, '7'));
+		test.insert(ft::make_pair(6, '8'));
 
 
 		itLow = test.upper_bound(4);
@@ -545,8 +547,15 @@ int main()
 			std::cout << itLow->first << " => " << itLow->second << '\n';
 			++itLow;
 		}
-
+		std::vector<int> d;
 		displayDataMap(test, "test");
+	}
+	std::cout << "=========unordered_map tests=========\n\n";
+	{
+		std::unordered_map<int, int> pouet;
+		pouet.insert(std::make_pair(1, 1));
+		pouet.insert(std::make_pair(2, 1));
+
 	}
 	return 0;
 }

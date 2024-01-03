@@ -1064,7 +1064,7 @@ namespace ft {
                         data, _allocNode, _alloc), _leaf,
                     _compare);
                 _size++;
-                return _root;
+                return iterator(_root);
             }    
             _size++;
             _it = insertNodeMultimap<value_type, Compare>(&_root,

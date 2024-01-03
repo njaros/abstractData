@@ -773,8 +773,7 @@ namespace ft {
 						data, _allocNode, _alloc), _leaf,
 					_compare);
 				_size++;
-				_it = _root;
-				return _it;
+				return iterator(_root);
 			}
 			_it = insertNodeMultiset<value_type, Compare>(&_root,
 				newNode<value_type, std::allocator<node<value_type> >, allocator_type>(
