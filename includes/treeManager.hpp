@@ -263,6 +263,37 @@ ft::pair< node<T>*, bool >    recursiveInsertSet(node<T> *root, node<T> *n, Comp
     return (ft::make_pair(n, true));
 }
 
+template < typename T, typename Compare >
+node<T>*   recursiveInsertMultiset(node<T>* root, node<T>* n, Compare compare, bool onlyLeft, bool onlyRight)
+{
+    bool    nIsHigherOrEqual = !compare(*(n->content), *(root->content));
+    if (!nIsHigherOrEqual) {
+        if (isNotLeaf(root->left))
+            return recursiveInsertMultiset<T, Compare>(root->left, n, compare, onlyLeft, false);
+    }
+    else if (isNotLeaf(root->right))
+        return recursiveInsertMultiset<T, Compare>(root->right, n, compare, false, onlyRight);
+    if (nIsHigherOrEqual) {
+        node<T>* leaf = root->right;
+        root->right = n;
+        n->right = leaf;
+        n->left = leaf;
+        if (onlyRight)
+            leaf->father = n;
+    }
+    else {
+        node<T>* leaf = root->left;
+        root->left = n;
+        n->right = leaf;
+        n->left = leaf;
+        if (onlyLeft)
+            leaf->left = n;
+    }
+    n->father = root;
+    return n;
+}
+
+
 template < typename T >
 void doFix1(node<T> *n, node<T> **root)
 {
@@ -340,7 +371,7 @@ ft::pair< node<T>*, bool >    insertNode(node<T> **root, node<T> *n, node<T> *le
 template < typename T, typename Compare>
 node<T>*    insertNodeMultimap(node<T>** root, node<T>* n, node<T>* leaf, Compare compare)
 {
-    ft::pair< node<T>*, bool >  result;
+    node<T>*  result;
 
     if (!*root)
     {
@@ -349,12 +380,11 @@ node<T>*    insertNodeMultimap(node<T>** root, node<T>* n, node<T>* leaf, Compar
         n->left = leaf;
         n->right = leaf;
         n->color = BLACK;
-        return (ft::make_pair<node<T> *, bool>(n, true));
+        return n;
     }
     else
         result = recursiveInsertMultimap<T, Compare>(*root, n, compare, true, true);
-    if (result.second)
-        fixTree(n, root);
+    fixTree(n, root);
     return result;
 }
 
@@ -376,6 +406,26 @@ ft::pair< node<T>*, bool >    insertNodeSet(node<T> **root, node<T> *n, node<T> 
         result = recursiveInsertSet<T, Compare>(*root, n, compare, true, true);
     if (result.second)
         fixTree(n, root);
+    return result;
+}
+
+template < typename T, typename Compare>
+node<T>* insertNodeMultiset(node<T>** root, node<T>* n, node<T>* leaf, Compare compare)
+{
+    node<T>* result;
+
+    if (!*root)
+    {
+        leaf->father = n;
+        leaf->left = n;
+        n->left = leaf;
+        n->right = leaf;
+        n->color = BLACK;
+        return n;
+    }
+    else
+        result = recursiveInsertMultiset<T, Compare>(*root, n, compare, true, true);
+    fixTree(n, root);
     return result;
 }
 
@@ -457,8 +507,9 @@ void    fixTreeDelete(node<T> *n, node<T> **root)
 template < typename T, typename allocNode, typename allocValueType >
 void    deleteNode(node<T> *n, node<T> **root, allocNode &alloc, allocValueType &allocT)
 {
-    node<T> *replace;
-    node<T> *child;
+    node<T>* replace;
+    node<T>* child;
+    Node<T>* temp;
 
     if (!n)
         return ;
@@ -474,29 +525,58 @@ void    deleteNode(node<T> *n, node<T> **root, allocNode &alloc, allocValueType 
             replace = replace->left;
     }
     if (n != replace) {
-        T   *temp;
 
-        temp = n->content;
-        n->content = replace->content;
-        replace->content = temp;
+        //FATHER EXCHANGE
+        if (n->father != NO_FATHER)
+        {
+            if (n == n->father->left)
+                n->father->left = replace;
+            else
+                n->father->right = replace;
+        }
+        if (replace == replace->father->right)
+            replace->father->right = n;
+        else
+            replace->father->left = n;
+        temp = n->father;
+        n->father = replace->father;
+        replace->father = temp;
+
+        //LEFT EXCHANGE
+        if (isNotLeaf(n->left))
+            n->left->father = replace;
+        if (isNotLeaf(replace->left))
+            replace->left->father = n;
+        temp = n->left;
+        n->left = replace->left;
+        replace->left = temp;
+
+        //RIGHT EXCHANGE
+        if (isNotLeaf(n->right))
+            n->right->father = replace;
+        if (isNotLeaf(replace->right))
+            replace->right->father = n;
+        temp = n->right;
+        n->right = replace->right;
+        replace->right = temp;
     }
-    if (isNotLeaf(replace->left))
-        child = replace->left;
+    if (isNotLeaf(n->left))
+        child = n->left;
     else
-        child = replace->right;
-    child->father = replace->father;
-    if (replace->father == NO_FATHER)
+        child = n->right;
+    child->father = n->father;
+    if (n->father == NO_FATHER)
         *root = child;
     else
     {
-        if (replace == replace->father->left)
-            replace->father->left = child;
+        if (n == n->father->left)
+            n->father->left = child;
         else
-            replace->father->right = child;
+            n->father->right = child;
     }
-    if (replace->color == BLACK)
+    if (n->color == BLACK)
         fixTreeDelete(child, root);
-    destroyNode(replace, alloc, allocT);
+    destroyNode(n, alloc, allocT);
 }
 
 template < typename T, typename allocNode, typename allocValueType >

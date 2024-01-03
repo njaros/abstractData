@@ -21,7 +21,6 @@
 # include "pair.hpp"
 # include "treeManager.hpp"
 # include "reverse_iterator.hpp"
-# include "vector.hpp"
 # include "equal.hpp"
 
 namespace ft {
@@ -247,13 +246,16 @@ namespace ft {
 
 // CONSTRUCTORS / DESTRUCTOR / OPERATOR=
 
-        map() : _root(0), _size(0)
+        map(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
+            : _root(0), _size(0), _alloc(alloc), _compare(comp)
         {
 			_leaf = doALeaf(value_type(), _allocNode, _alloc);
 		}
 
         template<class InputIterator>
-        map(InputIterator first, InputIterator last) : _root(0), _size(0)  {
+        map(InputIterator first, InputIterator last, const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
+            : _root(0), _size(0), _alloc(alloc), _compare(comp)
+        {
 			_leaf = doALeaf(value_type(),_allocNode, _alloc);
             while (first != last)
             {
@@ -262,7 +264,9 @@ namespace ft {
             }
         }
 
-        map(const map &other) : _root(0), _size(0) {
+        map(const map &other)
+            : _root(0), _size(0), _alloc(other._alloc), _compare(other._compare)
+        {
 			_leaf = doALeaf(value_type(),_allocNode, _alloc);
             *this = other;
         }
@@ -277,6 +281,8 @@ namespace ft {
             if (&other == this)
                 return (*this);
             _size = other._size;
+            _alloc = other._alloc;
+            _compare = other._compare;
             if (_root) {
 				recursiveBurnTheTree<value_type, std::allocator<node<value_type> >, allocator_type>(_root, _allocNode, _alloc);
                 _root = 0;
@@ -472,26 +478,29 @@ namespace ft {
         }
         void                        erase(iterator first, iterator last)
         {
-			ft::vector<key_type>	lst;
-			while (first != last) {
-				lst.push_back(first->first);
-				++first;
+			while (first != last)
+            {
+                erase(first++);
 			}
-            for (typename ft::vector<key_type>::iterator begin = lst.begin(); begin != lst.end(); ++begin) {
-                erase(*begin);
-            }
         }
         void                        swap(map &other) {
-            node<value_type>    *tempRoot = _root;
-			node<value_type>	*tempLeaf = _leaf;
-            size_type           tempSize = _size;
+            node<value_type>* tempRoot = _root;
+            node<value_type>* tempLeaf = _leaf;
+            size_type			tempSize = _size;
+            allocator_type		tempAlloc = _alloc;
+            key_type			tempCompare = _compare;
 
-			_root = other._root;
-			_size = other._size;
-			_leaf = other._leaf;
+            _root = other._root;
+            _size = other._size;
+            _leaf = other._leaf;
+            _alloc = other._alloc;
+            _compare = other._compare;
+
             other._root = tempRoot;
             other._size = tempSize;
-			other._leaf = tempLeaf;
+            other._leaf = tempLeaf;
+            other._alloc = tempAlloc;
+            other._compare = tempCompare;
         }
         void                        clear() {
             if (_root) {
@@ -957,13 +966,16 @@ namespace ft {
 
         // CONSTRUCTORS / DESTRUCTOR / OPERATOR=
 
-        multimap() : _root(0), _size(0)
+        multimap(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
+            : _root(0), _size(0), _alloc(alloc), _compare(comp)
         {
             _leaf = doALeaf(value_type(), _allocNode, _alloc);
         }
 
         template<class InputIterator>
-        multimap(InputIterator first, InputIterator last) : _root(0), _size(0) {
+        multimap(InputIterator first, InputIterator last, const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
+            : _root(0), _size(0), _alloc(alloc), _compare(comp)
+        {
             _leaf = doALeaf(value_type(), _allocNode, _alloc);
             while (first != last)
             {
@@ -972,7 +984,8 @@ namespace ft {
             }
         }
 
-        multimap(const multimap& other) : _root(0), _size(0) {
+        multimap(const multimap& other)
+            : _root(0), _size(0), _alloc(other._alloc), _compare(other._compare) {
             _leaf = doALeaf(value_type(), _allocNode, _alloc);
             *this = other;
         }
@@ -987,6 +1000,8 @@ namespace ft {
             if (&other == this)
                 return (*this);
             _size = other._size;
+            _alloc = other._alloc;
+            _compare = other._compare;
             if (_root) {
                 recursiveBurnTheTree<value_type, std::allocator<node<value_type> >, allocator_type>(_root, _allocNode, _alloc);
                 _root = 0;
@@ -1052,9 +1067,11 @@ namespace ft {
                 return _root;
             }    
             _size++;
-            return insertNodeMultimap<value_type, Compare>(&_root,
+            _it = insertNodeMultimap<value_type, Compare>(&_root,
                 newNode<value_type, std::allocator<node<value_type> >, allocator_type>(data, _allocNode, _alloc),
                 _leaf,_compare);
+            _root = getRoot(_root);
+            return _it;
         }
         iterator   insert(const ft::pair<key_type, mapped_type>& data)
         {
@@ -1149,26 +1166,29 @@ namespace ft {
         }
         void                        erase(iterator first, iterator last)
         {
-            ft::vector<key_type>	lst;
-            while (first != last) {
-                lst.push_back(first->first);
-                ++first;
-            }
-            for (typename ft::vector<key_type>::iterator begin = lst.begin(); begin != lst.end(); ++begin) {
-                erase(*begin);
+            while (first != last)
+            {
+                erase(first++);
             }
         }
-        void                        swap(map& other) {
+        void                        swap(multimap& other) {
             node<value_type>* tempRoot = _root;
             node<value_type>* tempLeaf = _leaf;
-            size_type           tempSize = _size;
+            size_type			tempSize = _size;
+            allocator_type		tempAlloc = _alloc;
+            key_type			tempCompare = _compare;
 
             _root = other._root;
             _size = other._size;
             _leaf = other._leaf;
+            _alloc = other._alloc;
+            _compare = other._compare;
+
             other._root = tempRoot;
             other._size = tempSize;
             other._leaf = tempLeaf;
+            other._alloc = tempAlloc;
+            other._compare = tempCompare;
         }
         void                        clear() {
             if (_root) {
@@ -1381,7 +1401,7 @@ namespace ft {
                 deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(found, &_root, _allocNode, _alloc);
             return 1;
         }
-        size_type           _count(const key_type& k, node<value_type>* current)	const
+        size_type   _count(const key_type& k, node<value_type>* current)	const
         {
             if (isNotLeaf(current) && !_compare(current->content->first, k) && !_compare(k, current->content->first))
                 return 1 + _count(k, current->right) + _count(k, current->left);
