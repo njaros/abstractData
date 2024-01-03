@@ -1089,7 +1089,7 @@ namespace ft {
 		}
 		bool	_erase(const key_type& k)
 		{
-			Node<value_type>* found = _findNode(k, _root);
+			node<value_type>* found = _findNode(k, _root);
 
 			if (!found)
 				return 0;

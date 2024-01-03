@@ -65,7 +65,7 @@ namespace ft
 		Alloc							_alloc;
 		size_type						_size;
 		static const size_type			_valueTypeSize = sizeof(value_type);
-		static const difference_type	_chunkSize =
+		static const difference_type	_chunkSize
 			= _valueTypeSize <= 1 ? 16
 			: _valueTypeSize <= 2 ? 8
 			: _valueTypeSize <= 4 ? 4

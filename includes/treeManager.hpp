@@ -509,7 +509,7 @@ void    deleteNode(node<T> *n, node<T> **root, allocNode &alloc, allocValueType 
 {
     node<T>* replace;
     node<T>* child;
-    Node<T>* temp;
+    node<T>* temp;
 
     if (!n)
         return ;

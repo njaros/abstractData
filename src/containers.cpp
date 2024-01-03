@@ -1,5 +1,5 @@
 #include "../includes/vector.hpp"
-//#include "../includes/map.hpp"
+#include "../includes/map.hpp"
 #include "../includes/pair.hpp"
 #include "../includes/stack.hpp"
 #include "../includes/iterator.hpp"
