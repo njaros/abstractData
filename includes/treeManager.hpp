@@ -41,9 +41,6 @@
         T                   *content;
     };
 
-template < typename T >
-void fixTree(node<T> *n);
-
 //MEMORY
 
 template < typename T, typename allocNode, typename allocValueType >
@@ -207,6 +204,36 @@ ft::pair< node<T>*, bool >    recursiveInsert(node<T> *root, node<T> *n, Compare
 }
 
 template < typename T, typename Compare >
+node<T>*    recursiveInsertMultimap(node<T>* root, node<T>* n, Compare compare, bool onlyLeft, bool onlyRight)
+{
+    bool    nIsHigherOrEqual = !compare(n->content->first, root->content->first);
+    if (!nIsHigherOrEqual) {
+        if (isNotLeaf(root->left))
+            return recursiveInsertMultimap<T, Compare>(root->left, n, compare, onlyLeft, false);
+    }
+    else if (isNotLeaf(root->right))
+        return recursiveInsertMultimap<T, Compare>(root->right, n, compare, false, onlyRight);
+    if (nIsHigherOrEqual) {
+        node<T>* leaf = root->right;
+        root->right = n;
+        n->right = leaf;
+        n->left = leaf;
+        if (onlyRight)
+            leaf->father = n;
+    }
+    else {
+        node<T>* leaf = root->left;
+        root->left = n;
+        n->right = leaf;
+        n->left = leaf;
+        if (onlyLeft)
+            leaf->left = n;
+    }
+    n->father = root;
+    return n;
+}
+
+template < typename T, typename Compare >
 ft::pair< node<T>*, bool >    recursiveInsertSet(node<T> *root, node<T> *n, Compare compare, bool onlyLeft, bool onlyRight)
 {
     bool    nIsHigher = compare(*(root->content), *(n->content));
@@ -305,6 +332,27 @@ ft::pair< node<T>*, bool >    insertNode(node<T> **root, node<T> *n, node<T> *le
     }
     else
         result = recursiveInsert<T, Compare>(*root, n, compare, true, true);
+    if (result.second)
+        fixTree(n, root);
+    return result;
+}
+
+template < typename T, typename Compare>
+node<T>*    insertNodeMultimap(node<T>** root, node<T>* n, node<T>* leaf, Compare compare)
+{
+    ft::pair< node<T>*, bool >  result;
+
+    if (!*root)
+    {
+        leaf->father = n;
+        leaf->left = n;
+        n->left = leaf;
+        n->right = leaf;
+        n->color = BLACK;
+        return (ft::make_pair<node<T> *, bool>(n, true));
+    }
+    else
+        result = recursiveInsertMultimap<T, Compare>(*root, n, compare, true, true);
     if (result.second)
         fixTree(n, root);
     return result;

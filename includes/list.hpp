@@ -493,10 +493,7 @@ namespace ft
 			Node* firstNode;
 			difference_type dist;
 
-			if (ft::is_pointer<value_type, InputIterator>::value)
-				dist = last - first;
-			else
-				dist = ft::distance(first, last);
+			dist = ft::distance(first, last);
 			if (dist < 0)
 				throw (ft::length_error("ft::list::assign : last input must be greater than first input"));
 			if (dist >= _allocMaxSize.max_size())
@@ -621,10 +618,7 @@ namespace ft
 		{
 			difference_type	dist;
 
-			if (ft::is_pointer<value_type, pointer>::value)
-				dist = last - first;
-			else
-				dist = ft::distance(first, last);
+			dist = ft::distance(first, last);
 			if (dist < 0)
 				throw (ft::length_error("ft::list::insert : last input must be greater than first input"));
 			if (_size + dist >= _allocMaxSize.max_size())

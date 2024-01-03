@@ -1,5 +1,5 @@
 #include "../includes/vector.hpp"
-#include "../includes/map.hpp"
+//#include "../includes/map.hpp"
 #include "../includes/pair.hpp"
 #include "../includes/stack.hpp"
 #include "../includes/iterator.hpp"
@@ -511,6 +511,42 @@ int main()
 
 		ft::list<int> l4(12, 7);
 		displayData(l4, "l4");
+	}
+
+	std::cout << "=========multimap tests=========\n\n";
+	{
+		std::multimap<int, char> test;
+		std::multimap<int, char>::iterator itLow;
+		std::multimap<int, char>::iterator itUp;
+
+		test.insert(std::make_pair(4, 'a'));
+		test.insert(std::make_pair(4, 'b'));
+		test.insert(std::make_pair(4, 'c'));
+		test.insert(std::make_pair(4, 'd'));
+		test.insert(std::make_pair(4, 'e'));
+		displayDataMap(test, "test");
+
+		test.insert(std::make_pair(5, 'a'));
+		test.insert(std::make_pair(5, 'b'));
+		test.insert(std::make_pair(5, 'c'));
+		test.insert(std::make_pair(5, 'd'));
+		test.insert(std::make_pair(5, 'e'));
+
+		test.insert(std::make_pair(6, '6'));
+		test.insert(std::make_pair(6, '7'));
+		test.insert(std::make_pair(6, '8'));
+
+
+		itLow = test.upper_bound(4);
+		itUp = test.upper_bound(5);
+
+		while (itLow != itUp)
+		{
+			std::cout << itLow->first << " => " << itLow->second << '\n';
+			++itLow;
+		}
+
+		displayDataMap(test, "test");
 	}
 	return 0;
 }
