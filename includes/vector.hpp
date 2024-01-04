@@ -13,7 +13,7 @@
 #ifndef vector_HPP
 # define vector_HPP
 
-# include "is_integral.hpp"
+# include "type_traits.hpp"
 # include "enable_if.hpp"
 # include "iterator.hpp"
 # include "reverse_iterator.hpp"
@@ -44,8 +44,8 @@ class vector
 		typedef const T												*const_pointer;
 		typedef T													&reference;
 		typedef const T												&const_reference;
-		typedef ptrdiff_t											difference_type;
-		typedef size_t												size_type;
+		typedef typename Alloc::difference_type						difference_type;
+		typedef typename Alloc::size_type							size_type;
 
 // CLASS ITERATOR AND HIS TYPEDEFS
 
@@ -389,13 +389,15 @@ class vector
 
 // CONSTRUCTORS / DESTRUCTOR
 
-		vector() :
+		vector(const allocator_type& alloc = allocator_type()) :
+			_alloc(alloc),
 			_firstPtr(0),
 			_size(0),
 			_capacity(0)
 		{}
 
-		vector( size_type n, value_type val ) :
+		vector( size_type n, value_type val, const allocator_type& alloc = allocator_type()) :
+			_alloc(alloc),
 			_firstPtr(_alloc.allocate(n, 0)),
 			_size(n),
 			_capacity(n)
@@ -411,7 +413,8 @@ class vector
 			}
 		}
 
-		explicit vector( size_type n ) : //C++11 constructor but he's so useful for testing, he deserves to be here.
+		explicit vector( size_type n, const allocator_type& alloc = allocator_type()) : //C++11 constructor but he's so useful for testing, he deserves to be here.
+			_alloc(alloc),
 			_size(n),
 			_capacity(n)
 		{
@@ -428,8 +431,9 @@ class vector
 		}
 
 		template < class InputIterator >
-		vector( InputIterator first, InputIterator last,
+		vector( InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
 				typename ft::enable_if< !ft::is_integral< InputIterator >::value >::type* = 0 )
+			: _alloc(alloc)
 		{
             _size = ft::distance<InputIterator> (first, last);
 			if (_size > _alloc.max_size())
@@ -800,13 +804,17 @@ class vector
 		}
 		void		swap( vector &other )
 		{
+			allocator_type allocTmp = _alloc;
 			pointer	ptrTmp = _firstPtr;
 			size_type	sizeTmp = _size;
 			size_type	capacityTmp = _capacity;
 
+			_alloc = other._alloc;
 			_firstPtr = other._firstPtr;
 			_size = other._size;
 			_capacity = other._capacity;
+
+			other._alloc = allocTmp;
 			other._firstPtr = ptrTmp;
 			other._size = sizeTmp;
 			other._capacity = capacityTmp;

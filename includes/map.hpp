@@ -18,10 +18,10 @@
 # include <cstring>
 # include "functional.hpp"
 # include "iterator.hpp"
-# include "pair.hpp"
+# include "utility.hpp"
 # include "treeManager.hpp"
 # include "reverse_iterator.hpp"
-# include "equal.hpp"
+# include "algorithm.hpp"
 
 namespace ft {
 

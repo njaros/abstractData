@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Pair.hpp                                           :+:      :+:    :+:   */
+/*   utility.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: njaros <njaros@student.42lyon.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PAIR_HPP
-# define PAIR_HPP
+#ifndef UTILITY_HPP_ABSTRACTDATA_BY_LE_N
+# define UTILITY_HPP_ABSTRACTDATA_BY_LE_N
 
 namespace ft
 {

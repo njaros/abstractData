@@ -5,7 +5,7 @@
 #include <iterator>
 #include <iostream>
 #include "exception.hpp"
-#include "is_integral.hpp"
+#include "type_traits.hpp"
 
 namespace ft
 {

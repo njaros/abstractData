@@ -135,22 +135,24 @@
     <ClInclude Include="includes\algorithm.hpp" />
     <ClInclude Include="includes\deque.hpp" />
     <ClInclude Include="includes\enable_if.hpp" />
-    <ClInclude Include="includes\equal.hpp" />
     <ClInclude Include="includes\exception.hpp" />
     <ClInclude Include="includes\functional.hpp" />
-    <ClInclude Include="includes\is_integral.hpp" />
+    <ClInclude Include="includes\type_traits.hpp" />
     <ClInclude Include="includes\iterator.hpp" />
     <ClInclude Include="includes\libft.hpp" />
     <ClInclude Include="includes\list.hpp" />
     <ClInclude Include="includes\map.hpp" />
-    <ClInclude Include="includes\pair.hpp" />
+    <ClInclude Include="includes\utility.hpp" />
     <ClInclude Include="includes\priority_queue.hpp" />
     <ClInclude Include="includes\queue.hpp" />
     <ClInclude Include="includes\reverse_iterator.hpp" />
     <ClInclude Include="includes\set.hpp" />
     <ClInclude Include="includes\stack.hpp" />
     <ClInclude Include="includes\treeManager.hpp" />
+    <ClInclude Include="includes\unordered_map.hpp" />
+    <ClInclude Include="includes\unordered_set.hpp" />
     <ClInclude Include="includes\vector.hpp" />
+    <ClInclude Include="includes\_hashTable.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

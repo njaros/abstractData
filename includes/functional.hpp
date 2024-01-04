@@ -1,8 +1,6 @@
 #ifndef FUNCTIONAL_HPP
 # define FUNCTIONAL_HPP
 
-#include "pair.hpp"
-
 namespace ft
 {
 	template<class A, class B, class Res>
@@ -39,6 +37,17 @@ namespace ft
 			return x == y;
 		}
 	};
+
+	//HASH
+
+	/*
+	* doc : https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+	* template specializations to do : 
+	* is_integral
+	* is_pointer
+	* is_iterable (or thing like that)
+	* if is_iterable, I have to redirect to templated function which has only template specialization : is_integral or is_pointer
+	*/
 
 }
 

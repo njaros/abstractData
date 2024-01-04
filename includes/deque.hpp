@@ -6,7 +6,7 @@
 
 # include "iterator.hpp"
 # include "reverse_iterator.hpp"
-# include "is_integral.hpp"
+# include "type_traits.hpp"
 # include "enable_if.hpp"
 # include "exception.hpp"
 # include "vector.hpp"

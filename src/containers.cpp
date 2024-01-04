@@ -1,6 +1,6 @@
 #include "../includes/vector.hpp"
 #include "../includes/map.hpp"
-#include "../includes/pair.hpp"
+#include "../includes/utility.hpp"
 #include "../includes/stack.hpp"
 #include "../includes/iterator.hpp"
 #include "../includes/set.hpp"
@@ -21,6 +21,30 @@
 #include <algorithm>
 #include <queue>
 #include <list>
+
+template < typename T >
+void	displayHashSet(T& container, const char* name)
+{
+	typename T::const_local_iterator clit;
+
+	std::cout << name << " content :" << '\n';
+	for (size_t i = 0; i < container.bucket_count(); ++i)
+	{
+		if (container.bucket_size(i))
+		{
+			std::cout << "bucket [" << i << "] : {";
+			clit = container.begin(i);
+			while (clit != container.end(i))
+			{
+				std::cout << "(addr : " << &(*clit) << " | val : " << *clit << ')';
+				if (++clit != container.end(i))
+					std::cout << ", ";
+				else
+					std::cout << "}\n";
+			}
+		}
+	}
+}
 
 template < typename T >
 void	displayInfo(T& container, const char* name)
@@ -470,31 +494,31 @@ int main()
 		//displayData(revPouetFromPouet, "revPouetFromPouet");
 	}*/
 
-/*	std::cout << "======Priority_queue tests========\n\n";
-	{
-		int myInts[] = { 5, 77, 1, 1, 1, 1, 45, 1000, 0 };
-		int myInts2[] = { 12, -1, -2, -1, 458, -4, 75, 45, 22, 4, -45, 1 };
-		ft::vector<int> b;
-		ft::vector<int> c(4, 4);
-		ft::set<int>	s;
-		for (int i : myInts)
-			b.insert(b.end(), i);
-		displayData(b, "b");
-		ft::priority_queue<int> p(b.begin(), b.end());
-		for (int i : myInts2)
+	/*	std::cout << "======Priority_queue tests========\n\n";
 		{
-			std::cout << "current top is " << p.top() << '\n';
-			std::cout << "i insert " << i << '\n';
-			p.push(i);
-			std::cout << "now top is " << p.top() << '\n';
+			int myInts[] = { 5, 77, 1, 1, 1, 1, 45, 1000, 0 };
+			int myInts2[] = { 12, -1, -2, -1, 458, -4, 75, 45, 22, 4, -45, 1 };
+			ft::vector<int> b;
+			ft::vector<int> c(4, 4);
+			ft::set<int>	s;
+			for (int i : myInts)
+				b.insert(b.end(), i);
+			displayData(b, "b");
+			ft::priority_queue<int> p(b.begin(), b.end());
+			for (int i : myInts2)
+			{
+				std::cout << "current top is " << p.top() << '\n';
+				std::cout << "i insert " << i << '\n';
+				p.push(i);
+				std::cout << "now top is " << p.top() << '\n';
+			}
+			while (!p.empty())
+			{
+				std::cout << p.top() << '\n';
+				p.pop();
+			}
 		}
-		while (!p.empty())
-		{
-			std::cout << p.top() << '\n';
-			p.pop();
-		}
-	}
-	*/
+		*/
 	std::cout << "============list tests=========\n\n";
 	{
 		int n[] = { 9, 5, 1, 12, 0, 421, 74, -45, 79 };
@@ -552,10 +576,34 @@ int main()
 	}
 	std::cout << "=========unordered_map tests=========\n\n";
 	{
-		std::unordered_map<int, int> pouet;
-		pouet.insert(std::make_pair(1, 1));
-		pouet.insert(std::make_pair(2, 1));
+		std::unordered_set<int> pouet;
+		int count;
 
+		for (int i = 0; i < 68; i++)
+		{
+			//std::cout << "size : " << pouet.size() << " | number of buckets : " << pouet.bucket_count() << '\n';
+			pouet.insert(i);
+			count = 0;
+			std::cout << "\nfor size = " << pouet.size() << ", nbr of bucket is " << pouet.bucket_count() << " :\n";
+			for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
+				std::cout << ++count << " : (addr : " << &(*cit) << " | val : " << *cit << ")\n";
+
+		}
+		std::unordered_set<int>::local_iterator lcit = pouet.begin(1);
+
+		for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
+			std::cout << "(addr : " << &(*cit) << " | val : " << *cit << ")\n";
+		displayHashSet(pouet, "pouet");
+
+		pouet.erase(56);
+		for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
+			std::cout << "(addr : " << &(*cit) << " | val : " << *cit << ")\n";
+		displayHashSet(pouet, "pouet");
+
+		pouet.insert(56);
+		for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
+			std::cout << "(addr : " << &(*cit) << " | val : " << *cit << ")\n";
+		displayHashSet(pouet, "pouet");
 	}
 	return 0;
 }
