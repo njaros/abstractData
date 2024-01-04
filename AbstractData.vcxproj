@@ -129,17 +129,14 @@
   <ItemGroup>
     <ClCompile Include="src\containers.cpp" />
     <ClCompile Include="src\exception.cpp" />
-    <ClCompile Include="src\libft.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\algorithm.hpp" />
     <ClInclude Include="includes\deque.hpp" />
-    <ClInclude Include="includes\enable_if.hpp" />
     <ClInclude Include="includes\exception.hpp" />
     <ClInclude Include="includes\functional.hpp" />
     <ClInclude Include="includes\type_traits.hpp" />
     <ClInclude Include="includes\iterator.hpp" />
-    <ClInclude Include="includes\libft.hpp" />
     <ClInclude Include="includes\list.hpp" />
     <ClInclude Include="includes\map.hpp" />
     <ClInclude Include="includes\utility.hpp" />

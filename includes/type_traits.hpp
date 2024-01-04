@@ -30,6 +30,12 @@ namespace ft
 	typedef integral_constant<bool, true>	true_type;
 	typedef integral_constant<bool, false>	false_type;
 
+	//ENABLE IF
+
+	template < bool Cond, class T = void > struct enable_if { };
+
+	template < class T > struct enable_if<true, T> { typedef T type; };
+
 	//IS INTEGRAL SPECIALIZATION
 
 	template < typename T >
@@ -67,14 +73,14 @@ namespace ft
 
 	//IS POINTER SPECIALIZATION
 
-	template < typename T, typename pointer >
-	struct isPointer : public false_type {};
+	template < typename T >
+	struct is_pointer : public false_type {};
 	
 	template < typename T >
-	struct isPointer<T, T*> : true_type {};
+	struct is_pointer<T*> : public true_type {};
 	
-	template < typename T, typename pointer >
-	struct is_pointer : public isPointer<T, pointer> {};
+	template < typename T >
+	struct is_pointer<const T*> : public true_type {};
 
 	//IS FLOATING POINT SPECIALIZATION
 

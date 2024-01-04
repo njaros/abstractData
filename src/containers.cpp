@@ -518,7 +518,7 @@ int main()
 				p.pop();
 			}
 		}
-		*/
+		
 	std::cout << "============list tests=========\n\n";
 	{
 		int n[] = { 9, 5, 1, 12, 0, 421, 74, -45, 79 };
@@ -573,37 +573,31 @@ int main()
 		}
 		std::vector<int> d;
 		displayDataMap(test, "test");
-	}
+	}*/
 	std::cout << "=========unordered_map tests=========\n\n";
-	{
+	{/*
 		std::unordered_set<int> pouet;
 		int count;
 
-		for (int i = 0; i < 68; i++)
+		for (int i = 0; i < 63; i++)
 		{
 			//std::cout << "size : " << pouet.size() << " | number of buckets : " << pouet.bucket_count() << '\n';
 			pouet.insert(i);
-			count = 0;
-			std::cout << "\nfor size = " << pouet.size() << ", nbr of bucket is " << pouet.bucket_count() << " :\n";
-			for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
-				std::cout << ++count << " : (addr : " << &(*cit) << " | val : " << *cit << ")\n";
-
 		}
 		std::unordered_set<int>::local_iterator lcit = pouet.begin(1);
 
-		for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
-			std::cout << "(addr : " << &(*cit) << " | val : " << *cit << ")\n";
 		displayHashSet(pouet, "pouet");
+		pouet.max_load_factor(0.3);
+		displayHashSet(pouet, "pouet after MLF = 0.5");
+		pouet.insert(63);
+		displayHashSet(pouet, "pouet after MLF = 0.5  and 1 insert");
+		*/
+		int i;
 
-		pouet.erase(56);
-		for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
-			std::cout << "(addr : " << &(*cit) << " | val : " << *cit << ")\n";
-		displayHashSet(pouet, "pouet");
+		unsigned char c;
 
-		pouet.insert(56);
-		for (std::unordered_set<int>::const_iterator cit = pouet.begin(); cit != pouet.end(); ++cit)
-			std::cout << "(addr : " << &(*cit) << " | val : " << *cit << ")\n";
-		displayHashSet(pouet, "pouet");
+		c = (unsigned char)&i;
+		std::cout << &i << " | " << (size_t)c << '\n';
 	}
 	return 0;
 }
