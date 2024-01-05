@@ -592,12 +592,13 @@ int main()
 		pouet.insert(63);
 		displayHashSet(pouet, "pouet after MLF = 0.5  and 1 insert");
 		*/
-		int i;
+		ft::hash<std::string> hasher;
+		std::hash<std::string> stdhasher;
+		std::string txt = "hello les cousin";
+		std::cout << txt << "  fthash => " << hasher(txt) << '\n';
+		std::cout << txt << " stdhash => " << stdhasher(txt) << '\n';
+		
 
-		unsigned char c;
-
-		c = (unsigned char)&i;
-		std::cout << &i << " | " << (size_t)c << '\n';
 	}
 	return 0;
 }

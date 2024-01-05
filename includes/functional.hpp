@@ -54,6 +54,8 @@ namespace ft
 	const size_t FNV_offset_basis = 14695981039346656037;
 	const size_t FNV_prime = 1099511628211;
 
+	//NECESSARY TEMPLATE SPECIALIZATIONS FOR HASH STRUCTURE (which are not in type_traits)
+
 	template <class T>
 	struct isString : public false_type {};
 
@@ -68,6 +70,8 @@ namespace ft
 
 	template <class T>
 	struct is_string : public isString<T> {};
+
+	//_hash templated functions, one function for each type I have to be able to hash
 
 	size_t	_do_hash_pls(const unsigned char* first, size_t len)
 	{
@@ -85,52 +89,72 @@ namespace ft
 	template < class T >
 	size_t	_hash(T elt, typename ft::enable_if<ft::is_integral< T >::value >::type* = 0)
 	{
-		size_t			nbBytes = sizeof(elt);
+		const size_t	nbBytes = sizeof(elt);
 		unsigned char	bytes[nbBytes];
+
 		for (int i = 0; i < nbBytes; ++i)
 		{
 			bytes[i] = (unsigned char)elt;
 			elt >>= 8;
 		}
-		
 		return _do_hash_pls(bytes, nbBytes);
 	}
 
 	template < class T >
 	size_t	_hash(const T& elt, typename ft::enable_if<ft::is_pointer< T >::value >::type* = 0)
 	{
-		size_t			nbBytes = sizeof(elt);
+		const size_t	nbBytes = sizeof(elt);
 		unsigned char	bytes[nbBytes];
+		
 		for (int i = 0; i < nbBytes; ++i)
 		{
 			bytes[i] = (unsigned char)elt;
 			elt >>= 8;
 		}
-
 		return _do_hash_pls(bytes, nbBytes);
+	}
+
+	template <class T>
+	size_t	_hash_floating_point(T elt, typename enable_if<sizeof(T) == 4>::type* = 0)
+	{
+		unsigned __int32	toUInt32 = *reinterpret_cast<unsigned __int32*>(&elt);
+		unsigned char		bytes[4];
+
+		for (int i = 0; i < 4; ++i)
+		{
+			bytes[i] = (unsigned char)toUInt32;
+			toUInt32 >>= 8;
+		}
+		return _do_hash_pls(bytes, 4);
+	}
+
+	template <class T>
+	size_t	_hash_floating_point(T elt, typename enable_if<sizeof(T) == 8>::type* = 0)
+	{
+		unsigned __int64	toUInt64 = *reinterpret_cast<unsigned __int64*>(&elt);
+		unsigned char		bytes[8];
+
+		for (int i = 0; i < 8; ++i)
+		{
+			bytes[i] = (unsigned char)toUInt64;
+			toUInt64 >>= 8;
+		}
+		return _do_hash_pls(bytes, 8);
 	}
 
 	template < class T >
 	size_t	_hash(T elt, typename ft::enable_if<ft::is_floating_point< T >::value >::type* = 0)
 	{
-		size_t			nbBytes = sizeof(elt);
-		unsigned char	bytes[nbBytes];
-		size_t			binaryExpr = *reinterpret_cast<size_t *>(&elt);
-		for (int i = 0; i < nbBytes; ++i)
-		{
-			bytes[i] = (unsigned char)binaryExpr;
-			elt >>= 8;
-		}
-
-		return _do_hash_pls(bytes, nbBytes);
+		return _hash_floating_point(elt);
 	}
 
 	template < class T >
 	size_t	_hash(const T& elt, typename ft::enable_if<ft::is_string< T >::value >::type* = 0)
 	{
-		size_t	nbBytes = T.size() * sizeof(typename T::value_type);
+		const size_t			nbBytes = elt.length() * sizeof(typename T::value_type);
+		const unsigned char*	bytes = reinterpret_cast<const unsigned char*>(elt.c_str());
 
-		return _do_hash_pls(reinterpret_cast<const unsigned char *>(T.c_str()), nbBytes);
+		return _do_hash_pls(bytes, nbBytes);
 	}
 
 	template < class T >
