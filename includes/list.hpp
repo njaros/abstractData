@@ -34,7 +34,7 @@ namespace ft
 			MyIt() : _n(nullptr) {}
 			MyIt(Node* n) : _n(n) {}
 			MyIt(const MyIt& o) : _n(o._n) {}
-			MyIt(const MyCIt& o) : _n(o._base()) {}
+			MyIt(const MyCIt& o) : _n(o.base()) {}
 			~MyIt() {}
 
 			virtual Node* base()	const { return _n; }
@@ -47,7 +47,7 @@ namespace ft
 
 			MyIt& operator=(const MyCIt& o)
 			{
-				_n = o._base();
+				_n = o.base();
 				return *this;
 			}
 
@@ -136,7 +136,7 @@ namespace ft
 
 			bool operator==(const MyIt& o)	const
 			{
-				return _n == o._base();
+				return _n == o.base();
 			}
 
 			bool operator==(const MyCIt& o)	const
@@ -350,7 +350,7 @@ namespace ft
 		//CONSTRUCTORS DESTRUCTOR OPERATOR=
 
 		explicit list(const allocator_type& alloc = allocator_type()) : _end(_getNewNullNode()), _size(0), _alloc(alloc) {}
-		list(const list& o) : _end(_getNewNullNode), _size(o._size), _alloc(o._alloc)
+		list(const list& o) : _end(_getNewNullNode()), _size(o._size), _alloc(o._alloc)
 		{
 			Node* newNode;
 			Node* first;
@@ -598,9 +598,9 @@ namespace ft
 		{
 			Node* newNode;
 
-			newNode = _getNewNode(position._base()->p, position._base(), val);
-			position._base()->p->n = newNode;
-			position._base()->p = newNode;
+			newNode = _getNewNode(position.base()->p, position.base(), val);
+			position.base()->p->n = newNode;
+			position.base()->p = newNode;
 			++_size;
 			return iterator(newNode);
 		}
@@ -638,7 +638,7 @@ namespace ft
 
 			if (position == end())
 				return position;
-			toDel = position._base();
+			toDel = position.base();
 			toDel->p->n = toDel->n;
 			toDel->n->p = toDel->p;
 			toReturn = toDel->n;
@@ -744,11 +744,11 @@ namespace ft
 
 			//Extraction from x
 			--(x._size);
-			toInsert = i._base();
+			toInsert = i.base();
 			toInsert->p->n = toInsert->n;
 			toInsert->n->p = toInsert->p;
-			beforeInsert = position->_base()->p;
-			afterInsert = position->_base();
+			beforeInsert = position.base()->p;
+			afterInsert = position.base();
 
 			//Insertion to self
 			beforeInsert->n = toInsert;
@@ -767,8 +767,8 @@ namespace ft
 			difference_type	dist;
 
 			//Extraction from x
-			first = start->_base();
-			last = end->_base()->p;
+			first = start->base();
+			last = end->base()->p;
 			dist = ft::distance(start, end);
 			x._size -= dist;
 			first->p->n = last->n;
@@ -776,8 +776,8 @@ namespace ft
 
 			//Insertion to self
 			_size += dist;
-			beforeInsert = position->_base()->p;
-			afterInsert = position->_base();
+			beforeInsert = position->base()->p;
+			afterInsert = position->base();
 			beforeInsert->n = first;
 			first->p = beforeInsert;
 			afterInsert->p = last;

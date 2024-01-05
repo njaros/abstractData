@@ -8,6 +8,7 @@
 #include "../includes/queue.hpp"
 #include "../includes/priority_queue.hpp"
 #include "../includes/list.hpp"
+#include "../includes/unordered_map.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include <cstdlib>
@@ -37,6 +38,30 @@ void	displayHashSet(T& container, const char* name)
 			while (clit != container.end(i))
 			{
 				std::cout << "(addr : " << &(*clit) << " | val : " << *clit << ')';
+				if (++clit != container.end(i))
+					std::cout << ", ";
+				else
+					std::cout << "}\n";
+			}
+		}
+	}
+}
+
+template < typename T >
+void	displayHashMap(T& container, const char* name)
+{
+	typename T::const_local_iterator clit;
+
+	std::cout << name << " content :" << '\n';
+	for (size_t i = 0; i < container.bucket_count(); ++i)
+	{
+		if (container.bucket_size(i))
+		{
+			std::cout << "bucket [" << i << "] : {";
+			clit = container.begin(i);
+			while (clit != container.end(i))
+			{
+				std::cout << "(addr : " << &(*clit) << " | val : " << clit->first << " => " << clit->second << ')';
 				if (++clit != container.end(i))
 					std::cout << ", ";
 				else
@@ -592,12 +617,27 @@ int main()
 		pouet.insert(63);
 		displayHashSet(pouet, "pouet after MLF = 0.5  and 1 insert");
 		*/
-		ft::hash<std::string> hasher;
-		std::hash<std::string> stdhasher;
-		std::string txt = "hello les cousin";
-		std::cout << txt << "  fthash => " << hasher(txt) << '\n';
-		std::cout << txt << " stdhash => " << stdhasher(txt) << '\n';
-		
+
+		ft::unordered_map<int, int> pouet;
+
+		pouet._insert(ft::pair<const int, int>(1, 1));
+		pouet._insert(ft::pair<const int, int>(2, 1));
+		pouet._insert(ft::pair<const int, int>(13, 1));
+		pouet._insert(ft::pair<const int, int>(44, 1));
+		pouet._insert(ft::pair<const int, int>(5, 1));
+		pouet._insert(ft::pair<const int, int>(89, 1));
+		pouet._insert(ft::pair<const int, int>(-156, 1));
+		pouet._insert(ft::pair<const int, int>(78, 1));
+
+		displayHashMap(pouet, "pouet");
+
+
+		pouet._insert(ft::pair<const int, int>(145, 1));
+		pouet._insert(ft::pair<const int, int>(896, 1));
+		pouet._insert(ft::pair<const int, int>(777, 1));
+		pouet._insert(ft::pair<const int, int>(489, 1));
+
+		displayHashMap(pouet, "pouet");
 
 	}
 	return 0;
