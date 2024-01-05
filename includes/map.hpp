@@ -355,10 +355,6 @@ namespace ft {
             return ((*((this->insert(ft::make_pair(k,mapped_type()))).first)).second);
         }
 
-        const mapped_type& operator[](const key_type& k) const {
-            return ((*((this->insert(ft::make_pair(k, mapped_type()))).first)).second);
-        }
-
 // MODIFIERS
 
         ft::pair<iterator, bool>    insert(const_reference data)

@@ -619,24 +619,7 @@ int main()
 		*/
 
 		ft::unordered_map<int, int> pouet;
-
-		pouet._insert(ft::pair<const int, int>(1, 1));
-		pouet._insert(ft::pair<const int, int>(2, 1));
-		pouet._insert(ft::pair<const int, int>(13, 1));
-		pouet._insert(ft::pair<const int, int>(44, 1));
-		pouet._insert(ft::pair<const int, int>(5, 1));
-		pouet._insert(ft::pair<const int, int>(89, 1));
-		pouet._insert(ft::pair<const int, int>(-156, 1));
-		pouet._insert(ft::pair<const int, int>(78, 1));
-
-		displayHashMap(pouet, "pouet");
-
-
-		pouet._insert(ft::pair<const int, int>(145, 1));
-		pouet._insert(ft::pair<const int, int>(896, 1));
-		pouet._insert(ft::pair<const int, int>(777, 1));
-		pouet._insert(ft::pair<const int, int>(489, 1));
-
+		
 		displayHashMap(pouet, "pouet");
 
 	}

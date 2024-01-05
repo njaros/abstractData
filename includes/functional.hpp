@@ -5,6 +5,14 @@
 
 namespace ft
 {
+
+	template <class Arg, class Result>
+	struct unary_function
+	{
+		typedef Arg argument_type;
+		typedef Result result_type;
+	};
+
 	template<class A, class B, class Res>
 	struct binary_function
 	{
@@ -158,12 +166,9 @@ namespace ft
 	}
 
 	template < class T >
-	struct hash
+	struct hash : public ft::unary_function< T, size_t >
 	{
-		typedef size_t	result_type;
-		typedef T		argument_type;
-
-		result_type operator()(const T& elt) { return _hash(elt); }
+		size_t operator()(const T& elt) { return _hash(elt); }
 	};
 }
 
