@@ -77,7 +77,7 @@
     <ClInclude Include="includes\unordered_set.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="includes\_hashTable.hpp">
+    <ClInclude Include="includes\basket.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

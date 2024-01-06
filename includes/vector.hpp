@@ -986,9 +986,6 @@ void	swap(ft::vector<T, Alloc>& x, ft::vector<T, Alloc>& y)
 	x.swap(y);
 }
 
-template < class Iterator >
-Iterator	operator+(size_t s, Iterator it) {return (it + s);}
-
 }
 
 #endif

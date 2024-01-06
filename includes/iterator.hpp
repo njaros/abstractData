@@ -103,6 +103,12 @@ namespace ft
 	{
 		return last - first;
 	}
+
+	// allows all operator+ in randomAccessIterator to work the other way
+	template < class Iterator, class K >
+	typename ft::enable_if<ft::is_RandomAccessIterator<Iterator>::value && ft::is_integral<K>::value, Iterator >::type	operator+(size_t s, Iterator it)
+	{ return (it + s); }
+
 }
 
 #endif

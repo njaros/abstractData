@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\algorithm.hpp" />
+    <ClInclude Include="includes\basket.hpp" />
     <ClInclude Include="includes\deque.hpp" />
     <ClInclude Include="includes\exception.hpp" />
     <ClInclude Include="includes\functional.hpp" />
@@ -149,7 +150,6 @@
     <ClInclude Include="includes\unordered_map.hpp" />
     <ClInclude Include="includes\unordered_set.hpp" />
     <ClInclude Include="includes\vector.hpp" />
-    <ClInclude Include="includes\_hashTable.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
