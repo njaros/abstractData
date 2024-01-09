@@ -6,13 +6,13 @@ namespace ft
 
 	//HEAP
 
-	template <typename RandomAccessIterator, typename difference_type = typename RandomAccessIterator::difference_type, typename Compare>
-	void	_tasser(RandomAccessIterator first, RandomAccessIterator last, Compare comp, difference_type idx)
+	template <typename RandomAccessIterator, typename Compare>
+	void	_tasser(RandomAccessIterator first, RandomAccessIterator last, Compare comp, typename RandomAccessIterator::difference_type idx)
 	{
-		difference_type	current;
-		difference_type	childL;
-		difference_type	childR;
-		difference_type	end;
+		typename RandomAccessIterator::difference_type	current;
+		typename RandomAccessIterator::difference_type	childL;
+		typename RandomAccessIterator::difference_type	childR;
+		typename RandomAccessIterator::difference_type	end;
 		typename RandomAccessIterator::value_type	tmp;
 
 		current = idx;

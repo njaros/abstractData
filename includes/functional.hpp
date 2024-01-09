@@ -59,7 +59,10 @@ namespace ft
 	* is_string
 	*/
 
-	const size_t FNV_offset_basis = 14695981039346656037;
+	//because of the -Werror flag, i need to split the FNV_offset_basis number in 2.
+	const size_t FNV_offset_basis_first_part = 7000000000000000000;
+	const size_t FNV_offset_basis_second_part= 7695981039346656037;
+	const size_t FNV_offset_basis = FNV_offset_basis_first_part + FNV_offset_basis_second_part;
 	const size_t FNV_prime = 1099511628211;
 
 	//NECESSARY TEMPLATE SPECIALIZATIONS FOR HASH STRUCTURE (which are not in type_traits)
@@ -71,10 +74,6 @@ namespace ft
 	struct isString<std::string> : public true_type {};
 	template <>
 	struct isString<std::wstring> : public true_type {};
-	template <>
-	struct isString<std::u16string> : public true_type {};
-	template <>
-	struct isString<std::u32string> : public true_type {};
 
 	template <class T>
 	struct is_string : public isString<T> {};
@@ -109,7 +108,8 @@ namespace ft
 	}
 
 	template < class T >
-	size_t	_hash(const T& elt, typename ft::enable_if<ft::is_pointer< T >::value >::type* = 0)
+	typename ft::enable_if<ft::is_pointer< T >::value, size_t >::type
+		_hash(const T& elt)
 	{
 		const size_t	nbBytes = sizeof(elt);
 		unsigned char	bytes[nbBytes];
@@ -123,9 +123,10 @@ namespace ft
 	}
 
 	template <class T>
-	size_t	_hash_floating_point(T elt, typename enable_if<sizeof(T) == 4>::type* = 0)
+	typename enable_if<sizeof(T) == 4, size_t>::type
+		_hash_floating_point(T elt)
 	{
-		unsigned __int32	toUInt32 = *reinterpret_cast<unsigned __int32*>(&elt);
+		__uint32_t	toUInt32 = *reinterpret_cast<__uint32_t*>(&elt);
 		unsigned char		bytes[4];
 
 		for (int i = 0; i < 4; ++i)
@@ -137,10 +138,11 @@ namespace ft
 	}
 
 	template <class T>
-	size_t	_hash_floating_point(T elt, typename enable_if<sizeof(T) == 8>::type* = 0)
+	typename enable_if<sizeof(T) == 8, size_t>::type
+		_hash_floating_point(T elt)
 	{
-		unsigned __int64	toUInt64 = *reinterpret_cast<unsigned __int64*>(&elt);
-		unsigned char		bytes[8];
+		__uint64_t		toUInt64 = *reinterpret_cast<__uint64_t*>(&elt);
+		unsigned char	bytes[8];
 
 		for (int i = 0; i < 8; ++i)
 		{

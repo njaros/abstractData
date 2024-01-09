@@ -1,6 +1,11 @@
 #include "../includes/test_elements.hpp"
 #include "../includes/exception.hpp"
-#include <Windows.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
 #include <iostream>
 
 template < typename T >
@@ -147,7 +152,6 @@ public:
 			throw (ft::logic_error("debug::copyConstructor : you construct on an instancied slot, you forgot to destroy"));
 		b = 0;
 	}
-	debug(short nb, bool imi) : a(nb), b(0) {}
 	debug(const debug& o)
 	{
 		if (!b && o.b != 0)
@@ -162,7 +166,7 @@ public:
 	~debug()
 	{
 		if (b != 0)
-			throw (ft::logic_error("debug::Destructor : called for a not constructed object"));
+			std::cerr << "debug::Destructor : called for a not constructed object\n";
 		a = -1;
 		b = -1;
 	}
@@ -262,21 +266,43 @@ std::ostream& operator<<(std::ostream& o, const debug& i)
 	return o;
 }
 
-void	setRandom(unsigned short& s, size_t pouet = 0)
+std::string filePath(const std::string& ctx, const std::string& container)
 {
-	SYSTEMTIME seed;
+	std::string ret(ctx);
+	ret += '/';
+	ret += container;
+	ret += '/';
+	return ret;
+}
 
-	if (!s || pouet > s)
+std::string dirName(const std::string& current, const std::string& ctx, std::string container = "")
+{
+	std::string ret(current);
+	ret += ctx;
+	if (!container.empty())
 	{
-		GetSystemTime(&seed);
-		s = seed.wMilliseconds;
+		ret += '/';
+		ret += container;
 	}
-	else
-		s -= pouet;
+	return ret;
 }
 
 int main()
 {
+	std::string mainPath;
+	std::string ctxPath;
+
+	mainPath = get_current_dir_name();
+	mainPath += '/';
+	if (FT == 1)
+		ctxPath = "ft_logs";
+	else
+		ctxPath = "std_logs";
+	
+	mkdir(dirName(mainPath, ctxPath).c_str(), 0777);
+	mkdir(dirName(mainPath, ctxPath, "vector").c_str(), 0777);
+
+	vector_tests(filePath(ctxPath, "vector"));
 	/*
 	std::cout << "------exceptions tests------\n\n\n";
 	{
@@ -599,6 +625,6 @@ int main()
 		ft::unordered_map<int, int> pouet;
 		displayHashMap(pouet, "pouet");
 		*/
-	flat_basket_tests();
+	//flat_basket_tests();
 	return 0;
 }

@@ -133,7 +133,7 @@ namespace ft {
 		}
 
 		set(const set& other)
-			: _root(0), _size(0), _alloc(other._alloc), _compare(other._alloc)
+			: _root(0), _size(0), _alloc(other._alloc), _compare(other._compare)
 		{
 			_leaf = doALeaf(value_type(), _allocNode, _alloc);
 			*this = other;

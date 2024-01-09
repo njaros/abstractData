@@ -98,15 +98,16 @@ namespace ft
 	}
 
 	template< typename pointer >
-	typename long distance(pointer first, pointer last,
-		typename ft::enable_if< ft::is_pointer< pointer >::value >::type* = 0)
+	typename ft::enable_if< ft::is_pointer< pointer >::value, long >::type
+		distance(pointer first, pointer last)
 	{
 		return last - first;
 	}
 
 	// allows all operator+ in randomAccessIterator to work the other way
 	template < class Iterator, class K >
-	typename ft::enable_if<ft::is_RandomAccessIterator<Iterator>::value && ft::is_integral<K>::value, Iterator >::type	operator+(K s, Iterator it)
+	typename ft::enable_if<ft::is_RandomAccessIterator<Iterator>::value && ft::is_integral<K>::value, Iterator >::type
+		operator+(K s, Iterator it)
 	{ return (it + s); }
 
 }
