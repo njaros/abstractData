@@ -129,13 +129,15 @@
   <ItemGroup>
     <ClCompile Include="src\containers.cpp" />
     <ClCompile Include="src\exception.cpp" />
+    <ClCompile Include="src\flat_basket_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\algorithm.hpp" />
-    <ClInclude Include="includes\basket.hpp" />
+    <ClInclude Include="includes\flat_basket.hpp" />
     <ClInclude Include="includes\deque.hpp" />
     <ClInclude Include="includes\exception.hpp" />
     <ClInclude Include="includes\functional.hpp" />
+    <ClInclude Include="includes\test_elements.hpp" />
     <ClInclude Include="includes\type_traits.hpp" />
     <ClInclude Include="includes\iterator.hpp" />
     <ClInclude Include="includes\list.hpp" />

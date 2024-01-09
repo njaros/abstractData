@@ -1,28 +1,7 @@
-#include "../includes/vector.hpp"
-#include "../includes/map.hpp"
-#include "../includes/utility.hpp"
-#include "../includes/stack.hpp"
-#include "../includes/iterator.hpp"
-#include "../includes/set.hpp"
-#include "../includes/deque.hpp"
-#include "../includes/queue.hpp"
-#include "../includes/priority_queue.hpp"
-#include "../includes/list.hpp"
-#include "../includes/unordered_map.hpp"
-#include "../includes/basket.hpp"
-#include <unordered_map>
-#include <unordered_set>
-#include <cstdlib>
+#include "../includes/test_elements.hpp"
+#include "../includes/exception.hpp"
+#include <Windows.h>
 #include <iostream>
-#include <vector>
-#include <map>
-#include <string>
-#include <set>
-#include <stack>
-#include <windows.h>
-#include <algorithm>
-#include <queue>
-#include <list>
 
 template < typename T >
 void	displayHashSet(T& container, const char* name)
@@ -599,9 +578,9 @@ int main()
 		}
 		std::vector<int> d;
 		displayDataMap(test, "test");
-	}*/
+	}
 	std::cout << "=========unordered_map tests=========\n\n";
-	{/*
+	{
 		std::unordered_set<int> pouet;
 		int count;
 
@@ -617,12 +596,9 @@ int main()
 		displayHashSet(pouet, "pouet after MLF = 0.5");
 		pouet.insert(63);
 		displayHashSet(pouet, "pouet after MLF = 0.5  and 1 insert");
-		*/
-
 		ft::unordered_map<int, int> pouet;
-		
 		displayHashMap(pouet, "pouet");
-
-	}
+		*/
+	flat_basket_tests();
 	return 0;
 }
