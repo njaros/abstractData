@@ -39,7 +39,11 @@ OBJS_FT =		$(addprefix ${PATH_OBJS_FT}/,${LST_OBJS})
 OBJS_STD =		$(addprefix ${PATH_OBJS_STD}/,${LST_OBJS})
 INCLUDES =		$(addprefix ${PATH_INCLUDES}/,${LST_INCLUDES})
 
-all :					AbstractDataTestsFT AbstractDataTestsSTD Makefile
+all :					AbstractDataTestsFT.exe AbstractDataTestsSTD.exe Makefile exe
+
+exe :
+						./AbstractDataTestsFT.exe
+						./AbstractDataTestsSTD.exe
 
 AbstractDataTestsFT.exe :	${OBJS_FT} ${INCLUDES} Makefile
 						${CC} ${FLAGS} ${OBJS_FT} -o $@

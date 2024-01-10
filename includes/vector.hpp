@@ -397,13 +397,16 @@ namespace ft
 
 		vector(size_type n, value_type val, const allocator_type& alloc = allocator_type()) :
 			_alloc(alloc),
-			_firstPtr(_alloc.allocate(n, 0)),
+			_firstPtr(0),
 			_size(n),
 			_capacity(n)
 		{
 			size_type	idx;
+			if (n > _alloc.max_size())
+				throw(ft::length_error("cannot create ft::vector larger than max_size()"));
+			
+			_firstPtr = _alloc.allocate(n, 0);
 			_ptr = _firstPtr;
-
 			idx = 0;
 			while (idx++ < _size)
 			{
@@ -420,7 +423,7 @@ namespace ft
 			size_type   s = 0;
 
 			if (n > _alloc.max_size())
-				throw (ft::out_of_range("cannot create ft::vector larger than max_size()"));
+				throw (ft::length_error("cannot create ft::vector larger than max_size()"));
 			_firstPtr = _alloc.allocate(n, 0);
 			while (s < n)
 			{
@@ -436,7 +439,7 @@ namespace ft
 		{
 			_size = ft::distance<InputIterator>(first, last);
 			if (_size > _alloc.max_size())
-				throw (ft::out_of_range("cannot create ft::vector larger than max_size()"));
+				throw (ft::length_error("cannot create ft::vector larger than max_size()"));
 			_capacity = _size;
 			_firstPtr = _alloc.allocate(_size, 0);
 			_ptr = _firstPtr;
@@ -574,6 +577,8 @@ namespace ft
 		}
 		void		reserve(size_type n)
 		{
+			if (n > _alloc.max_size())
+				throw(ft::length_error("cannot reserve larger than max_size()"));
 			if (n > _capacity)
 			{
 				if (!_firstPtr)
@@ -662,6 +667,8 @@ namespace ft
 		}
 		void		assign(size_type n, const value_type& val)
 		{
+			if (n > _alloc.max_size())
+				throw(ft::length_error("cannot create ft::vector larger than max_size()"));
 			_it = begin();
 			while (_it != end())
 				_alloc.destroy(_it++.operator->());
@@ -842,6 +849,8 @@ namespace ft
 		size_type		_capacity;
 		void			checkCapacityAvailable(size_type n)
 		{
+			if (n > _alloc.max_size())
+				throw(ft::length_error("cannot reserve larger than max_size()"));
 			if (!_firstPtr && n)
 			{
 				_firstPtr = _alloc.allocate(n, 0);
