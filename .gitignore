@@ -31,6 +31,10 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+[Ff]t_logs/
+[Ss]td_logs/
+[Dd]ep/
+*.exe
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

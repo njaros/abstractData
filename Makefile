@@ -41,10 +41,10 @@ INCLUDES =		$(addprefix ${PATH_INCLUDES}/,${LST_INCLUDES})
 
 all :					AbstractDataTestsFT AbstractDataTestsSTD Makefile
 
-AbstractDataTestsFT :	${OBJS_FT} ${INCLUDES} Makefile
+AbstractDataTestsFT.exe :	${OBJS_FT} ${INCLUDES} Makefile
 						${CC} ${FLAGS} ${OBJS_FT} -o $@
 
-AbstractDataTestsSTD :	${OBJS_STD} Makefile 
+AbstractDataTestsSTD.exe :	${OBJS_STD} Makefile 
 						${CC} ${FLAGS} ${OBJS_STD} -o $@
 
 ${PATH_OBJS_FT}/%.o:	${PATH_SRCS}/%.cpp Makefile ${INCLUDES} | ${PATH_OBJS_FT}
@@ -63,7 +63,7 @@ clean :
 					rm -rf obj obj_ft obj_std dep
 
 fclean :			clean
-					rm -f AbstractDataTestsFT AbstractDataTestsSTD
+					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe
 					rm -rf ft_logs std_logs
 
 re :				fclean all
