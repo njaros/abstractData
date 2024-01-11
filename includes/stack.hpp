@@ -1,11 +1,11 @@
 #ifndef STACK_HPP
 # define STACK_HPP
 
-#include "vector.hpp"
+#include "deque.hpp"
 
 namespace ft {
 
-	template <class T, class Container = ft::vector<T> >
+	template <typename T, typename Container = ft::deque<T> >
 	class stack {
 
 		template <class TN, class ContainerN>
@@ -41,7 +41,7 @@ namespace ft {
 
 // MEMBER FUNCTIONS
 
-        bool empty()        const {return c.empty();}
+        bool empty()        const {return c.empty();}	
         size_type size()    const {return c.size();}
         value_type  &top() {return c.back();}
         const value_type &top() const {return c.back();}

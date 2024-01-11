@@ -1,5 +1,3 @@
-#include <iostream>
-#include <fstream>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -7,6 +5,7 @@
 #include <errno.h>
 #include <string.h>
 #include <string>
+#include "../includes/test_elements.hpp"
 
 #if FT == 1
 	#include "../includes/vector.hpp"
@@ -20,63 +19,6 @@
 	using namespace std;
 #endif
 
-void	_itoaRecu(std::string& str, int nb)
-{
-	int divided = nb / 10;
-	if (divided)
-		_itoaRecu(str, divided);
-	str += nb % 10 + '0';
-}
-
-std::string	itoa(int nb)
-{
-	std::string str;
-
-	_itoaRecu(str, nb);
-	return str;
-}
-
-template < typename T >
-void	displayData(const T& container, std::ostream& stream, typename T::size_type eltsPerLine)
-{
-	typename T::const_iterator	it;
-	typename T::const_iterator	end;
-	typename T::size_type		eltCount;
-
-	if (eltsPerLine > container.size())
-		eltsPerLine = container.size();
-	it = container.begin();
-	end = container.end();
-	stream << "*****content*****" << '\n';
-	eltCount = 0;
-	while (it != end)
-	{
-		if (eltCount == eltsPerLine)
-		{
-			eltCount = 0;
-			stream << '\n';
-		}
-		if (eltCount)
-			stream << " | ";
-		stream << *it;
-		it++;
-		++eltCount;
-	}
-	stream << "\n\n";
-}
-
-template < typename T >
-void	displayInfo(const T& container, const char* name, std::ostream& stream, typename T::size_type eltsPerLine = 1)
-{
-	stream << "----------> " << name << " <---------\n";
-	stream << "size " << " : " << container.size() << '\n';
-	stream << "capacity " << " : " << container.capacity() << '\n';
-	stream << "max_size " << " : " << container.max_size() << "\n";
-	if (eltsPerLine)
-		displayData(container, stream, eltsPerLine);
-	else
-		stream << '\n';
-}
 
 void	vector_tests(const std::string& currentPath)
 {
@@ -84,6 +26,7 @@ void	vector_tests(const std::string& currentPath)
 	set<std::string> toolForRangeFill;
 	std::ofstream outfile;
 	
+	std::boolalpha(outfile);
 	toolForRangeFill.insert("Jhon");
 	toolForRangeFill.insert("Clem");
 	toolForRangeFill.insert("");
@@ -343,6 +286,87 @@ void	vector_tests(const std::string& currentPath)
 		outfile.close();
 	}
 
+	//CAPACITY
+
+	{
+		fileName = currentPath + "capacity.log";
+		outfile.open(fileName.c_str());
+
+		vector<int> e1;
+		vector<int> e2;
+		vector<int> e3;
+		vector<int> e4;
+		const vector<int> ec;
+		const vector<int> c(12, 12);
+		vector<int> filled(c);
+
+		outfile << "non modifiers methods\n\n";
+		outfile << "empty of empty vector is " << e1.empty() << '\n';
+		outfile << "empty of empty const vector is " << ec.empty() << '\n';
+		outfile << "empty of filled const vector is " << c.empty() << '\n';
+		outfile << "empty of filled vector is " << filled.empty() << '\n';
+
+		outfile << "size of empty vector is " << e1.size() << '\n';
+		outfile << "size of empty const vector is " << ec.size() << '\n';
+		outfile << "size of filled const vector is " << c.size() << '\n';
+		outfile << "size of filled vector is " << filled.size() << '\n';
+
+		outfile << "max_size of empty vector is " << e1.max_size() << '\n';
+		outfile << "max_size of empty const vector is " << ec.max_size() << '\n';
+		outfile << "max_size of filled const vector is " << c.max_size() << '\n';
+		outfile << "max_size of filled vector is " << filled.max_size() << '\n';
+
+		outfile << "capacity of empty vector is " << e1.capacity() << '\n';
+		outfile << "capacity of empty const vector is " << ec.capacity() << '\n';
+		outfile << "capacity of filled const vector is " << c.capacity() << '\n';
+		outfile << "capacity of filled vector is " << filled.capacity() << '\n';
+
+		outfile << "\nmodifier methods\n";
+		outfile << "\nempty vector with 0 capacity tests\n\n";
+		displayInfo(e1, "before reserve", outfile);
+		e1.reserve(450);
+		displayInfo(e1, "after reserve", outfile);
+		e2.resize(30);
+		displayInfo(e2, "after resise with default value_type", outfile, 10);
+		e3.resize(30, 3);
+		displayInfo(e3, "after resise with value_type 3", outfile, 10);
+		e4.reserve(0);
+		displayInfo(e4, "after reserve 0", outfile, 10);
+		e4.resize(0, 4);
+		displayInfo(e4, "after resise 0", outfile, 10);
+		e4.resize(0);
+		displayInfo(e4, "after resise 0 with default value_type", outfile, 10);
+
+		outfile << "empty vector with some capacity tests\n\n";
+		e1.reserve(550);
+		displayInfo(e1, "after reserve more", outfile);
+		e1.reserve(450);
+		displayInfo(e1, "after reserve less", outfile);
+		e1.resize(30);
+		displayInfo(e1, "after resise with default value_type", outfile, 10);
+		e4.reserve(450);
+		e4.resize(30, 3);
+		displayInfo(e4, "after resise with value_type 3", outfile, 10);
+
+		outfile << "vector with some elements tests\n\n";
+		e3.reserve(50);
+		displayInfo(e3, "after reserve more", outfile, 10);
+		e3.reserve(20);
+		displayInfo(e3, "after reserve less", outfile, 10);
+		e3.resize(51);
+		displayV2(e3, "after resize more than size with defaut value_type", outfile, 21);
+		e3.resize(60, 4);
+		displayV2(e3, "after resize more than size", outfile, 21);
+		e3.resize(35);
+		displayV2(e3, "after resize less then size with default value_type", outfile, 20);
+		e3.resize(12, 785);
+		displayV2(e3, "after resize less then size", outfile, 20);
+		e3.resize(0);
+		displayV2(e3, "after resize 0", outfile, 20);
+
+		outfile.close();
+	}
+
 	//ACCESS
 
 	{
@@ -354,6 +378,14 @@ void	vector_tests(const std::string& currentPath)
 			v_str.push_back(itoa(i));
 
 		const vector<std::string> const_v_str(v_str);
+
+		outfile << "front, back, const, non const : \n\n";
+		outfile << v_str.front() << " | " << v_str.back() << '\n';
+		v_str.front() = "lol";
+		v_str.back() = "mdr";
+		outfile << v_str.front() << " | " << v_str.back() << '\n';
+		outfile << const_v_str.front() << " | " << const_v_str.back() << '\n';
+		outfile << "\n[] and at() tests : \n\n";
 		std::string& str = v_str[7];
 		outfile << "with [], take a non const reference from a vector : " << str << '\n';
 		const std::string& const_str2 = v_str[0];
@@ -366,7 +398,7 @@ void	vector_tests(const std::string& currentPath)
 		const std::string& const_str4 = v_str.at(3);
 		outfile << "with at(), take a const reference from a vector : " << const_str4 << '\n';
 		const std::string& const_str5 = const_v_str.at(3);
-		outfile << "with at(), take a const reference from a const vector : " << const_str5 << '\n';
+		outfile << "with at(), take a const reference from a const vector : " << const_str5 << "\n\n";
 
 		v_str[4] = "I was 4";
 		displayInfo(v_str, "change the 4th element with [] operator", outfile, 10);
@@ -390,26 +422,70 @@ void	vector_tests(const std::string& currentPath)
 	//ITERATOR
 
 	{
-		typedef vector<int>::iterator Tt;
-		typedef vector<int>::const_iterator Cit;
-
 		fileName = currentPath + "iterator.log";
 		outfile.open(fileName.c_str());
+		randomIteratorTests<vector<std::string> >(outfile);
+		ReverseRandomIteratorTests<vector<std::string> >(outfile);
+		outfile.close();
+	}
 
-		vector<std::string> v;
-		
-		for (int i = 0; i < 20; ++i)
-		{
-			v.push_back(itoa(i));
-		}
+	//SWAP
 
-		const vector<int> const_v(v);
-		Cit cit = const_v.begin();
-		outfile << "const_iterator tests\n";
-		outfile << *cit << " | size = " << cit->size() << '\n';
-		outfile << *++cit << " must be equal to " << *cit++ << '\n';
-		outfile << *(cit + 2) << " | " << *(2 + cit) << '\n';
-		outfile << *--cit << " must be equal to " << *cit-- << '\n';
-		outfile << *(cit - 2) << '\n';
+	{
+		fileName = currentPath + "swap.log";
+		outfile.open(fileName.c_str());
+		vector<std::string> a(12, "hello");
+		vector<std::string> b(1, "pouet");
+		displayInfo(a, "a before swap", outfile, 6);
+		displayInfo(b, "b before swap", outfile);
+
+		a.swap(b);
+		displayInfo(a, "a after swap member method", outfile);
+		displayInfo(b, "b after swap member method", outfile, 6);
+
+		swap(a, b);
+		displayInfo(a, "a after swap non member overload", outfile, 6);
+		displayInfo(b, "b after swap non member overload", outfile);
+		outfile.close();
+	}
+
+	//GET_ALLOCATOR
+
+	{
+		typedef dummyAllocator<char> Dumb;
+		typedef vector<char, Dumb> V;
+		fileName = currentPath + "get_allocator.log";
+		outfile.open(fileName.c_str());
+
+		char adr = 'o';
+		char otherchar = 'u';
+		dummyAllocator<char> dumb(&adr);
+		V v(dumb);
+		Dumb cpy = v.get_allocator();
+		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
+		outfile.close();
+	}
+
+	//RELATIONAL OPERATORS
+
+	{
+		typedef vector<std::string> V;
+		fileName = currentPath + "relational.log";
+		outfile.open(fileName.c_str());
+		const V c1(4, "fleur");
+		V v4(c1);
+		V v1(5, "fleur");
+		V v2(5, "fleurs");
+		V v3(v1);
+		v3.resize(7, "fleur");
+
+		outfile << (c1 == v4) << '|' << (c1 == v1) << '|' << (v1 == v2) << '|' << (v3 == v1) << '|' << (v3 == v2) << '\n';
+		outfile << (c1 != v4) << '|' << (c1 != v1) << '|' << (v1 != v2) << '|' << (v3 != v1) << '|' << (v3 != v2) << '\n';
+		outfile << (c1 < v4) << '|' << (c1 < v1) << '|' << (v1 < v2) << '|' << (v3 < v1) << '|' << (v3 < v2) << '\n';
+		outfile << (c1 <= v4) << '|' << (c1 <= v1) << '|' << (v1 <= v2) << '|' << (v3 <= v1) << '|' << (v3 <= v2) << '\n';
+		outfile << (c1 > v4) << '|' << (c1 > v1) << '|' << (v1 > v2) << '|' << (v3 > v1) << '|' << (v3 > v2) << '\n';
+		outfile << (c1 >= v4) << '|' << (c1 >= v1) << '|' << (v1 >= v2) << '|' << (v3 >= v1) << '|' << (v3 >= v2) << '\n';
+
+		outfile.close();
 	}
 }

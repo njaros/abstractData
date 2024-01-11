@@ -2,6 +2,7 @@
 # define FUNCTIONAL_HPP
 
 #include <string>
+#include <type_traits.hpp>
 
 namespace ft
 {
@@ -80,21 +81,11 @@ namespace ft
 
 	//_hash templated functions, one function for each type I have to be able to hash
 
-	size_t	_do_hash_pls(const unsigned char* first, size_t len)
-	{
-		size_t h;
-
-		h = FNV_offset_basis;
-		for (size_t i = 0; i < len; ++i)
-		{
-			h ^= first[i];
-			h *= FNV_prime;
-		}
-		return h;
-	}
+	size_t	_do_hash_pls(const unsigned char* first, size_t len);
 
 	template < class T >
-	size_t	_hash(T elt, typename ft::enable_if<ft::is_integral< T >::value >::type* = 0)
+	typename ft::enable_if< ft::is_integral< T >::value, size_t >::type
+		_hash(T elt)
 	{
 		const size_t	nbBytes = sizeof(elt);
 		unsigned char	bytes[nbBytes];
@@ -153,13 +144,15 @@ namespace ft
 	}
 
 	template < class T >
-	size_t	_hash(T elt, typename ft::enable_if<ft::is_floating_point< T >::value >::type* = 0)
+	typename ft::enable_if<ft::is_floating_point< T >::value, size_t >::type
+		_hash(T elt)
 	{
 		return _hash_floating_point(elt);
 	}
 
 	template < class T >
-	size_t	_hash(const T& elt, typename ft::enable_if<ft::is_string< T >::value >::type* = 0)
+	typename ft::enable_if<ft::is_string< T >::value, size_t >::type
+		_hash(const T& elt)
 	{
 		const size_t			nbBytes = elt.length() * sizeof(typename T::value_type);
 		const unsigned char*	bytes = reinterpret_cast<const unsigned char*>(elt.c_str());

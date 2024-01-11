@@ -9,17 +9,18 @@
 # include "type_traits.hpp"
 # include "exception.hpp"
 # include "vector.hpp"
+# include "utility.hpp"
 
 /*
 * Documentation sources :
 * - https://stackoverflow.com/questions/6292332/what-really-is-a-deque-in-stl
 * - https://cplusplus.com/reference/deque/deque/
 * idees :
-* - la base est un vecteur de chunk = value_type[n] malloquées, n dependant du sizeof(value_type)
-* - le vecteur contient autant de chunk vide (chunk malloqué mais non construit) avant et apres l'array de chunk pas vide
+* - la base est un vecteur de chunk = value_type[n] malloquï¿½es, n dependant du sizeof(value_type)
+* - le vecteur contient autant de chunk vide (chunk malloquï¿½ mais non construit) avant et apres l'array de chunk pas vide
 * apres chaque agrandissement du vecteur
-* - tout element de chunk en dehors de begin() et end() doit etre detruit ou non construit (mais pas desalloué)
-* - établir une base saine d'allocation et desallocation mémoire de chunk
+* - tout element de chunk en dehors de begin() et end() doit etre detruit ou non construit (mais pas desallouï¿½)
+* - ï¿½tablir une base saine d'allocation et desallocation mï¿½moire de chunk
 */
 
 namespace ft
@@ -82,10 +83,10 @@ namespace ft
 		//ITERATORS
 
 		class MyConstIterator;
-		class MyIterator : public ft::iterator< ft::bidirectional_iterator_tag, value_type >
+		class MyIterator : public ft::iterator< ft::random_access_iterator_tag, value_type >
 		{
-			friend ft::deque<value_type>;
-			friend MyConstIterator;
+			friend class ft::deque<value_type>;
+			friend class MyConstIterator;
 
 		private:
 
@@ -278,10 +279,10 @@ namespace ft
 			}
 		};
 
-		class MyConstIterator : public ft::iterator< ft::bidirectional_iterator_tag, const value_type >
+		class MyConstIterator : public ft::iterator< ft::random_access_iterator_tag, const value_type >
 		{
-			friend ft::deque<value_type>;
-			friend MyIterator;
+			friend class ft::deque<value_type>;
+			friend class MyIterator;
 
 		private:
 
@@ -349,17 +350,17 @@ namespace ft
 				if (o != *this)
 				{
 					_basePosition = o._basePosition;
-					_chunkPosition = o._basePosition;
+					_chunkPosition = o._chunkPosition;
 				}
 				return *this;
 			}
 
-			MyIterator& operator+=(difference_type val)
+			MyConstIterator& operator+=(difference_type val)
 			{
 				return _move(val);
 			}
 
-			MyIterator& operator-=(difference_type val)
+			MyConstIterator& operator-=(difference_type val)
 			{
 				return _move(-val);
 			}
@@ -566,9 +567,9 @@ namespace ft
 			std::cout << std::endl << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << std::endl;
 			std::cout << "_begin is " << "(" << _begin.first << " , " << _begin.second << ")\n";
 			std::cout << " _end  is " << "(" << _end.first << " , " << _end.second << ")\n";
-			for (int i = 0; i < _chunks.size(); ++i)
+			for (size_type i = 0; i < _chunks.size(); ++i)
 			{
-				printf("_chunks[%d] = %lx", i, _chunks[i]);
+				printf("_chunks[%lu] = %p", i, _chunks[i]);
 				std::cout << " : vals = (";
 				for (int j = 0; j < _chunkSize; ++j)
 				{
@@ -672,7 +673,7 @@ namespace ft
 			if (_begin.first > newLen)
 				newLen = _begin.first;
 			copyStart = newLen - _begin.first;
-			newBase.assign(3 * newLen, nullptr);
+			newBase.assign(3 * newLen, 0);
 			idxNew = 0;
 
 			while (idxNew < copyStart)
@@ -833,7 +834,7 @@ namespace ft
 			if (_chunks.size() - _end.first >= newLen)
 				newLen = _chunks.size() - _end.first;
 			copyStart = newLen - _begin.first + lenToAdd;
-			newBase.assign(3 * newLen, nullptr);
+			newBase.assign(3 * newLen, 0);
 			idxNew = 0;
 
 			while (idxNew < copyStart)
@@ -1020,7 +1021,7 @@ namespace ft
 			}
 		}
 
-		void	_joinChunksRightToLeft(_edge first, _edge last, difference_type range)
+		void	_joinChunksRightToLeft(_edge first, _edge last)
 		{
 			bool	haveToJoin(false);
 			bool	joinWay(false);
@@ -1103,11 +1104,11 @@ namespace ft
 			if (range % _chunkSize)
 				_joinDatasRightToLeft(first, range);
 			else
-				_joinChunksRightToLeft(first, last, range);
+				_joinChunksRightToLeft(first, last);
 			_edgeSub(_end, range);
 		}
 
-		void	_joinDatasLeftToRight(_edge first, _edge last, difference_type range)
+		void	_joinDatasLeftToRight(_edge first, _edge last)
 		{
 			/*
 			* [left] [~~~~] [right]
@@ -1135,7 +1136,7 @@ namespace ft
 			_destroyDataChunk(_chunks[src.first], src.second, 1);
 		}
 
-		void	_joinChunksLeftToRight(_edge first, _edge last, difference_type range)
+		void	_joinChunksLeftToRight(_edge first, _edge last)
 		{
 			bool	haveToJoin(false);
 			bool	joinWay(false);
@@ -1210,9 +1211,9 @@ namespace ft
 		void	_joinLeftToRight(_edge first, _edge last, difference_type range)
 		{
 			if (range % _chunkSize)
-				_joinDatasLeftToRight(first, last, range);
+				_joinDatasLeftToRight(first, last);
 			else
-				_joinChunksLeftToRight(first, last, range);
+				_joinChunksLeftToRight(first, last);
 			_edgeAdd(_begin, range);
 		}
 
@@ -1239,7 +1240,7 @@ namespace ft
 				size = _size / _chunkSize;
 				if (_size % _chunkSize)
 					++size;
-				_chunks.assign(size, nullptr);
+				_chunks.assign(size, 0);
 				while (n--)
 				{
 					if (_end.second == 0)
@@ -1268,7 +1269,7 @@ namespace ft
 				size = _size / _chunkSize;
 				if (_size % _chunkSize)
 					++size;
-				_chunks.assign(size, nullptr);
+				_chunks.assign(size, 0);
 				for (const_iterator cit = o.begin(); cit != o.end(); ++cit)
 				{
 					if (_end.second == 0)
@@ -1303,7 +1304,7 @@ namespace ft
 				baseSize = _size / _chunkSize;
 				if (_size % _chunkSize)
 					++baseSize;
-				_chunks.assign(baseSize, nullptr);
+				_chunks.assign(baseSize, 0);
 				while (first != last)
 				{
 					if (_end.second == 0)
@@ -1364,8 +1365,11 @@ namespace ft
 			{
 				it = end();
 				_edgeSub(_end, (_size - n));
-				while (_size-- > n)
+				while (_size > n)
+				{
+					--_size;
 					_alloc.destroy(&(*(--it)));
+				}
 			}
 			else if (n > _size)
 				insert(end(), n - _size, val);

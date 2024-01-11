@@ -17,6 +17,7 @@
 # include "iterator.hpp"
 # include "reverse_iterator.hpp"
 # include "exception.hpp"
+# include "algorithm.hpp"
 
 # include <memory>
 # include <new>
@@ -83,14 +84,6 @@ namespace ft
 				if (other == *this)
 					return (*this);
 				this->_p = other._p;
-				return (*this);
-			}
-
-			MyIterator& operator=(const MyConstIterator& other)
-			{
-				if (other == *this)
-					return (*this);
-				this->_p = other.base();
 				return (*this);
 			}
 
@@ -541,8 +534,7 @@ namespace ft
 			}
 			else
 			{
-				if (n > _capacity)
-					reserve(n);
+				checkCapacityAvailable(n - _size);
 				while (_size < n)
 				{
 					_alloc.construct(&_firstPtr[_size], value_type());
@@ -564,8 +556,7 @@ namespace ft
 			}
 			else
 			{
-				if (n > _capacity)
-					reserve(n);
+				checkCapacityAvailable(n - _size);
 				_ptr = &_firstPtr[_size];
 				while (_size < n)
 				{
@@ -930,21 +921,9 @@ namespace ft
 	template < class T, class Alloc >
 	bool	operator==(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
 	{
-		typename ft::vector<T>::iterator itL;
-		typename ft::vector<T>::iterator itR;
-
 		if (lhs.size() != rhs.size())
 			return (false);
-		itL = lhs.begin();
-		itR = rhs.begin();
-		while (itL != lhs.end())
-		{
-			if (*itL != *itR)
-				return (false);
-			itL++;
-			itR++;
-		}
-		return (true);
+		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
 	}
 
 	template < class T, class Alloc >
@@ -953,19 +932,7 @@ namespace ft
 	template < class T, class Alloc >
 	bool	operator<(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
 	{
-		typename ft::vector<T>::const_iterator itL;
-		typename ft::vector<T>::const_iterator itR;
-
-		itL = lhs.begin();
-		itR = rhs.begin();
-		while (itL != lhs.end() && itR != rhs.end())
-		{
-			if (*itL != *itR)
-				return (*itL < *itR);
-			itR++;
-			itL++;
-		}
-		return (lhs.size() < rhs.size());
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template < class T, class Alloc >
@@ -974,19 +941,7 @@ namespace ft
 	template < class T, class Alloc >
 	bool	operator>(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
 	{
-		typename ft::vector<T>::const_iterator itL;
-		typename ft::vector<T>::const_iterator itR;
-
-		itL = lhs.begin();
-		itR = rhs.begin();
-		while (itL != lhs.end() && itR != rhs.end())
-		{
-			if (*itL != *itR)
-				return (*itL > *itR);
-			itR++;
-			itL++;
-		}
-		return (lhs.size() > rhs.size());
+		return (rhs < lhs);
 	}
 
 	template < class T, class Alloc >

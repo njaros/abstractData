@@ -301,8 +301,13 @@ int main()
 	
 	mkdir(dirName(mainPath, ctxPath).c_str(), 0777);
 	mkdir(dirName(mainPath, ctxPath, "vector").c_str(), 0777);
-
 	vector_tests(filePath(ctxPath, "vector"));
+
+	mkdir(dirName(mainPath, ctxPath, "deque").c_str(), 0777);
+	deque_tests(filePath(ctxPath, "deque"));
+
+	mkdir(dirName(mainPath, ctxPath, "stack").c_str(), 0777);
+	stack_tests(filePath(ctxPath, "stack"));
 	/*
 	std::cout << "------exceptions tests------\n\n\n";
 	{

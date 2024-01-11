@@ -8,7 +8,11 @@ PATH_INCLUDES	=	includes
 
 LST_SRCS		=	containers.cpp\
 					exception.cpp\
-					vector_tests.cpp
+					vector_tests.cpp\
+					stack_tests.cpp\
+					deque_tests.cpp\
+					functional.cpp\
+					utils.cpp
 LST_OBJS		=	${LST_SRCS:.cpp=.o}
 LST_DEP			=	${LST_SRCS:.cpp=.d}
 LST_INCLUDES	=	algorithm.hpp\
