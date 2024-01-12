@@ -11,7 +11,10 @@ LST_SRCS		=	containers.cpp\
 					vector_tests.cpp\
 					stack_tests.cpp\
 					deque_tests.cpp\
+					queue_tests.cpp\
+					priority_queue_tests.cpp\
 					functional.cpp\
+					map_tests.cpp\
 					utils.cpp
 LST_OBJS		=	${LST_SRCS:.cpp=.o}
 LST_DEP			=	${LST_SRCS:.cpp=.d}
@@ -23,7 +26,6 @@ LST_INCLUDES	=	algorithm.hpp\
 					iterator.hpp\
 					list.hpp\
 					map.hpp\
-					priority_queue.hpp\
 					queue.hpp\
 					reverse_iterator.hpp\
 					set.hpp\
@@ -68,7 +70,7 @@ ${PATH_OBJS_STD}:
 					mkdir obj_std
 
 clean :
-					rm -rf obj obj_ft obj_std dep
+					rm -rf obj_ft obj_std
 
 fclean :			clean
 					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe

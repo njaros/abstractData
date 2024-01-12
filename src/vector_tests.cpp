@@ -20,7 +20,7 @@
 #endif
 
 
-void	vector_tests(const std::string& currentPath)
+void	vector_tests(const std::string& currentPath, std::ostream& except)
 {
 	std::string fileName;
 	set<std::string> toolForRangeFill;
@@ -68,7 +68,6 @@ void	vector_tests(const std::string& currentPath)
 		vector<int> vInt2(vInt1.begin(), vInt1.end());
 		displayInfo(vInt2, "range constructor on vector of int", outfile, 4);
 		
-		outfile << "construtor with too much elements\nEXCEPT : ";
 		try
 		{
 			vector<int> big(std::allocator<int>().max_size() + 1, 1);
@@ -76,20 +75,12 @@ void	vector_tests(const std::string& currentPath)
 		}
 		catch(length_error& e)
 		{
-			outfile << e.what() << "\n\n";
+			except << "VECTOR : construtor with too much elements\n" << e.what() << '\n';
 		}
 
-		try
-		{
-			vector<int> lessBig(15000000, 1);
-			displayInfo(lessBig, "fill constructor with 15000000 elements", outfile, 0);
-		}
-		catch(std::exception& e)
-		{
-			outfile << e.what() << '\n';
-			std::cerr << "an abort during memory allocation causes memory issues, you have to relog to catch back lost memory.\n";
-			exit(errno);
-		}
+		vector<int> lessBig(15000000, 1);
+		displayInfo(lessBig, "fill constructor with 15000000 elements", outfile, 0);
+
 		outfile.close();
 	}
 
@@ -119,14 +110,13 @@ void	vector_tests(const std::string& currentPath)
 		v1.insert(v1.begin() + 1, 15, "fillElt");
 		displayInfo(v1, "fill insert some elements", outfile, 6);
 
-		outfile << "try inserting too much elements\nEXCEPT : ";
 		try
 		{
 			v2.insert(v2.begin(), v2.max_size() + 1, "too much elt");
 		}
 		catch(length_error& e)
 		{
-			outfile << e.what() << "\n\n";
+			except << "VECTOR: try inserting too much elements\n" << e.what() << '\n';
 		}
 
 		v2.insert(v2.begin(), 0, "saucisse");
@@ -201,7 +191,7 @@ void	vector_tests(const std::string& currentPath)
 		}
 		catch(length_error& e)
 		{
-			outfile << e.what() << "\n\n";
+			except << "VECTOR : try assign too much elements\n" << e.what() << '\n';
 		}
 		
 		displayInfo(empty, "check a filled vector after a length_error exception on assign", outfile, 4);
@@ -406,14 +396,13 @@ void	vector_tests(const std::string& currentPath)
 		v_str.at(18) = "I was 18";
 		displayInfo(v_str, "change the 18th element with at()", outfile, 10);
 
-		outfile << "provoque an exception with an out of range element with at().\nEXCEPT : ";
 		try
 		{
 			v_str.at(25);
 		}
 		catch(out_of_range& e)
 		{
-			outfile << e.what() << "\n\n";
+			except << "VECTOR : provoque an exception with an out of range element with at().\n" << e.what() << '\n';
 		}
 		
 		outfile.close();

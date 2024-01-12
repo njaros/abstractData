@@ -8,24 +8,22 @@
 #include "../includes/test_elements.hpp"
 
 #if FT == 1
-	#include "../includes/stack.hpp"
+	#include "../includes/queue.hpp"
 	#include "../includes/vector.hpp"
 	#define FT 1
 	using namespace ft;
 #else
-	#include <stack>
+	#include <queue>
 	#include <vector>
 	#define FT 0
 	using namespace std;
 #endif
 
-void stack_tests(const std::string& currentPath)
+void	queue_tests(const std::string& currentPath)
 {
 	std::string fileName;
 	std::ofstream outfile;
 	std::boolalpha(outfile);
-
-	//CONSTRUCTORS
 
 	{
 		fileName = currentPath + "constructor.log";
@@ -34,65 +32,43 @@ void stack_tests(const std::string& currentPath)
 		deque<int> d;
 		for (int i = 0; i < 30; ++i)
 			d.push_back(i);
-		stack<int> s1;
-		stack<int> s2(d);
-		stack<int, vector<int> > s_v1;
-		stack<int, vector<int> > s_v2(v);
-		const stack<int> s3(d);
+		queue<int> s1;
+		queue<int> s2(d);
+		queue<int, vector<int> > s_v1;
+		queue<int, vector<int> > s_v2(v);
+		const queue<int> s3(d);
 
-		displayForAdaptator(s1, "empty stack with default underlying container", outfile);
-		displayForAdaptator(s2, "filled stack with default underlying container", outfile);
-		displayForAdaptator(s_v1, "empty stack with vector underlying container", outfile);
-		displayForAdaptator(s_v2, "filled stack with vector underlying container", outfile);
-		displayForAdaptator(s3, "const filled stack with default underlying container", outfile);
+		displayForAdaptator(s1, "empty queue with default underlying container", outfile);
+		displayForAdaptator(s2, "filled queue with default underlying container", outfile);
+		displayForAdaptator(s_v1, "empty queue with vector underlying container", outfile);
+		displayForAdaptator(s_v2, "filled queue with vector underlying container", outfile);
+		displayForAdaptator(s3, "const filled queue with default underlying container", outfile);
 
 		outfile.close();
 	}
 
-	//TOP, PUSH, POP
+	//TOP, FRONT, PUSH, POP
 
 	{
-		fileName = currentPath + "top_push_pop.log";
+		fileName = currentPath + "top_front_push_pop.log";
 		outfile.open(fileName.c_str());
-		vector<int> v(12, 4);
+
 		deque<int> d;
-		for (int i = 0; i < 30; ++i)
+		for (int i = 0; i < 100; ++i)
 			d.push_back(i);
-		stack<int> s1;
-		stack<int> s2(d);
-		stack<int, vector<int> > s_v1;
-		stack<int, vector<int> > s_v2(v);
-		const stack<int> c1(d);
+		
+		queue<int> q(d);
 
-		outfile << "top = " << s2.top() << '\n';
-		s2.push(44);
-		outfile << "top = " << s2.top() << '\n';
-
-		outfile << "top = " << s_v2.top() << '\n';
-		s_v2.push(44);
-		outfile << "top = " << s_v2.top() << '\n';
-		s_v2.top() = 512;
-		outfile << "top = " << s_v2.top() << '\n';
-
-		for (int i = 0; i <= 30; ++i)
+		for (int i = 100; i < 130; ++i)
 		{
-			outfile << "top = " << s2.top() << " | ";
-			s2.pop();
+			outfile << q.back() << " | " << q.front() << '\n';
+			q.pop();
+			q.push(i);
 		}
 
-		outfile << '\n';
-		displayForAdaptator(s2, "full poped stack", outfile);
+		const queue<int> q2(d);
 
-		for (int i = 0; i < 23; ++i)
-		{
-			s2.push(i * i + i);
-			outfile << "top = " << s2.top() << " | ";
-		}
-
-		outfile << '\n';
-		displayForAdaptator(s2, "re pushed stack", outfile);
-
-		outfile << "const top : " << c1.top();
+		outfile << q2.back() << " | " << q2.front();
 
 		outfile.close();
 	}
@@ -101,7 +77,7 @@ void stack_tests(const std::string& currentPath)
 
 	{
 		typedef deque<std::string> V;
-		typedef stack<std::string> S;
+		typedef queue<std::string> S;
 		fileName = currentPath + "relational.log";
 		outfile.open(fileName.c_str());
 		const V dc1(4, "fleur");

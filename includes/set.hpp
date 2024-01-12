@@ -149,7 +149,6 @@ namespace ft {
 			if (&other == this)
 				return (*this);
 			_size = other._size;
-			_alloc = other._alloc;
 			_compare = other._compare;
 			if (_root) {
 				recursiveBurnTheTree<value_type, std::allocator<node<value_type> >, allocator_type>(_root, _allocNode, _alloc);
@@ -709,7 +708,6 @@ namespace ft {
 			if (&other == this)
 				return (*this);
 			_size = other._size;
-			_alloc = other._alloc;
 			_compare = other._compare;
 			if (_root) {
 				recursiveBurnTheTree<value_type, std::allocator<node<value_type> >, allocator_type>(_root, _allocNode, _alloc);

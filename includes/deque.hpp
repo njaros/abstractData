@@ -559,25 +559,51 @@ namespace ft
 
 		//DEBUG UTILITIES
 
+		template <class K>
+		struct isChar : public false_type {};
+
+		template<>
+		struct isChar<char> : public true_type {};
+
+		template <class K>
+		struct is_char : public isChar<T> {};
+
+		template <class K>
+		typename enable_if<is_char<K>::value, void>::type
+			_printVal(K elt) const
+			{
+				std::cout << (int) elt;
+			}
+		
+		template <class K>
+		typename enable_if<!is_char<K>::value, void>::type
+			_printVal(const K& elt) const
+			{
+				std::cout << elt;
+			}
+
 		void	_printMemory(const char* str = 0) const
 		{
 			std::cout << std::endl << "DEBUG---- start of printMemory ----DEBUG";
 			if (str)
 				std::cout << std::endl << str;
 			std::cout << std::endl << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << std::endl;
+			std::cout << "_size is " << _size << '\n';
 			std::cout << "_begin is " << "(" << _begin.first << " , " << _begin.second << ")\n";
 			std::cout << " _end  is " << "(" << _end.first << " , " << _end.second << ")\n";
 			for (size_type i = 0; i < _chunks.size(); ++i)
 			{
-				printf("_chunks[%lu] = %p", i, _chunks[i]);
+				std::hex(std::cout);
+				std::cout << "_chunks[" << i << "] = " << (ptrdiff_t)_chunks[i];
+				std::dec(std::cout);
 				std::cout << " : vals = (";
 				for (int j = 0; j < _chunkSize; ++j)
 				{
-					std::cout << _chunks[i][j];
+					_printVal(_chunks[i][j]);
 					if (j != _chunkSize - 1)
 						std::cout << ", ";
 					else
-						std::cout << ")" << std::endl;
+						std::cout << ")\n";
 				}
 			}
 			std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
@@ -800,7 +826,7 @@ namespace ft
 				available = _chunkSize * (_chunks.size() - _end.first) - _end.second;
 				if (available < holeSize)
 				{
-					if (_chunks.capacity() * _chunkSize > 3 * (_size + holeSize))
+					if (_chunks.capacity() > 2 && _chunks.capacity() * _chunkSize > 3 * (_size + holeSize))
 						_reorderBaseRight(chunkNeed + 1, position.first); //Only repositionning the chunks, _begin and _end
 					else
 						_reallocBaseRight(chunkNeed + 1, position.first); //Allocate bigger _base, copy _chunks, repositionning _begin and _end
@@ -859,15 +885,23 @@ namespace ft
 			_baseSizeType	destIdx;
 			bool			countEnd;
 
+			//_printMemory("before");
+
 			countEnd = _end.second != 0;
 			distBetweenBeginAndEnd = _end.first - _begin.first;
 			distBetweenBeginAndInsertPos = insertPos - _begin.first;
 			newBeginFirst = distBetweenBeginAndEnd + countEnd + (2 * lenToAdd);
 			destIdx = newBeginFirst + distBetweenBeginAndEnd - !countEnd;
 
+			/*std::cout << "newBeginFirst " << newBeginFirst << " | "
+			<< "distBetweenBeginAndEnd " <<  distBetweenBeginAndEnd << " | "
+			<< "distBetweenBeginAndInsertPos " << distBetweenBeginAndInsertPos << " | "
+			<< "destIdx " << destIdx << " | "
+			<< "countEnd " << countEnd << '\n';*/
 			if (_end.second)
 				_swapChunk(destIdx--, _end.first);
-			srcIdx = _end.first - 1;
+			//_printMemory("before crash");
+			srcIdx = _end.first - 1 + countEnd;
 			while (srcIdx > _begin.first)
 			{
 				_swapChunk(destIdx--, srcIdx);
@@ -878,6 +912,7 @@ namespace ft
 			_begin.first = newBeginFirst;
 			_end.first = newBeginFirst + distBetweenBeginAndEnd;
 			insertPos = newBeginFirst + distBetweenBeginAndInsertPos;
+			//_printMemory("after");
 		}
 
 		void	_moveDataLeft(_edge& position, size_type holeSize)
@@ -983,7 +1018,7 @@ namespace ft
 				available = _chunkSize * (_begin.first) + _begin.second;
 				if (available < holeSize)
 				{
-					if (_chunks.capacity() * _chunkSize > 3 * (_size + holeSize))
+					if (_chunks.capacity() > 2 && _chunks.capacity() * _chunkSize > 3 * (_size + holeSize))
 						_reorderBaseLeft(chunkNeed + 1, position.first); //Only repositionning the chunks, _begin and _end
 					else
 						_reallocBaseLeft(chunkNeed + 1, position.first); //Allocate bigger _base, copy _chunks, repositionning _begin and _end
@@ -1118,7 +1153,6 @@ namespace ft
 			_edge	src;
 			_edge	dest;
 
-			_printMemory("before joindataLeftToRight");
 			if (first == _begin)
 				return;
 			src = first;
@@ -1235,6 +1269,8 @@ namespace ft
 		{
 			_baseSizeType	size;
 
+			if (n > _alloc.max_size())
+				throw(ft::length_error("ft::deque::constructor (fill) : too much elements."));
 			if (_size)
 			{
 				size = _size / _chunkSize;
@@ -1320,6 +1356,14 @@ namespace ft
 				}
 			}
 
+		}
+
+		deque&	operator=(const deque& o)
+		{
+			if (&o == this)
+				return *this;
+			assign(o.begin(), o.end());
+			return *this;
 		}
 
 		//DESTRUCTOR

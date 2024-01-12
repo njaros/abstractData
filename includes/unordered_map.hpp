@@ -277,7 +277,6 @@ namespace ft
 		{
 			if (&o != this)
 			{
-				_alloc = o._alloc;
 				_t = o._t;
 				_hasher = o._hasher;
 				_equal = o._equal;
@@ -1004,7 +1003,6 @@ namespace ft
 		{
 			if (&o != this)
 			{
-				_alloc = o._alloc;
 				_t = o._t;
 				_hasher = o._hasher;
 				_equal = o._equal;

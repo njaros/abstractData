@@ -1,7 +1,6 @@
 #ifndef TESTS_ELEMENTS_HPP_ABSTRACTDATA_BY_LE_N
 # define TESTS_ELEMENTS_HPP_ABSTRACTDATA_BY_LE_N
 
-#include <string>
 #include <fstream>
 #include <iostream>
 #include <cstddef>
@@ -9,6 +8,21 @@
 // COMMON TOOLS
 
 std::string	itoa(int nb);
+
+template < class T >
+typename T::size_type getRandom(typename T::size_type& seed, typename T::size_type modulo)
+		{
+			typename T::size_type toReturn;
+
+			if (!modulo)
+				return modulo;
+
+			if (!seed)
+				seed = 482346873;
+			toReturn = seed % modulo;
+			seed /= modulo;
+			return toReturn;
+		}
 
 // END OF COMMON TOOLS
 
@@ -117,6 +131,36 @@ void	displayV2(const T& container, const char* name, std::ostream& stream, typen
 		displayData(container, stream, eltsPerLine);
 	else
 		stream << '\n';
+}
+
+//allows to display content of containers with casting the type as int. usefull to display whitespaces
+template < typename T >
+void	displayDataCastInt(const T& container, const char* name, std::ostream& stream, typename T::size_type eltsPerLine = 1)
+{
+	typename T::const_iterator	it;
+	typename T::const_iterator	end;
+	typename T::size_type		eltCount;
+
+	if (eltsPerLine > container.size())
+		eltsPerLine = container.size();
+	it = container.begin();
+	end = container.end();
+	stream << name << " content : " << '\n';
+	eltCount = 0;
+	while (it != end)
+	{
+		if (eltCount == eltsPerLine)
+		{
+			eltCount = 0;
+			stream << '\n';
+		}
+		if (eltCount)
+			stream << " | ";
+		stream << (int)*it;
+		it++;
+		++eltCount;
+	}
+	stream << "\n\n";
 }
 
 //std reallocation implementation defers according to OS used, so compare capacity is non sense.
@@ -495,8 +539,11 @@ template <class Cont> void ReverseRandomIteratorTestsForDeque(std::ofstream& out
 // END OF COMMON TESTS LIBRARY
 
 void flat_basket_tests();
-void vector_tests(const std::string& currentPath);
-void deque_tests(const std::string& currentPath);
+void vector_tests(const std::string& currentPath, std::ostream& except);
+void deque_tests(const std::string& currentPath, std::ostream& except);
 void stack_tests(const std::string& currentPath);
+void queue_tests(const std::string& currentPath);
+void priority_queue_tests(const std::string& currentPath);
+void map_tests(const std::string& currentPath, std::ostream& except);
 
 #endif

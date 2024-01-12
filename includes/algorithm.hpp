@@ -21,9 +21,9 @@ namespace ft
 		childR = (current * 2) + 2;
 		while (childL < end)
 		{
-			if (!comp(*(first + childL), *(first + current)))
+			if (!comp(*(first + current), *(first + childL)))
 			{
-				if (childR >= end || !comp(*(first + childR), *(first + current)))
+				if (childR >= end || !comp(*(first + current), *(first + childR)))
 					return;
 				tmp = *(first + current);
 				*(first + current) = *(first + childR);
@@ -32,7 +32,7 @@ namespace ft
 			}
 			else
 			{
-				if (childR < end && comp(*(first + childR), *(first + childL)))
+				if (childR < end && comp(*(first + childL), *(first + childR)))
 				{
 					tmp = *(first + current);
 					*(first + current) = *(first + childR);
@@ -79,7 +79,7 @@ namespace ft
 			parent = (current - 1) / 2;
 		else
 			parent = (current - 2) / 2;
-		while (current && comp(*(first + current), *(first + parent)))
+		while (current && comp(*(first + parent), *(first + current)))
 		{
 			tmp = *(first + current);
 			*(first + current) = *(first + parent);

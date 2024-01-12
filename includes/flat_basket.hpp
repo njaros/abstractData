@@ -195,8 +195,6 @@ namespace ft
 		{
 			if (&o != this)
 			{
-				_alloc = o._alloc;
-				_allocGround = o._allocGround;
 				_basket = o._basket;
 				_groundControl(o._ground);
 				_basketCapacity = o._basketCapacity;

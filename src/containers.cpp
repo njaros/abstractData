@@ -291,6 +291,7 @@ int main()
 {
 	std::string mainPath;
 	std::string ctxPath;
+	std::ofstream exceptionFile;
 
 	mainPath = get_current_dir_name();
 	mainPath += '/';
@@ -300,14 +301,25 @@ int main()
 		ctxPath = "std_logs";
 	
 	mkdir(dirName(mainPath, ctxPath).c_str(), 0777);
+	exceptionFile.open((ctxPath + "/exceptions.log").c_str());
+
 	mkdir(dirName(mainPath, ctxPath, "vector").c_str(), 0777);
-	vector_tests(filePath(ctxPath, "vector"));
+	vector_tests(filePath(ctxPath, "vector"), exceptionFile);
 
 	mkdir(dirName(mainPath, ctxPath, "deque").c_str(), 0777);
-	deque_tests(filePath(ctxPath, "deque"));
+	deque_tests(filePath(ctxPath, "deque"), exceptionFile);
 
 	mkdir(dirName(mainPath, ctxPath, "stack").c_str(), 0777);
 	stack_tests(filePath(ctxPath, "stack"));
+
+	mkdir(dirName(mainPath, ctxPath, "queue").c_str(), 0777);
+	queue_tests(filePath(ctxPath, "queue"));
+
+	mkdir(dirName(mainPath, ctxPath, "priority_queue").c_str(), 0777);
+	priority_queue_tests(filePath(ctxPath, "priority_queue"));
+
+	mkdir(dirName(mainPath, ctxPath, "map").c_str(), 0777);
+	map_tests(filePath(ctxPath, "map"), exceptionFile);
 	/*
 	std::cout << "------exceptions tests------\n\n\n";
 	{
@@ -410,127 +422,8 @@ int main()
 		std::cout << "display of a tree with 20 random inserted ints in range [0, 14] : \n";
 		tree.display();
 	}
-	std::cout << "\n\n-----stack tests-----\n\n\n";
-	{
-		ft::stack<int> test;
-		std::cout << "push() and top() test :\n";
-		for (int i = 0; i < 100; i++)
-		{
-			test.push(i + 2);
-			if (i >= 90)
-				std::cout << test.top() << " | ";
-		}
-		std::cout << "\npop() and top() test :\n";
-		for (int i = 0; i < 10; i++)
-		{
-			test.pop();
-			std::cout << test.top() << " | ";
-		}
-		std::cout << "\ncrash test (pop() more than size then top())\n";
-		for (int i = 0; i < 100; i++)
-		{
-			test.pop();
-		}
-		std::cout << "when size = " << test.size() << " top = " << test.top() << '\n';
-	}
-	std::cout << "\n\n-----vector tests-----\n\n\n";
-	{
-		ft::vector<int> a(4, 12);
-		ft::vector<int> b;
-		ft::vector<int> vide(0, 0);
-		ft::set<int>    tree;
-		vide.pop_back();
-		b.pop_back();
-		for (int i = 0; i < 1000; ++i) {
-			tree.insert(rand() % 1000);
-		}
-		ft::reverse_iterator<ft::set<int>::iterator> treeRend = tree.rend();
-		for (ft::reverse_iterator<ft::set<int>::iterator> it = tree.rbegin(); it != treeRend; ++it) {
-			a.insert(a.end(), it, treeRend);
-			b.clear();
-			b.insert(b.end(), it, treeRend);
-			vide.insert(vide.end(), it, treeRend);
-		}
-		ft::vector<int> c(tree.begin(), tree.end());
-		ft::vector<int> d(a.rbegin(), a.rend());
-		ft::vector<int> e(tree.rbegin(), tree.rend());
-		std::cout << "size tree = " << tree.size() << std::endl;
-		std::cout << "size a = " << a.size() << std::endl;
-		std::cout << "size b = " << b.size() << std::endl;
-		std::cout << "size vide = " << vide.size() << std::endl;
-		std::cout << "size c = " << c.size() << std::endl;
-		std::cout << "size d = " << d.size() << std::endl;
-		std::cout << "size e = " << e.size() << std::endl;
 
-		a.insert(a.begin() + 500, 100, 100);
-		b.assign(a.begin() + 500, a.begin() + 600);
-
-		std::cout << b.size() << " " << b[50];
-	}
-
-	std::cout << "\n\n-----deque tests-----\n\n\n";
-	{
-		unsigned short random;
-		//ft::deque<littleDebug> a(31, 5);
-		ft::deque<debug> b;
-		std::deque<debug> stdB;
-		ft::deque<debug> c(4, 100);
-		//ft::vector<std::string> v(7, "pouet");
-		//v.push_back("pas pouet");
-		//ft::deque<std::string> pouet(v.begin(), v.end());
-		//ft::deque<std::string> revPouet(v.rbegin(), v.rend());
-		//ft::deque<std::string> revPouetFromPouet(pouet.rbegin(), pouet.rend());
-
-		//displayData(a, "a");
-		random = 0;
-		setRandom(random);
-		for (int i = 1; i < 15; ++i)
-		{
-			b.insert(b.begin() + (random % (b.size() + 1)), 2, 'A' + i);
-			stdB.insert(stdB.begin() + (random % (stdB.size() + 1)), 2, 'A' + i);
-			setRandom(random, b.size());
-		}
-		c.insert(c.end(), b.rbegin() + 7, b.rend() - 4);
-		displayData(c, "c");
-		displayData(b, "b");
-		std::deque<debug>::const_iterator cmp = stdB.begin();
-		for (ft::deque<debug>::const_iterator it = b.begin(); it != b.end(); ++it)
-		{
-			if (*it != *cmp)
-			{
-				std::cout << "bad order\n";
-				break;
-			}
-			++cmp;
-		}
-		for (int i = 0; i < 150; ++i)
-		{
-			stdB.erase(stdB.end() - 9, stdB.end());
-			stdB.insert(stdB.begin(), 11, debug(i, true));
-			b.erase(b.end() - 9, b.end());
-			b.insert(b.begin(), 11, debug(i, true));
-		}
-		cmp = stdB.begin();
-		for (ft::deque<debug>::const_iterator it = b.begin(); it != b.end(); ++it)
-		{
-			if (*it != *cmp)
-			{
-				std::cout << "bad order\n";
-				break;
-			}
-			++cmp;
-		}
-		b.clear();
-		displayData(b, "b");
-		b.insert(b.begin(), 51, debug(4, true));
-		displayData(b, "b");
-		//displayData(c, "c");
-		//displayData(pouet, "pouet");
-		//displayData(revPouet, "revPouet");
-		//displayData(revPouetFromPouet, "revPouetFromPouet");
-	}*/
-
-	/*	std::cout << "======Priority_queue tests========\n\n";
+		std::cout << "======Priority_queue tests========\n\n";
 		{
 			int myInts[] = { 5, 77, 1, 1, 1, 1, 45, 1000, 0 };
 			int myInts2[] = { 12, -1, -2, -1, 458, -4, 75, 45, 22, 4, -45, 1 };
