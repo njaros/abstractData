@@ -93,6 +93,25 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 		ReverseRandomIteratorTests<deque<std::string> >(outfile);
 		ReverseRandomIteratorTestsForDeque<deque<char> >(outfile);
 
+		Strs str(3, "pouet");
+		str.push_back("banana");
+
+		outfile << str.begin()->length() << '\n';
+		outfile << str.rbegin()->length() << '\n';
+		outfile << ++str.begin()->length() << '\n';
+		outfile << ++str.rbegin()->length() << '\n';
+		outfile << --str.end()->length() << '\n';
+		outfile << --str.rend()->length() << '\n';
+
+		const Strs str2(str);
+
+		outfile << str2.begin()->length() << '\n';
+		outfile << str2.rbegin()->length() << '\n';
+		outfile << ++str2.begin()->length() << '\n';
+		outfile << ++str2.rbegin()->length() << '\n';
+		outfile << --str2.end()->length() << '\n';
+		outfile << --str2.rend()->length() << '\n';
+
 		outfile.close();
 	}
 

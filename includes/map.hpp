@@ -15,7 +15,6 @@
 
 # include <memory>
 # include <cstddef>
-# include <cstring>
 # include "functional.hpp"
 # include "iterator.hpp"
 # include "utility.hpp"

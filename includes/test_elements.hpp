@@ -7,18 +7,19 @@
 
 // COMMON TOOLS
 
-std::string	itoa(int nb);
+std::string	itoa(long long nb);
+long long pow(long long a, long long b);
 
 template < class T >
 typename T::size_type getRandom(typename T::size_type& seed, typename T::size_type modulo)
 		{
 			typename T::size_type toReturn;
+			typename T::allocator_type alloc;
 
 			if (!modulo)
 				return modulo;
-
 			if (!seed)
-				seed = 482346873;
+				seed = alloc.max_size();
 			toReturn = seed % modulo;
 			seed /= modulo;
 			return toReturn;
@@ -89,6 +90,15 @@ class dummyAllocator
 
 	pointer dummyValue;
 };
+
+template < typename Pair, typename T1 = typename Pair::first_type, typename T2 = typename Pair::second_type > 
+std::ostream&	operator<<(std::ostream& o, const Pair& p)
+{
+	T1 first = p.first;
+	T2 second = p.second;
+	o << '(' << first << ", " << second << ')';
+	return o;
+}
 
 template < typename T >
 void	displayData(const T& container, std::ostream& stream, typename T::size_type eltsPerLine)
@@ -365,6 +375,49 @@ template <class Cont> void randomIteratorTestsForDeque(std::ofstream& outfile)
 
 }
 
+template <class Cont>
+void bidirectionalIteratorTests(Cont& c, std::ofstream& outfile)
+{
+	typedef typename Cont::iterator It;
+	typedef typename Cont::const_iterator Cit;
+
+	It it;
+	const Cont c2(c);
+		
+	Cit cit = c2.begin();
+	Cit citRange = c.end() - 3;
+	it = c.begin();
+
+	outfile << "++, --, *(), *++, *-- const_iterator tests\n\n";
+	outfile << *++cit << " must be equal to " << *cit++ << '\n';
+	outfile << *--cit << " must be equal to " << *cit-- << '\n';
+
+	outfile << "\n++, --, *(), *++, *-- iterator tests\n\n";
+	outfile << *++it << " must be equal to " << *it++ << '\n';
+	outfile << *--it << " must be equal to " << *it-- << '\n';
+
+	it = c.end();
+	cit = c2.end();
+	Cit cit2(it);
+	Cit cit3(cit2);
+	outfile << "\niterator and const_iterator comparisons : \n\n";
+	outfile << "is " << *--cit << " == " << *--cit2 << " ? " << (cit == cit2) << '\n';
+	outfile << "is " << *--cit3 << " == " << *cit2 << " ? " << (cit3 == cit2) << '\n';
+	outfile << "is " << *--cit3 << " == " << *cit2 << " ? " << (cit3 == cit2) << '\n';
+	outfile << "is " << *--it << " == " << *cit2 << " ? " << (it == cit2) << '\n';
+	outfile << "is " << *it << " == " << *--cit2 << " ? " << (it == cit2) << '\n';
+	outfile << "is " << *--cit << " != " << *--cit2 << " ? " << (cit != cit2) << '\n';
+	outfile << "is " << *--cit << " != " << *cit2 << " ? " << (cit != cit2) << '\n';
+	it = c.begin();
+	cit = c2.begin();
+	cit2 = it;
+	cit3 = it;
+	outfile << "is " << *cit << " != " << *cit2 << " ? " << (cit != cit2) << '\n';
+	outfile << "is " << *it << " != " << *cit << " ? " << (it != cit) << '\n';
+	outfile << "is " << *it << " != " << *cit2 << " ? " << (it != cit2) << '\n';
+	outfile << "is " << *cit2 << " != " << *cit3 << " ? " << (cit2 != cit3) << '\n';
+}
+
 //Only works with std::string as value_type
 template <class Cont> void ReverseRandomIteratorTests(std::ofstream& outfile)
 {
@@ -533,7 +586,49 @@ template <class Cont> void ReverseRandomIteratorTestsForDeque(std::ofstream& out
 	outfile << "is " << *cit2 << " > " << *cit3 << " ? " << (cit2 > cit3) << '\n';
 	outfile << "is " << *it << " >= " << *cit2 << " ? " << (it >= cit2) << '\n';
 	outfile << "is " << *cit2 << " >= " << *cit3 << " ? " << (cit2 >= cit3) << '\n';
+}
 
+template <class Cont>
+void bidirectionalReverseIteratorTests(Cont& c, std::ofstream& outfile)
+{
+	typedef typename Cont::reverse_iterator It;
+	typedef typename Cont::const_reverse_iterator Cit;
+
+	It it;
+	const Cont c2(c);
+		
+	Cit cit = c2.begin();
+	Cit citRange = c.end() - 3;
+	it = c.begin();
+
+	outfile << "++, --, *(), *++, *-- reverse_const_iterator tests\n\n";
+	outfile << *++cit << " must be equal to " << *cit++ << '\n';
+	outfile << *--cit << " must be equal to " << *cit-- << '\n';
+
+	outfile << "\n++, --, *(), *++, *-- reverse_iterator tests\n\n";
+	outfile << *++it << " must be equal to " << *it++ << '\n';
+	outfile << *--it << " must be equal to " << *it-- << '\n';
+
+	it = c.end();
+	cit = c2.end();
+	Cit cit2(it);
+	Cit cit3(cit2);
+	outfile << "\niterator and const_reverse_iterator comparisons : \n\n";
+	outfile << "is " << *--cit << " == " << *--cit2 << " ? " << (cit == cit2) << '\n';
+	outfile << "is " << *--cit3 << " == " << *cit2 << " ? " << (cit3 == cit2) << '\n';
+	outfile << "is " << *--cit3 << " == " << *cit2 << " ? " << (cit3 == cit2) << '\n';
+	outfile << "is " << *--it << " == " << *cit2 << " ? " << (it == cit2) << '\n';
+	outfile << "is " << *it << " == " << *--cit2 << " ? " << (it == cit2) << '\n';
+	outfile << "is " << *--cit << " != " << *--cit2 << " ? " << (cit != cit2) << '\n';
+	outfile << "is " << *--cit << " != " << *cit2 << " ? " << (cit != cit2) << '\n';
+	it = c.begin();
+	cit = c2.begin();
+	cit2 = it;
+	cit3 = it;
+	outfile << "is " << *cit << " != " << *cit2 << " ? " << (cit != cit2) << '\n';
+	outfile << "is " << *it << " != " << *cit << " ? " << (it != cit) << '\n';
+	outfile << "is " << *it << " != " << *cit2 << " ? " << (it != cit2) << '\n';
+	outfile << "is " << *cit2 << " != " << *cit3 << " ? " << (cit2 != cit3) << '\n';
 }
 
 // END OF COMMON TESTS LIBRARY
@@ -545,5 +640,8 @@ void stack_tests(const std::string& currentPath);
 void queue_tests(const std::string& currentPath);
 void priority_queue_tests(const std::string& currentPath);
 void map_tests(const std::string& currentPath, std::ostream& except);
+void multimap_tests(const std::string& currentPath, std::ostream& except);
+void set_tests(const std::string& currentPath);
+void multiset_tests(const std::string& currentPath);
 
 #endif

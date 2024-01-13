@@ -12,7 +12,7 @@
 	using namespace std;
 #endif
 
-void	map_tests(const std::string& currentPath, std::ostream& except)
+void	multimap_tests(const std::string& currentPath, std::ostream& except)
 {
 	std::string fileName;
 	std::ofstream outfile;
@@ -25,7 +25,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "constructor.log";
 		outfile.open(fileName.c_str());
 
-		map<int, std::string> me;
+		multimap<int, std::string> me;
 		displayV2(me, "map default constructor", outfile);
 
 		me[3] = "pouet";
@@ -33,21 +33,21 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		me[8] = "gigi";
 		me[0] = "0";
 
-		const map<int, std::string> mc(me);
-		displayV2(mc, "const map copy constructor", outfile, 2);
+		const multimap<int, std::string> mc(me);
+		displayV2(mc, "const multimap copy constructor", outfile, 2);
 
-		map<int, std::string> mc2(mc);
-		displayV2(mc2, "map copy constructor with a const map as parameter", outfile, 2);
+		multimap<int, std::string> mc2(mc);
+		displayV2(mc2, "multimap copy constructor with a const multimap as parameter", outfile, 2);
 
 		mc2[2] = "another value";
 		outfile << mc2[2] << " was a deep copy of " << mc.at(2) << '\n';
 
-		map<int, std::string> mr(++mc.begin(), mc.end());
-		displayV2(mr, "map range constructor with a const map iterators as parameters", outfile, 3);
+		multimap<int, std::string> mr(++mc.begin(), mc.end());
+		displayV2(mr, "multimap range constructor with a const multimap iterators as parameters", outfile, 3);
 		
-		const map<int, std::string> mce;
+		const multimap<int, std::string> mce;
 
-		map<int, std::string> me3;
+		multimap<int, std::string> me3;
 
 		me = mce;
 		displayV2(me, "operator= notEmpty = constEmpty", outfile, 2);
@@ -80,16 +80,16 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "iterator.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int> m;
+		multimap<int, int> m;
 		for (int i = 0; i < 30; ++i)
 			m[i] = i * i - i;
 
 		bidirectionalIteratorTests(m, outfile);
 		bidirectionalReverseIteratorTests(m, outfile);
 
-		const map<int, int> m2(m);
-		map<int, int>::iterator it;
-		map<int, int>::const_iterator cit;
+		const multimap<int, int> m2(m);
+		multimap<int, int>::iterator it;
+		multimap<int, int>::const_iterator cit;
 		
 		cit = m2.begin();
 		outfile << cit->first << " | " << cit->second << '\n';
@@ -129,7 +129,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 	{
 		fileName = currentPath + "access.log";
 		outfile.open(fileName.c_str());
-		map<int, int> m;
+		multimap<int, int> m;
 
 		m[2] = 3;
 		outfile << m[2] << '\n';
@@ -138,7 +138,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		m.at(2) = 8;
 		outfile << m[2] << " | " << m.at(2) << '\n';
 
-		const map<int, int> mc(m);
+		const multimap<int, int> mc(m);
 		outfile << mc.at(2) << '\n';
 
 		try
@@ -147,7 +147,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		}
 		catch(const out_of_range& e)
 		{
-			except << "MAP : const : at : out_of_range\n" << e.what() << '\n';
+			except << "MULTIMAP : const : at : out_of_range\n" << e.what() << '\n';
 		}
 
 		try
@@ -156,7 +156,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		}
 		catch(const out_of_range& e)
 		{
-			except << "MAP : not const : at : out_of_range\n" << e.what() << '\n';
+			except << "MULTIMAP : not const : at : out_of_range\n" << e.what() << '\n';
 		}
 
 		outfile.close();
@@ -168,10 +168,10 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "insert.log";
 		outfile.open(fileName.c_str());
 
-		pair<map<int, int>::iterator, bool> insertResult;
-		map<int, int>::iterator hint;
-		map<int, int> me;
-		map<int, int> range;
+		multimap<int, int>::iterator insertResult;
+		multimap<int, int>::iterator hint;
+		multimap<int, int> me;
+		multimap<int, int> range;
 		pair<int, int> p;
 
 		outfile << "single element inserts :\n\n";
@@ -180,10 +180,10 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 			p.first = i * i;
 			p.second = i;
 			insertResult = me.insert(p);
-			outfile << "inserting " << p << " => succeed ? " << insertResult.second << ". "
-					<< insertResult.first->first << " => " << insertResult.first->second << '\n';			
+			outfile << "inserting " << p << " => succeed ? true" << ". "
+					<< insertResult->first << " => " << insertResult->second << '\n';			
 		}
-		displayV2(me, "map view after inserts", outfile, 5);
+		displayV2(me, "multimap view after inserts", outfile, 5);
 
 		hint = me.begin();
 		p.first = 5;
@@ -212,10 +212,10 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 	//ERASE
 
 	{
-		map<int, int> m;
-		map<int, int>::size_type seed;
-		map<int, int>::size_type count;
-		map<int, int>::size_type eraseCount;
+		multimap<int, int> m;
+		multimap<int, int>::size_type seed;
+		multimap<int, int>::size_type count;
+		multimap<int, int>::size_type eraseCount;
 		bool started = false;
 
 		seed = 0;
@@ -224,11 +224,14 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		for (int i = 0; i < 50; ++i)
 			m[i] = i;
 
+		for (int i = 0; i < 50; ++i)
+			m[i] = i;
+
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
 			++count;
-			eraseCount += m.erase(getRandom< map<int, int> >(seed, 50));
+			eraseCount += m.erase(getRandom< multimap<int, int> >(seed, 50));
 		}
 		outfile << "number of erase attempts : " << count << " | truely erased : " << eraseCount << '\n';
 		displayV2(m, "erase by key", outfile, 6);
@@ -241,7 +244,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			m.erase(m.find(getRandom< map<int, int> >(seed, 50)));
+			m.erase(m.find(getRandom< multimap<int, int> >(seed, 50)));
 		}
 
 		displayV2(m, "erase by iterator", outfile, 6);
@@ -271,8 +274,9 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "clear.log";
 		outfile.open(fileName.c_str());
 
-		map<std::string, std::string> m;
+		multimap<std::string, std::string> m;
 
+		m["alcool"] = "biere";
 		m["alcool"] = "biere";
 		m["chat"] = "animal";
 		m["viande"] = "chat";
@@ -285,9 +289,10 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 
 		m["ecole"] = "42";
 		m["42"] = "Saint Etienne";
-		m["map"] = "still working fine after clear";
+		m["42"] = "Saint Etienne";
+		m["multimap"] = "still working fine after clear";
 
-		displayV2(m, "reuse of cleared map", outfile);
+		displayV2(m, "reuse of cleared multimap", outfile);
 
 		outfile.close();
 	}
@@ -298,8 +303,8 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "swap.log";
 		outfile.open(fileName.c_str());
 
-		map<std::string, std::string> m1;
-		map<std::string, std::string> m2;
+		multimap<std::string, std::string> m1;
+		multimap<std::string, std::string> m2;
 
 		std::string* ptr1;
 		std::string* ptr2;
@@ -314,6 +319,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 
 		m2["mois"] = "juillet";
 		m2["juillet"] = "vacances";
+		m2["vacances"] = "camping";
 		m2["vacances"] = "camping";
 		m2["camping"] = "Franck";
 		m2["Franck"] = "y Vincent";
@@ -341,7 +347,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "observer.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int, greater<int> > m;
+		multimap<int, int, greater<int> > m;
 
 		m[1] = 4;
 		m[3] = 3;
@@ -358,7 +364,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 			m.key_comp()(12, 9) << ' ' <<
 			m.key_comp()(1, 2) << '\n';
 
-		map<int, int> m2;
+		multimap<int, int> m2;
 
 		m2[1] = 4;
 		m2[3] = 3;
@@ -385,20 +391,22 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "operation.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int>::size_type count = 0;
+		multimap<int, int>::size_type count = 0;
 
-		map<int, int>::iterator it;
-		map<int, int>::iterator it2;
-		map<int, int>::const_iterator cit;
-		map<int, int>::const_iterator cit2;
+		multimap<int, int>::iterator it;
+		multimap<int, int>::iterator it2;
+		multimap<int, int>::const_iterator cit;
+		multimap<int, int>::const_iterator cit2;
 
-		map<int, int> m;
+		multimap<int, int> m;
 		for (int i = 0; i < 501; i += 5)
 		{
 			m[i + 2] = i;
 			m[i + 3] = i;
+			m[i + 2] = i;
+			m[i + 3] = i;
 		}
-		const map<int, int> m2(m);
+		const multimap<int, int> m2(m);
 
 		outfile << "====find====\n\n"
 
@@ -515,7 +523,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		char adr = 'o';
 		char otherchar = 'u';
 		dummyAllocator<char> dumb(&adr);
-		map<char, char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
+		multimap<char, char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
 		dummyAllocator<char> cpy = m.get_allocator();
 		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
 
@@ -528,10 +536,10 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "relational.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int> m1;
-		map<int, int> m2;
-		map<int, int> m3;
-		map<int, int> m4;
+		multimap<int, int> m1;
+		multimap<int, int> m2;
+		multimap<int, int> m3;
+		multimap<int, int> m4;
 
 		for (int i = 0; i < 10; ++i)
 		{
@@ -539,10 +547,16 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 			m2[i] = i + 1;
 			m3[i] = i;
 			m4[i] = i;
+			m1[i] = i;
+			m2[i] = i + 1;
+			m3[i] = i;
+			m4[i] = i;
+			m1[i] = i;
+			m2[i] = i + 1;
+			m4[i] = i;
 		}
-		m3[9] = 10;
 		m4[9] = 8;
-		const map<int, int> mc1(m1);
+		const multimap<int, int> mc1(m1);
 
 		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
 		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';

@@ -320,6 +320,15 @@ int main()
 
 	mkdir(dirName(mainPath, ctxPath, "map").c_str(), 0777);
 	map_tests(filePath(ctxPath, "map"), exceptionFile);
+
+	mkdir(dirName(mainPath, ctxPath, "multimap").c_str(), 0777);
+	multimap_tests(filePath(ctxPath, "multimap"), exceptionFile);
+
+	mkdir(dirName(mainPath, ctxPath, "set").c_str(), 0777);
+	set_tests(filePath(ctxPath, "set"));
+
+	mkdir(dirName(mainPath, ctxPath, "multiset").c_str(), 0777);
+	multiset_tests(filePath(ctxPath, "multiset"));
 	/*
 	std::cout << "------exceptions tests------\n\n\n";
 	{

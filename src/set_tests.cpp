@@ -3,16 +3,16 @@
 #include "../includes/test_elements.hpp"
 
 #if FT == 1
-	#include "../includes/map.hpp"
+	#include "../includes/set.hpp"
 	#define FT 1
 	using namespace ft;
 #else
-	#include <map>
+	#include <set>
 	#define FT 0
 	using namespace std;
 #endif
 
-void	map_tests(const std::string& currentPath, std::ostream& except)
+void	set_tests(const std::string& currentPath)
 {
 	std::string fileName;
 	std::ofstream outfile;
@@ -25,29 +25,30 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "constructor.log";
 		outfile.open(fileName.c_str());
 
-		map<int, std::string> me;
-		displayV2(me, "map default constructor", outfile);
+		set<std::string> me;
+		displayV2(me, "set default constructor", outfile);
 
-		me[3] = "pouet";
-		me[2] = "lol";
-		me[8] = "gigi";
-		me[0] = "0";
+		me.insert("pouet");
+		me.insert("lol");
+		me.insert("gigi");
+		me.insert("0");
 
-		const map<int, std::string> mc(me);
-		displayV2(mc, "const map copy constructor", outfile, 2);
+		const set<std::string> mc(me);
+		displayV2(mc, "const set copy constructor", outfile, 2);
 
-		map<int, std::string> mc2(mc);
-		displayV2(mc2, "map copy constructor with a const map as parameter", outfile, 2);
+		outfile << "must be false : " << &(*(mc.begin())) == &(*(me.begin())) << '\n';
 
-		mc2[2] = "another value";
-		outfile << mc2[2] << " was a deep copy of " << mc.at(2) << '\n';
+		set<std::string> mc2(mc);
+		displayV2(mc2, "set copy constructor with a const set as parameter", outfile, 2);
 
-		map<int, std::string> mr(++mc.begin(), mc.end());
-		displayV2(mr, "map range constructor with a const map iterators as parameters", outfile, 3);
+		outfile << "must be false : " << &(*(mc.begin())) == &(*(mc2.begin())) << '\n';
+
+		set<std::string> mr(++mc.begin(), mc.end());
+		displayV2(mr, "set range constructor with a const set iterators as parameters", outfile, 3);
 		
-		const map<int, std::string> mce;
+		const set<std::string> mce;
 
-		map<int, std::string> me3;
+		set<std::string> me3;
 
 		me = mce;
 		displayV2(me, "operator= notEmpty = constEmpty", outfile, 2);
@@ -68,8 +69,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		me = me3;
 		displayV2(me, "operator= notEmpty = notEmpty", outfile, 2);
 
-		me[0] = "another value";
-		outfile << me[0] << " was a deep copy of " << me3[0] << '\n';
+		outfile << "must be false " << &(*(me.begin())) == &(*(me3.begin())) << '\n';
 
 		outfile.close();
 	}
@@ -80,84 +80,46 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "iterator.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int> m;
-		for (int i = 0; i < 30; ++i)
-			m[i] = i * i - i;
+		set<std::string> m;
+		for (long long i = 0; i < 9; ++i)
+			m.insert(itoa(pow(10, i)));
 
 		bidirectionalIteratorTests(m, outfile);
 		bidirectionalReverseIteratorTests(m, outfile);
 
-		const map<int, int> m2(m);
-		map<int, int>::iterator it;
-		map<int, int>::const_iterator cit;
+		const set<std::string> m2(m);
+		set<std::string>::iterator it;
+		set<std::string>::const_iterator cit;
 		
 		cit = m2.begin();
-		outfile << cit->first << " | " << cit->second << '\n';
+		outfile << *cit << '\n';
 		++cit;
-		outfile << cit++->first << " | " << cit++->second<< '\n';
-		outfile << cit->first << " | " << cit->second << '\n';
+		outfile << cit++->size() << '\n';
+		outfile << *cit->size() << '\n';
 
 		cit = m2.end();
 		--cit;
-		outfile << cit->first << " | " << cit->second << '\n';
+		outfile << *cit << '\n';
 		--cit;
-		outfile << cit--->first << " | " << cit--->second << '\n'; //don't worry, I never write that thing in usual codes. It must work anyway
-		outfile << cit->first << " | " << cit->second << '\n';
+		outfile << cit--->size() << '\n'; //don't worry, I never write that thing in usual codes. It must work anyway
+		outfile << cit->size() << '\n';
 
 		it = m.begin();
 
-		outfile << it->first << " | " << it->second << '\n';
+		outfile << *it << '\n';
 		++it;
-		outfile << it++->first << " | " << it++->second << '\n';
-		outfile << it->first << " | " << it->second << '\n';
+		outfile << it++->size() << '\n';
+		outfile << it->size() << '\n';
 
 		it = m.end();
 		--it;
-		outfile << it->first << " | " << it->second << '\n';
+		outfile << it->size() << '\n';
 		--it;
-		outfile << it--->first << " | " << it--->second << '\n';
-		outfile << it->first << " | " << it->second << '\n';
+		outfile << it--->size() << '\n';
+		outfile << it->size() << '\n';
 
-		it->second = 456;
+		it->second = "pouet";
 		outfile << *it << '\n';
-
-		outfile.close();
-	}
-
-	//ACCESS
-
-	{
-		fileName = currentPath + "access.log";
-		outfile.open(fileName.c_str());
-		map<int, int> m;
-
-		m[2] = 3;
-		outfile << m[2] << '\n';
-		m[2] = 5;
-		outfile << m[2] << " | " << m.at(2) << '\n';
-		m.at(2) = 8;
-		outfile << m[2] << " | " << m.at(2) << '\n';
-
-		const map<int, int> mc(m);
-		outfile << mc.at(2) << '\n';
-
-		try
-		{
-			mc.at(3);
-		}
-		catch(const out_of_range& e)
-		{
-			except << "MAP : const : at : out_of_range\n" << e.what() << '\n';
-		}
-
-		try
-		{
-			m.at(3);
-		}
-		catch(const out_of_range& e)
-		{
-			except << "MAP : not const : at : out_of_range\n" << e.what() << '\n';
-		}
 
 		outfile.close();
 	}
@@ -168,36 +130,30 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "insert.log";
 		outfile.open(fileName.c_str());
 
-		pair<map<int, int>::iterator, bool> insertResult;
-		map<int, int>::iterator hint;
-		map<int, int> me;
-		map<int, int> range;
-		pair<int, int> p;
+		pair<set<int>::iterator, bool> insertResult;
+		set<int>::iterator hint;
+		set<int> me;
+		set<int> range;
 
 		outfile << "single element inserts :\n\n";
 		for (int i = -20; i <= 20; ++i)
 		{
-			p.first = i * i;
-			p.second = i;
-			insertResult = me.insert(p);
+			insertResult = me.insert(i * i);
 			outfile << "inserting " << p << " => succeed ? " << insertResult.second << ". "
-					<< insertResult.first->first << " => " << insertResult.first->second << '\n';			
+					<< *(insertResult.first) << '\n';			
 		}
-		displayV2(me, "map view after inserts", outfile, 5);
+		displayV2(me, "set view after inserts", outfile, 5);
 
 		hint = me.begin();
-		p.first = 5;
-		hint = me.insert(hint, p);
+		hint = me.insert(hint, 5);
 		outfile << *hint << '\n';
 		displayV2(me, "non sense hint insert", outfile, 5);
 
-		p.first += 1;
-		hint = me.insert(hint, p);
+		hint = me.insert(hint, 6);
 		outfile << *hint << '\n';
 		displayV2(me, "more sense hint insert", outfile, 5);
 
-		p.second = 0;
-		hint = me.insert(hint, p);
+		hint = me.insert(hint, 6);
 		outfile << *hint << '\n';
 		displayV2(me, "hint insert with same key", outfile, 5);
 
@@ -212,42 +168,42 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 	//ERASE
 
 	{
-		map<int, int> m;
-		map<int, int>::size_type seed;
-		map<int, int>::size_type count;
-		map<int, int>::size_type eraseCount;
+		set<int> m;
+		set<int>::size_type seed;
+		set<int>::size_type count;
+		set<int>::size_type eraseCount;
 		bool started = false;
 
 		seed = 0;
 		count = 0;
 		eraseCount = 0;
 		for (int i = 0; i < 50; ++i)
-			m[i] = i;
+			m.insert(i);
 
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
 			++count;
-			eraseCount += m.erase(getRandom< map<int, int> >(seed, 50));
+			eraseCount += m.erase(getRandom< set<int> >(seed, 50));
 		}
 		outfile << "number of erase attempts : " << count << " | truely erased : " << eraseCount << '\n';
 		displayV2(m, "erase by key", outfile, 6);
 		
 		for (int i = 0; i < 50; ++i)
-			m[i] = i;
+			m.insert(i);
 		
 		started = false;
 		seed = 0;
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			m.erase(m.find(getRandom< map<int, int> >(seed, 50)));
+			m.erase(m.find(getRandom< set<int> >(seed, 50)));
 		}
 
 		displayV2(m, "erase by iterator", outfile, 6);
 
 		for (int i = 0; i < 500; ++i)
-			m[i] = i * i;
+			m.insert(i);
 
 		m.erase(m.find(4), m.find(490));
 		displayV2(m, "erase by range", outfile, 4);
@@ -271,23 +227,23 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "clear.log";
 		outfile.open(fileName.c_str());
 
-		map<std::string, std::string> m;
+		set<std::string> m;
 
-		m["alcool"] = "biere";
-		m["chat"] = "animal";
-		m["viande"] = "chat";
-		m["cocorico"] = "France";
-		m["pouet"] = "lol";
+		m.insert("biere");
+		m.insert("animal");
+		m.insert("viande");
+		m.insert("cocorico");
+		m.insert("lol");
 
 		displayV2(m, "before clear()", outfile);
 		m.clear();
 		displayV2(m, "after clear()", outfile);
 
-		m["ecole"] = "42";
-		m["42"] = "Saint Etienne";
-		m["map"] = "still working fine after clear";
+		m.insert("42");
+		m.insert("Saint Etienne");
+		m.insert("set");
 
-		displayV2(m, "reuse of cleared map", outfile);
+		displayV2(m, "reuse of cleared set", outfile);
 
 		outfile.close();
 	}
@@ -298,32 +254,32 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "swap.log";
 		outfile.open(fileName.c_str());
 
-		map<std::string, std::string> m1;
-		map<std::string, std::string> m2;
+		set<std::string> m1;
+		set<std::string> m2;
 
 		std::string* ptr1;
 		std::string* ptr2;
 
-		m1["legume"] = "chou";
-		m1["carotte"] = "aimable";
-		m1["gentil"] = "lapin";
-		m1["lapin"] = "carotte";
-		m1["legume"] = "on boucle la non ?";
+		m1.insert("chou");
+		m1.insert("carotte");
+		m1.insert("gentil");
+		m1.insert("lapin");
+		m1.insert("legume");
 
-		ptr1 = &(m1["lapin"]);
+		ptr1 = &(*(m1.find("lapin")));
 
-		m2["mois"] = "juillet";
-		m2["juillet"] = "vacances";
-		m2["vacances"] = "camping";
-		m2["camping"] = "Franck";
-		m2["Franck"] = "y Vincent";
+		m2.insert("mois");
+		m2.insert("juillet");
+		m2.insert("vacances");
+		m2.insert("camping");
+		m2.insert("Franck");
 
 		m1.swap(m2);
 
 		displayV2(m1, "m1 after swap", outfile);
 		displayV2(m2, "m2 after swap", outfile);
 		
-		ptr2 = &(m2["lapin"]);
+		ptr2 = &(*(m2.find("lapin")));
 
 		outfile << "ptr1 == ptr2 ? " << ptr1 == ptr2 << '\n';
 
@@ -341,7 +297,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "observer.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int, greater<int> > m;
+		set<int, greater<int> > m;
 
 		m[1] = 4;
 		m[3] = 3;
@@ -358,7 +314,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 			m.key_comp()(12, 9) << ' ' <<
 			m.key_comp()(1, 2) << '\n';
 
-		map<int, int> m2;
+		set<int> m2;
 
 		m2[1] = 4;
 		m2[3] = 3;
@@ -385,20 +341,20 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "operation.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int>::size_type count = 0;
+		set<int>::size_type count = 0;
 
-		map<int, int>::iterator it;
-		map<int, int>::iterator it2;
-		map<int, int>::const_iterator cit;
-		map<int, int>::const_iterator cit2;
+		set<int>::iterator it;
+		set<int>::iterator it2;
+		set<int>::const_iterator cit;
+		set<int>::const_iterator cit2;
 
-		map<int, int> m;
+		set<int> m;
 		for (int i = 0; i < 501; i += 5)
 		{
-			m[i + 2] = i;
-			m[i + 3] = i;
+			m.insert(i + 2);
+			m.insert(i + 3);
 		}
-		const map<int, int> m2(m);
+		const set<int> m2(m);
 
 		outfile << "====find====\n\n"
 
@@ -420,8 +376,6 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.find(8);
 		outfile << *cit << '\n';
 
-		it->second = -11;
-
 		outfile << *it << " muse be same as " << *(m.find(3)) << '\n';
 
 
@@ -435,8 +389,6 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 
 		outfile << "\n====lower_bound====\n\n";
 
-		m.lower_bound(0) = -58;
-
 		outfile << *(m.lower_bound(2)) << '\n';
 		outfile << *(m.lower_bound(0)) << '\n';
 		outfile << *(m.lower_bound(5)) << '\n';
@@ -448,8 +400,6 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		outfile << *(m2.lower_bound(7)) << '\n';
 
 		outfile << "\n====upper_bound====\n\n";
-
-		m.upper_bound(2) = 789;
 
 		outfile << *(m.upper_bound(2)) << '\n';
 		outfile << *(m.upper_bound(0)) << '\n';
@@ -515,7 +465,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		char adr = 'o';
 		char otherchar = 'u';
 		dummyAllocator<char> dumb(&adr);
-		map<char, char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
+		set<char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
 		dummyAllocator<char> cpy = m.get_allocator();
 		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
 
@@ -528,21 +478,23 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "relational.log";
 		outfile.open(fileName.c_str());
 
-		map<int, int> m1;
-		map<int, int> m2;
-		map<int, int> m3;
-		map<int, int> m4;
+		set<int> m1;
+		set<int> m2;
+		set<int> m3;
+		set<int> m4;
 
 		for (int i = 0; i < 10; ++i)
 		{
-			m1[i] = i;
-			m2[i] = i + 1;
-			m3[i] = i;
-			m4[i] = i;
+			m1.insert(i);
+			m2.insert(i + 1);
+			m3.insert(i);
+			m4.insert(i);
 		}
-		m3[9] = 10;
-		m4[9] = 8;
-		const map<int, int> mc1(m1);
+		m3.erase(9);
+		m3.insert(10);
+		m4.erase(9);
+		m4.insert(-1);
+		const set<int> mc1(m1);
 
 		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
 		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
@@ -551,7 +503,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
 		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
 
-		m1[10] = 10;
+		m1.insert(10);
 
 		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
 		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';

@@ -15,6 +15,9 @@ LST_SRCS		=	containers.cpp\
 					priority_queue_tests.cpp\
 					functional.cpp\
 					map_tests.cpp\
+					multimap_tests.cpp\
+					set_tests.cpp\
+					multiset_tests.cpp\
 					utils.cpp
 LST_OBJS		=	${LST_SRCS:.cpp=.o}
 LST_DEP			=	${LST_SRCS:.cpp=.d}

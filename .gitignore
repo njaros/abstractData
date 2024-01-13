@@ -29,6 +29,8 @@ x86/
 bld/
 [Bb]in/
 [Oo]bj/
+[Oo]bj_ft/
+[Oo]bj_std/
 [Ll]og/
 [Ll]ogs/
 [Ff]t_logs/
