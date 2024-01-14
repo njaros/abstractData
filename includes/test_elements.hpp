@@ -643,5 +643,6 @@ void map_tests(const std::string& currentPath, std::ostream& except);
 void multimap_tests(const std::string& currentPath, std::ostream& except);
 void set_tests(const std::string& currentPath);
 void multiset_tests(const std::string& currentPath);
+void list_tests(const std::string& currentPath, std::ostream& except);
 
 #endif

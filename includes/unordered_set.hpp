@@ -623,7 +623,6 @@ namespace ft
 		class _hTIt : public ft::iterator< ft::forward_iterator_tag, const value_type, difference_type, pointer, reference >
 		{
 
-			friend _hTIt;
 			friend unordered_multiset;
 
 			const _table* _ctx;
