@@ -14,6 +14,37 @@
 	using namespace std;
 #endif
 
+struct is_odd
+{
+  bool operator() (const int& value) { return (value%2)==1; }
+};
+
+struct is_peer
+{
+  bool operator() (const int& value) { return (value%2)==0; }
+};
+
+struct is_near
+{
+  bool operator() (double first, double second)
+  { return (fabs(first-second)<5.0); }
+};
+
+bool same_integral_part (double first, double second)
+{ return ( int(first)==int(second) ); }
+
+bool compare_nocase (const std::string& first, const std::string& second)
+{
+  unsigned int i=0;
+  while ( (i<first.length()) && (i<second.length()) )
+  {
+    if (tolower(first[i])<tolower(second[i])) return true;
+    else if (tolower(first[i])>tolower(second[i])) return false;
+    ++i;
+  }
+  return ( first.length() < second.length() );
+}
+
 class IntLog
 {
 	int i;
@@ -53,15 +84,22 @@ class IntLog
 		else
 			outfile = out;
 	}
+
+	int	get() const { return i; }
 };
 
 std::ostream& operator<<(std::ostream& o, const IntLog& i)
 {
-	o << i.i;
+	o << i.get();
 	return o;
 }
 
-void	switchLog(list<IntLog>& l, std::outfile& out)
+bool operator<(const IntLog& lhs, const IntLog& rhs)
+{
+	return lhs.get() < rhs.get();
+}
+
+void	switchLog(list<IntLog>& l, std::ostream& out)
 {
 	for (list<IntLog>::iterator it = l.begin(); it != l.end(); ++it)
 		it->switchLog(&out);
@@ -76,6 +114,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 	typedef list<std::string> S;
 	typedef list<int> I;
+	typedef list<double> D;
 	typedef list<IntLog> IL;
 	typedef set<std::string> SetS;
 	typedef set<int> SetI;
@@ -588,7 +627,313 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(l2, "l2 after splice one elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 		l2.splice(++(l.begin()));
+		displayV2(l2, "l2 after splice one elt", outfile, 5);
+		displayV2(l, "l after got spliced", outfile, 5);
 		l2.splice(++(l.begin()));
+		displayV2(l2, "l2 after splice one elt", outfile, 5);
+		displayV2(l, "l after got spliced", outfile, 5);
+
+		l2.splice(++(l.begin()), --(l.end()));
+		displayV2(l2, "l2 after range splice", outfile, 5);
+		displayV2(l, "l after got spliced", outfile, 5);
+
+		l2.splice(l.begin(), l.end());
+		displayV2(l2, "l2 after range splice all", outfile, 5);
+		displayV2(l, "l after got spliced", outfile, 5);
+
+		l.splice(l2.begin(), l2.end());
+		displayV2(l, "l after range splice all", outfile, 5);
+		displayV2(l2, "l2 after got spliced", outfile, 5);
+
+		l.splice(l2.begin(), l2.end());
+		displayV2(l, "l after range splice all again", outfile, 5);
+		displayV2(l2, "l2 after got spliced", outfile, 5);
+
+		l2.splice(l.begin(), l.begin());
+		displayV2(l2, "l2 after range splice nothing", outfile, 5);
+		displayV2(l, "l after got spliced", outfile, 5);
+
+		l2.splice(l.begin(), ++(l.begin()));
+		displayV2(l2, "l2 after range splice 1 elt", outfile, 5);
+		displayV2(l, "l after got spliced", outfile, 5);
+
+		l2.splice(--(l.end()), l.end());
+		displayV2(l2, "l2 after range splice 1 elt", outfile, 5);
+		displayV2(l, "l after got spliced", outfile, 5);
+
+		switchLog(l, outfile);
+		switchLog(l2, outfile);
+
+		outfile.close();
 	}
 
+	//REMOVE
+
+	{
+		fileName = currentPath + "remove.log";
+		outfile.open(fileName.c_str());
+
+		S le;
+		S l;
+
+		l.push_back("lustucru");
+		l.push_back("pouet");
+		l.push_back("saperlipopette");
+		l.push_back("pouet");
+		l.push_back("cafe");
+		l.push_back("cafe");
+		l.push_back("pouet");
+		l.push_back("pouet");
+
+		l.remove("introuvable");
+		le.remove("empty");
+		displayV2(l, "removing not present element", outfile, 3);
+
+		l.remove("saperlipopette");
+		displayV2(l, "removing present element", outfile, 3);
+
+		l.remove("cafe");
+		displayV2(l, "removing present elements", outfile, 3);
+
+		l.remove("lustucru");
+		displayV2(l, "removing present element", outfile, 3);
+
+		l.remove("pouet");
+		displayV2(l, "removing last elements", outfile, 3);
+
+		outfile.close();
+	}
+
+	//REMOVE_IF
+
+	{
+		fileName = currentPath + "remove_if.log";
+		outfile.open(fileName.c_str());
+
+		is_odd predOdd;
+		is_peer predPeer;
+
+		I l(setI.begin(), setI.end());
+		l.remove_if(predOdd);
+		displayv2(l, "after remove_if for is_odd", outfile, 5);
+
+		l.insert(l.end(), setI.begin(), setI.end());
+		l.remove_if(predPeer);
+		displayv2(l, "after remove_if for is_peer", outfile, 5);
+
+		outfile.close();
+	}
+
+	//SORT
+
+	{
+		fileName = currentPath + "sort.log";
+		outfile.open(fileName.c_str());
+
+		S mylist;
+		S::iterator it;
+		mylist.push_back ("one");
+		mylist.push_back ("two");
+		mylist.push_back ("Three");
+		mylist.push_back ("four");
+		mylist.push_back ("cinq");
+		mylist.push_back ("Six");
+		mylist.push_back ("Four");
+		mylist.push_back ("one");
+
+		mylist.sort();
+		displayV2(mylist, "normal sort", outfile, 3);
+
+		mylist.sort(compare_nocase);
+		displayV2(mylist, "non case sensitive sort", outfile, 3);
+
+		IL l;
+		I::size_type seed = 0;
+		while (l.size() != 500)
+			l.push_back(IntLog(getRandom< I >(seed, 500)));
+
+		I l2(l);
+
+		switchLog(l, outfile);
+		switchLog(l2, outfile);
+
+		l.sort();
+		displayV2(l, "normal sort", outfile, 50);
+
+		l2.sort(greater<IntLog>());
+		displayV2(l2, "greater sort", outfile, 50);
+
+		switchLog(l, outfile);
+		switchLog(l2, outfile);
+
+		outfile.close();
+	}
+
+	//MERGE
+
+	{
+		fileName = currentPath + "merge.log";
+		outfile.open(fileName.c_str());
+
+		IL l1;
+		IL l2;
+		I::size_type seed;
+		for (int i = 0; i < 30; ++i)
+		{
+			l1.push_back(IntLog(getRandom< I >(seed, 40)));
+			l2.push_back(IntLog(getRandom< I >(seed, 40)));
+		}
+		IL l3(l1);
+		IL l4(l2);
+
+		switchLog(l1, outfile);
+		switchLog(l2, outfile);
+		switchLog(l3, outfile);
+		switchLog(l4, outfile);
+
+		l1.sort();
+		l2.sort();
+		l1.merge(l2);
+		displayV2(l1, "after normal merge", outfile, 5);
+		displayV2(l2, "the merged one", outfile, 5);
+
+		l3.sort(greater<IntLog>());
+		l4.sort(greater<IntLog>());
+
+		l3.merge(l4, greater<IntLog>());
+		displayV2(l3, "after greater merge", outfile, 5);
+		displayV2(l4, "the merged one", outfile, 5);
+
+		switchLog(l1, outfile);
+		switchLog(l2, outfile);
+		switchLog(l3, outfile);
+		switchLog(l4, outfile);
+
+		outfile.close();
+	}
+
+	//UNIQUE
+
+	{
+		fileName = currentPath + "unique.log";
+		outfile.open(fileName.c_str());
+
+		double mydoubles[]={ 12.15,  2.72, 73.0,  12.77,  3.14,
+						12.77, 73.35, 72.25, 15.3,  72.25 };
+
+		D mylist(mydoubles, mydoubles + 10);
+
+		mylist.sort();
+		mylist.unique();
+		displayV2(mylist, "sorted + unique", outfile, 5);
+
+		mylist.unique(same_integral_part);
+		displayV2(mylist, "sorted + unique(same integral part)", outfile, 5);
+
+		mylist.unique(is_near());
+		displayV2(mylist, "sorted + unique(is near())", outfile, 5);
+
+		I l;
+		for (int i = -10; i < 10; ++i)
+		{
+			l.push_back(i * i);
+			l.push_back(i * i);
+		}
+
+		I l2(l);
+
+		l.unique();
+		displayV2(l, "not sorted + unique", outfile, 8);
+
+		l2.sort();
+		l2.unique();
+		displayV2(l2, "sorted + unique", outfile, 8);
+
+		outfile.close();
+	}
+
+	//REVERSE
+
+	{
+		fileName = currentPath + "reverse.log";
+		outfile.open(fileName.c_str());
+
+		IL l;
+		for (int i = 0; i < 30; ++i)
+			l.push_back(IntLog(i));
+
+		switchLog(l, outfile);
+
+		l.reverse();
+		displayV2(l, "reverse", outfile, 5);
+
+		switchLog(l, outfile);
+
+		outfile.close();
+	}
+
+	//GET_ALLOCATOR
+
+	{
+		fileName = currentPath + "get_allocator.log";
+		outfile.open(fileName.c_str());
+
+		char adr = 'o';
+		char otherchar = 'u';
+		dummyAllocator<char> dumb(&adr);
+		list<char, dummyAllocator<char> > l(dumb);
+		dummyAllocator<char> cpy = l.get_allocator();
+		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
+
+		outfile.close();
+	}
+
+	//RELATIONAL
+
+	{
+		fileName = currentPath + "relational.log";
+		outfile.open(fileName.c_str());
+
+		I l1;
+		I l2;
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l1.push_back(0);
+		l2.push_back(0);
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l2.pop_back();
+		l2.push_back(1);
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l1.push_back(3);
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l1.sort(greater<int>());
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l1.sort();
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l2.pop_back();
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l1.assign(150, 4);
+		l2.assign(151, 4);
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		l1.assign(1, 5);
+
+		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+
+		outfile.close();
+	}
 }
