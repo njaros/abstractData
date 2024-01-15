@@ -217,7 +217,7 @@ void	vector_tests(const std::string& currentPath, std::ostream& except)
 		displayInfo(v, "push_back 1 time on empty vector", outfile, 10);
 
 		for (int i = 0; i < 20; ++i)
-			v.push_back(itoa(i));
+			v.push_back(myItoa(i));
 		displayInfo(v, "push_back 20 times", outfile, 10);
 
 		outfile.close();
@@ -235,7 +235,7 @@ void	vector_tests(const std::string& currentPath, std::ostream& except)
 		displayInfo(v, "range erase begin to end on empty vector", outfile, 10);
 
 		for (int i = 0; i < 20; ++i)
-			v.push_back(itoa(i));
+			v.push_back(myItoa(i));
 
 		v.erase(v.begin() + v.size() / 3);
 		displayInfo(v, "erase on middle iterator", outfile, 10);
@@ -264,7 +264,7 @@ void	vector_tests(const std::string& currentPath, std::ostream& except)
 		vector<std::string> v;
 
 		for (int i = 0; i < 20; ++i)
-			v.push_back(itoa(i));
+			v.push_back(myItoa(i));
 
 		v.pop_back();
 		displayInfo(v, "pop_back() one time a filled vector", outfile, 10);
@@ -365,7 +365,7 @@ void	vector_tests(const std::string& currentPath, std::ostream& except)
 		outfile.open(fileName.c_str(), std::ios_base::out);
 		vector<std::string> v_str;
 		for (int i = 0; i < 20; ++i)
-			v_str.push_back(itoa(i));
+			v_str.push_back(myItoa(i));
 
 		const vector<std::string> const_v_str(v_str);
 

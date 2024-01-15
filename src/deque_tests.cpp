@@ -32,7 +32,7 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 	set<int> fillerInt;
 	for (int i = 0; i < 25; ++i)
 	{
-		filler.insert(itoa(i));
+		filler.insert(myItoa(i));
 		fillerInt.insert(i * i / 2 + i);
 	}
 
@@ -98,19 +98,19 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 
 		outfile << str.begin()->length() << '\n';
 		outfile << str.rbegin()->length() << '\n';
-		outfile << ++str.begin()->length() << '\n';
-		outfile << ++str.rbegin()->length() << '\n';
-		outfile << --str.end()->length() << '\n';
-		outfile << --str.rend()->length() << '\n';
+		outfile << (++str.begin())->length() << '\n';
+		outfile << (++str.rbegin())->length() << '\n';
+		outfile << (--str.end())->length() << '\n';
+		outfile << (--str.rend())->length() << '\n';
 
 		const Strs str2(str);
 
 		outfile << str2.begin()->length() << '\n';
 		outfile << str2.rbegin()->length() << '\n';
-		outfile << ++str2.begin()->length() << '\n';
-		outfile << ++str2.rbegin()->length() << '\n';
-		outfile << --str2.end()->length() << '\n';
-		outfile << --str2.rend()->length() << '\n';
+		outfile << (++str2.begin())->length() << '\n';
+		outfile << (++str2.rbegin())->length() << '\n';
+		outfile << (--str2.end())->length() << '\n';
+		outfile << (--str2.rend())->length() << '\n';
 
 		outfile.close();
 	}
@@ -227,7 +227,7 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 		Strs::size_type seedS = 0;
 		Strs::size_type posS;
 		Strs::size_type lenS;
-		set<Strs::const_iterator> rangePosS;
+		multiset<Strs::const_iterator> rangePosS;
 		const Strs::size_type maxRangeInsertS = 2;
 
 		Strs s1;
@@ -241,14 +241,14 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 				lenS = getRandom< Strs >(seedS, maxRangeInsertS);
 
 				posS = getRandom< Strs >(seedS, s1.size());
-				s1.insert(s1.begin() + posS, lenS, itoa(c));
+				s1.insert(s1.begin() + posS, lenS, myItoa(c));
 				posS = getRandom< Strs >(seedS, s1.size());
-				s1.insert(s1.begin() + posS, itoa(c));
+				s1.insert(s1.begin() + posS, myItoa(c));
 
 				posS = getRandom< Strs >(seedS, s2.size());
-				s2.insert(s2.begin() + posS, lenS, itoa(c));
+				s2.insert(s2.begin() + posS, lenS, myItoa(c));
 				posS = getRandom< Strs >(seedS, s2.size());
-				s2.insert(s2.begin() + posS, itoa(c));
+				s2.insert(s2.begin() + posS, myItoa(c));
 
 				rangePosS.insert(s2.begin() + getRandom< Strs >(seedS, s2.size()));
 				rangePosS.insert(s2.begin() + getRandom< Strs >(seedS, s2.size()));
@@ -528,7 +528,7 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 
 		Strs s1;
 		for (int i = 0; i < 50; ++i)
-			s1.push_back(itoa(i));
+			s1.push_back(myItoa(i));
 		Strs s2(4, "pouet");
 
 		s1.swap(s2);

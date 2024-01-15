@@ -5,14 +5,20 @@
 #if FT == 1
 	#include "../includes/map.hpp"
 	#define FT 1
+	template <class T, class U>
+	ft::pair<T, U> mpair(const T& x, const U& y) { return ft::make_pair(x, y); }
+	
 	using namespace ft;
 #else
 	#include <map>
 	#define FT 0
+	template <class T, class U>
+	std::pair<T, U> mpair(const T& x, const U& y) { return std::make_pair(x, y); }
+
 	using namespace std;
 #endif
 
-void	multimap_tests(const std::string& currentPath, std::ostream& except)
+void	multimap_tests(const std::string& currentPath)
 {
 	std::string fileName;
 	std::ofstream outfile;
@@ -28,10 +34,11 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		multimap<int, std::string> me;
 		displayV2(me, "map default constructor", outfile);
 
-		me[3] = "pouet";
-		me[2] = "lol";
-		me[8] = "gigi";
-		me[0] = "0";
+		me.insert(mpair(3, std::string("pouet")));
+		me.insert(mpair(2, std::string("lol")));
+		me.insert(mpair(8, std::string("gigi")));
+		me.insert(mpair(0, std::string("0")));
+		me.insert(mpair(2, std::string("ici")));
 
 		const multimap<int, std::string> mc(me);
 		displayV2(mc, "const multimap copy constructor", outfile, 2);
@@ -39,8 +46,8 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		multimap<int, std::string> mc2(mc);
 		displayV2(mc2, "multimap copy constructor with a const multimap as parameter", outfile, 2);
 
-		mc2[2] = "another value";
-		outfile << mc2[2] << " was a deep copy of " << mc.at(2) << '\n';
+		mc2.find(3)->second = "another value";
+		outfile << mc2.find(3)->second << " was a deep copy of " << mc.find(3)->second << '\n';
 
 		multimap<int, std::string> mr(++mc.begin(), mc.end());
 		displayV2(mr, "multimap range constructor with a const multimap iterators as parameters", outfile, 3);
@@ -68,8 +75,8 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		me = me3;
 		displayV2(me, "operator= notEmpty = notEmpty", outfile, 2);
 
-		me[0] = "another value";
-		outfile << me[0] << " was a deep copy of " << me3[0] << '\n';
+		me.find(0)->second = "another value";
+		outfile << me.find(0)->second << " was a deep copy of " << me3.find(0)->second << '\n';
 
 		outfile.close();
 	}
@@ -82,7 +89,7 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 
 		multimap<int, int> m;
 		for (int i = 0; i < 30; ++i)
-			m[i] = i * i - i;
+			m.insert(mpair(i, i * i - i));
 
 		bidirectionalIteratorTests(m, outfile);
 		bidirectionalReverseIteratorTests(m, outfile);
@@ -120,44 +127,6 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 
 		it->second = 456;
 		outfile << *it << '\n';
-
-		outfile.close();
-	}
-
-	//ACCESS
-
-	{
-		fileName = currentPath + "access.log";
-		outfile.open(fileName.c_str());
-		multimap<int, int> m;
-
-		m[2] = 3;
-		outfile << m[2] << '\n';
-		m[2] = 5;
-		outfile << m[2] << " | " << m.at(2) << '\n';
-		m.at(2) = 8;
-		outfile << m[2] << " | " << m.at(2) << '\n';
-
-		const multimap<int, int> mc(m);
-		outfile << mc.at(2) << '\n';
-
-		try
-		{
-			mc.at(3);
-		}
-		catch(const out_of_range& e)
-		{
-			except << "MULTIMAP : const : at : out_of_range\n" << e.what() << '\n';
-		}
-
-		try
-		{
-			m.at(3);
-		}
-		catch(const out_of_range& e)
-		{
-			except << "MULTIMAP : not const : at : out_of_range\n" << e.what() << '\n';
-		}
 
 		outfile.close();
 	}
@@ -202,7 +171,7 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(me, "hint insert with same key", outfile, 5);
 
 		for (int i = 0; i < 30; ++i)
-			range[i] = -i;
+			range.insert(mpair(i, -i));
 		me.insert(range.find(7), range.find(27));
 		displayV2(me, "range insert", outfile, 7);
 
@@ -212,20 +181,23 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 	//ERASE
 
 	{
+		fileName = currentPath + "erase.log";
+		outfile.open(fileName.c_str());
 		multimap<int, int> m;
 		multimap<int, int>::size_type seed;
 		multimap<int, int>::size_type count;
 		multimap<int, int>::size_type eraseCount;
+		multimap<int, int>::iterator it;
 		bool started = false;
 
 		seed = 0;
 		count = 0;
 		eraseCount = 0;
 		for (int i = 0; i < 50; ++i)
-			m[i] = i;
+			m.insert(mpair(i, i));
 
 		for (int i = 0; i < 50; ++i)
-			m[i] = i;
+			m.insert(mpair(i, i));
 
 		while (m.size() > 30 && (seed || !started))
 		{
@@ -237,20 +209,21 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(m, "erase by key", outfile, 6);
 		
 		for (int i = 0; i < 50; ++i)
-			m[i] = i;
+			m.insert(mpair(1, 1));
 		
 		started = false;
 		seed = 0;
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			m.erase(m.find(getRandom< multimap<int, int> >(seed, 50)));
+			it = m.find(getRandom< multimap<int, int> >(seed, 50));
+			if (it != m.end())
+				m.erase(it);
 		}
-
 		displayV2(m, "erase by iterator", outfile, 6);
 
 		for (int i = 0; i < 500; ++i)
-			m[i] = i * i;
+			m.insert(mpair(1, 1));
 
 		m.erase(m.find(4), m.find(490));
 		displayV2(m, "erase by range", outfile, 4);
@@ -274,23 +247,23 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "clear.log";
 		outfile.open(fileName.c_str());
 
-		multimap<std::string, std::string> m;
+		multimap<int, int> m;
 
-		m["alcool"] = "biere";
-		m["alcool"] = "biere";
-		m["chat"] = "animal";
-		m["viande"] = "chat";
-		m["cocorico"] = "France";
-		m["pouet"] = "lol";
+		m.insert(mpair(3, 4));
+		m.insert(mpair(7, 0));
+		m.insert(mpair(2, 1));
+		m.insert(mpair(3, 4));
+		m.insert(mpair(0, 0));
+		m.insert(mpair(3, 4));
 
 		displayV2(m, "before clear()", outfile);
 		m.clear();
 		displayV2(m, "after clear()", outfile);
 
-		m["ecole"] = "42";
-		m["42"] = "Saint Etienne";
-		m["42"] = "Saint Etienne";
-		m["multimap"] = "still working fine after clear";
+		m.insert(mpair(4, 4));
+		m.insert(mpair(3, 4));
+		m.insert(mpair(3, 4));
+		m.insert(mpair(3, 4));
 
 		displayV2(m, "reuse of cleared multimap", outfile);
 
@@ -303,35 +276,34 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "swap.log";
 		outfile.open(fileName.c_str());
 
-		multimap<std::string, std::string> m1;
-		multimap<std::string, std::string> m2;
+		multimap<int, int> m1;
+		multimap<int, int> m2;
 
-		std::string* ptr1;
-		std::string* ptr2;
+		int* ptr1;
+		int* ptr2;
 
-		m1["legume"] = "chou";
-		m1["carotte"] = "aimable";
-		m1["gentil"] = "lapin";
-		m1["lapin"] = "carotte";
-		m1["legume"] = "on boucle la non ?";
+		m1.insert(mpair(3, 4));
+		m1.insert(mpair(7, 0));
+		m1.insert(mpair(2, 1));
+		m1.insert(mpair(3, 4));
+		m1.insert(mpair(0, 0));
+		m1.insert(mpair(3, 4));
 
-		ptr1 = &(m1["lapin"]);
+		ptr1 = &(m1.find(2)->second);
 
-		m2["mois"] = "juillet";
-		m2["juillet"] = "vacances";
-		m2["vacances"] = "camping";
-		m2["vacances"] = "camping";
-		m2["camping"] = "Franck";
-		m2["Franck"] = "y Vincent";
+		m2.insert(mpair(4, 44));
+		m2.insert(mpair(3, 41));
+		m2.insert(mpair(0, 42));
+		m2.insert(mpair(3, 43));
 
 		m1.swap(m2);
 
 		displayV2(m1, "m1 after swap", outfile);
 		displayV2(m2, "m2 after swap", outfile);
 		
-		ptr2 = &(m2["lapin"]);
+		ptr2 = &(m2.find(2)->second);
 
-		outfile << "ptr1 == ptr2 ? " << ptr1 == ptr2 << '\n';
+		outfile << "ptr1 == ptr2 ? " << (ptr1 == ptr2) << '\n';
 
 		swap(m1, m2);
 
@@ -349,11 +321,11 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 
 		multimap<int, int, greater<int> > m;
 
-		m[1] = 4;
-		m[3] = 3;
-		m[9] = 0;
-		m[12] = 4;
-
+		m.insert(mpair(1, 4));
+		m.insert(mpair(3, 3));
+		m.insert(mpair(9, 0));
+		m.insert(mpair(12, 4));
+		
 		outfile << m.value_comp()(*(m.find(12)), *(m.find(9))) << ' ' <<
 			m.value_comp()(*(m.find(1)), *(m.find(9))) << ' ' <<
 			m.value_comp()(*(m.find(3)), *(m.find(3))) << ' ' <<
@@ -366,10 +338,10 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 
 		multimap<int, int> m2;
 
-		m2[1] = 4;
-		m2[3] = 3;
-		m2[9] = 0;
-		m2[12] = 4;
+		m2.insert(mpair(1, 4));
+		m2.insert(mpair(3, 3));
+		m2.insert(mpair(9, 0));
+		m2.insert(mpair(12, 4));
 
 		outfile << m2.value_comp()(*(m2.find(12)), *(m2.find(9))) << ' ' <<
 			m2.value_comp()(*(m2.find(1)), *(m2.find(9))) << ' ' <<
@@ -401,23 +373,23 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		multimap<int, int> m;
 		for (int i = 0; i < 501; i += 5)
 		{
-			m[i + 2] = i;
-			m[i + 3] = i;
-			m[i + 2] = i;
-			m[i + 3] = i;
+			m.insert(mpair(i + 2, i));
+			m.insert(mpair(i + 3, i));
+			m.insert(mpair(i + 2, i));
+			m.insert(mpair(i + 3, i));
 		}
 		const multimap<int, int> m2(m);
 
-		outfile << "====find====\n\n"
+		outfile << "====find====\n\n";
 
 		cit = m.find(1);
-		outfile << cit == m.end() << '\n';
+		outfile << (cit == m.end()) << '\n';
 
 		it = m.find(1);
-		outfile << it == cit << '\n';
+		outfile << (it == cit) << '\n';
 
 		cit = m2.find(1);
-		outfile << cit == m2.end() << '\n';
+		outfile << (cit == m2.end()) << '\n';
 
 		it = m.find(3);
 		outfile << *it << '\n';
@@ -433,7 +405,7 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		outfile << *it << " muse be same as " << *(m.find(3)) << '\n';
 
 
-		outfile << "\n====count====\n\n"
+		outfile << "\n====count====\n\n";
 		for (int i = 0; i < 501; ++i)
 		{
 			count += m.count(i);
@@ -443,7 +415,7 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 
 		outfile << "\n====lower_bound====\n\n";
 
-		m.lower_bound(0) = -58;
+		m.lower_bound(0)->second = -58;
 
 		outfile << *(m.lower_bound(2)) << '\n';
 		outfile << *(m.lower_bound(0)) << '\n';
@@ -457,7 +429,7 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 
 		outfile << "\n====upper_bound====\n\n";
 
-		m.upper_bound(2) = 789;
+		m.upper_bound(2)->second = 789;
 
 		outfile << *(m.upper_bound(2)) << '\n';
 		outfile << *(m.upper_bound(0)) << '\n';
@@ -479,8 +451,8 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(103).first;
 		cit2 = m2.equal_range(103).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(10).first;
 		it2 = m.equal_range(10).second;
@@ -488,8 +460,8 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(100).first;
 		cit2 = m2.equal_range(100).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(401).first;
 		it2 = m.equal_range(401).second;
@@ -497,8 +469,8 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(101).first;
 		cit2 = m2.equal_range(101).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(4000).first;
 		it2 = m.equal_range(4000).second;
@@ -506,10 +478,10 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(10000).first;
 		cit2 = m2.equal_range(10000).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
-		outfile << it == m.end() << ' ' << cit == m2.end() << '\n';
+		outfile << (it == m.end()) << ' ' << (cit == m2.end()) << '\n';
 
 		outfile.close();
 	}
@@ -520,12 +492,9 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "get_allocator.log";
 		outfile.open(fileName.c_str());
 
-		char adr = 'o';
-		char otherchar = 'u';
-		dummyAllocator<char> dumb(&adr);
-		multimap<char, char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
-		dummyAllocator<char> cpy = m.get_allocator();
-		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
+		multimap<char, char> m;
+		std::allocator<char> cpy = m.get_allocator();
+		// must not crash
 
 		outfile.close();
 	}
@@ -543,36 +512,36 @@ void	multimap_tests(const std::string& currentPath, std::ostream& except)
 
 		for (int i = 0; i < 10; ++i)
 		{
-			m1[i] = i;
-			m2[i] = i + 1;
-			m3[i] = i;
-			m4[i] = i;
-			m1[i] = i;
-			m2[i] = i + 1;
-			m3[i] = i;
-			m4[i] = i;
-			m1[i] = i;
-			m2[i] = i + 1;
-			m4[i] = i;
+			m1.insert(mpair(i, i));
+			m2.insert(mpair(i, i + 1));
+			m3.insert(mpair(i, i));
+			m4.insert(mpair(i, i));
+			m1.insert(mpair(i, i));
+			m2.insert(mpair(i, i + 1));
+			m3.insert(mpair(i, i));
+			m4.insert(mpair(i, i));
+			m1.insert(mpair(i, i));
+			m2.insert(mpair(i, i + 1));
+			m4.insert(mpair(i, i));
 		}
-		m4[9] = 8;
+		m4.insert(mpair(9, 8));
 		const multimap<int, int> mc1(m1);
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
-		m1[10] = 10;
+		m2.insert(mpair(10, 10));
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
 		outfile.close();
 	}

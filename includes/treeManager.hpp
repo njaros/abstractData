@@ -509,7 +509,9 @@ void    deleteNode(node<T> *n, node<T> **root, allocNode &alloc, allocValueType 
 {
     node<T>* replace;
     node<T>* child;
-    node<T>* temp;
+    //node<T>* temp;
+	//bool nColorTmp;
+	//bool replaceColorTmp;
 
     if (!n)
         return ;
@@ -517,15 +519,17 @@ void    deleteNode(node<T> *n, node<T> **root, allocNode &alloc, allocValueType 
         destroyNode(*root, alloc, allocT);
         return ;
     }
+//	nColorTmp = n->color;
     replace = n;
     if (isNotLeaf(replace->left) && isNotLeaf(replace->right))
     {
-        replace = replace->right;
-        while (isNotLeaf(replace->left))
-            replace = replace->left;
+        replace = replace->left;
+        while (isNotLeaf(replace->right))
+            replace = replace->right;
     }
+//	replaceColorTmp = replace->color;
     if (n != replace) {
-
+/*
         //FATHER EXCHANGE
         if (n->father != NO_FATHER)
         {
@@ -558,9 +562,16 @@ void    deleteNode(node<T> *n, node<T> **root, allocNode &alloc, allocValueType 
             replace->right->father = n;
         temp = n->right;
         n->right = replace->right;
-        replace->right = temp;
+        replace->right = temp;*/
+		T   *temp;
+
+        temp = n->content;
+        n->content = replace->content;
+        replace->content = temp;
     }
-    if (isNotLeaf(n->left))
+	//replace->color = nColorTmp;
+	//n->color = replaceColorTmp;
+    /*if (isNotLeaf(n->left))
         child = n->left;
     else
         child = n->right;
@@ -575,8 +586,27 @@ void    deleteNode(node<T> *n, node<T> **root, allocNode &alloc, allocValueType 
             n->father->right = child;
     }
     if (n->color == BLACK)
+	{
         fixTreeDelete(child, root);
-    destroyNode(n, alloc, allocT);
+	}
+    destroyNode(n, alloc, allocT);*/
+	if (isNotLeaf(replace->left))
+        child = replace->left;
+    else
+        child = replace->right;
+    child->father = replace->father;
+    if (replace->father == NO_FATHER)
+        *root = child;
+    else
+    {
+        if (replace == replace->father->left)
+            replace->father->left = child;
+        else
+            replace->father->right = child;
+    }
+    if (replace->color == BLACK)
+        fixTreeDelete(child, root);
+    destroyNode(replace, alloc, allocT);
 }
 
 template < typename T, typename allocNode, typename allocValueType >

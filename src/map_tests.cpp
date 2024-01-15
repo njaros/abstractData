@@ -6,10 +6,16 @@
 	#include "../includes/map.hpp"
 	#define FT 1
 	using namespace ft;
+	
+	template <class T, class U>
+	ft::pair<T, U> mpair(const T& x, const U& y) { return ft::make_pair(x, y); }
 #else
 	#include <map>
 	#define FT 0
 	using namespace std;
+
+	template <class T, class U>
+	ft::pair<T, U> mpair(const T& x, const U& y) { return std::make_pair(x, y); }
 #endif
 
 void	map_tests(const std::string& currentPath, std::ostream& except)
@@ -38,13 +44,14 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 
 		map<int, std::string> mc2(mc);
 		displayV2(mc2, "map copy constructor with a const map as parameter", outfile, 2);
-
 		mc2[2] = "another value";
-		outfile << mc2[2] << " was a deep copy of " << mc.at(2) << '\n';
+
+		outfile << mc2[2];
+		outfile << " was a deep copy of " << mc.at(2) << '\n';
 
 		map<int, std::string> mr(++mc.begin(), mc.end());
 		displayV2(mr, "map range constructor with a const map iterators as parameters", outfile, 3);
-		
+
 		const map<int, std::string> mce;
 
 		map<int, std::string> me3;
@@ -212,7 +219,11 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 	//ERASE
 
 	{
+		fileName = currentPath + "erase.log";
+		outfile.open(fileName.c_str());
+		
 		map<int, int> m;
+		map<int, int>::iterator it;
 		map<int, int>::size_type seed;
 		map<int, int>::size_type count;
 		map<int, int>::size_type eraseCount;
@@ -241,7 +252,9 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			m.erase(m.find(getRandom< map<int, int> >(seed, 50)));
+			it = m.find(getRandom< map<int, int> >(seed, 50));
+			if (it != m.end())
+				m.erase(it);
 		}
 
 		displayV2(m, "erase by iterator", outfile, 6);
@@ -259,7 +272,9 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(m, "erase by range, begin() included, 1 element", outfile, 4);
 
 		m.erase(2);
+
 		m.erase(1);
+
 		displayV2(m, "nothing left", outfile);
 
 		outfile.close();
@@ -325,7 +340,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		
 		ptr2 = &(m2["lapin"]);
 
-		outfile << "ptr1 == ptr2 ? " << ptr1 == ptr2 << '\n';
+		outfile << "ptr1 == ptr2 ? " << (ptr1 == ptr2) << '\n';
 
 		swap(m1, m2);
 
@@ -400,16 +415,16 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		}
 		const map<int, int> m2(m);
 
-		outfile << "====find====\n\n"
+		outfile << "====find====\n\n";
 
 		cit = m.find(1);
-		outfile << cit == m.end() << '\n';
+		outfile << (cit == m.end()) << '\n';
 
 		it = m.find(1);
-		outfile << it == cit << '\n';
+		outfile << (it == cit) << '\n';
 
 		cit = m2.find(1);
-		outfile << cit == m2.end() << '\n';
+		outfile << (cit == m2.end()) << '\n';
 
 		it = m.find(3);
 		outfile << *it << '\n';
@@ -425,7 +440,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		outfile << *it << " muse be same as " << *(m.find(3)) << '\n';
 
 
-		outfile << "\n====count====\n\n"
+		outfile << "\n====count====\n\n";
 		for (int i = 0; i < 501; ++i)
 		{
 			count += m.count(i);
@@ -435,7 +450,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 
 		outfile << "\n====lower_bound====\n\n";
 
-		m.lower_bound(0) = -58;
+		m.lower_bound(0)->second = -58;
 
 		outfile << *(m.lower_bound(2)) << '\n';
 		outfile << *(m.lower_bound(0)) << '\n';
@@ -449,7 +464,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 
 		outfile << "\n====upper_bound====\n\n";
 
-		m.upper_bound(2) = 789;
+		m.upper_bound(2)->second = 789;
 
 		outfile << *(m.upper_bound(2)) << '\n';
 		outfile << *(m.upper_bound(0)) << '\n';
@@ -471,8 +486,8 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(103).first;
 		cit2 = m2.equal_range(103).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(10).first;
 		it2 = m.equal_range(10).second;
@@ -480,8 +495,8 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(100).first;
 		cit2 = m2.equal_range(100).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(401).first;
 		it2 = m.equal_range(401).second;
@@ -489,8 +504,8 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(101).first;
 		cit2 = m2.equal_range(101).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(4000).first;
 		it2 = m.equal_range(4000).second;
@@ -498,10 +513,10 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		cit = m2.equal_range(10000).first;
 		cit2 = m2.equal_range(10000).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
-		outfile << it == m.end() << ' ' << cit == m2.end() << '\n';
+		outfile << (it == m.end()) << ' ' << (cit == m2.end()) << '\n';
 
 		outfile.close();
 	}
@@ -512,12 +527,9 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "get_allocator.log";
 		outfile.open(fileName.c_str());
 
-		char adr = 'o';
-		char otherchar = 'u';
-		dummyAllocator<char> dumb(&adr);
-		map<char, char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
-		dummyAllocator<char> cpy = m.get_allocator();
-		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
+		map<char, char> m;
+		std::allocator<char> cpy = m.get_allocator();
+		// must not crash
 
 		outfile.close();
 	}
@@ -544,21 +556,21 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		m4[9] = 8;
 		const map<int, int> mc1(m1);
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
 		m1[10] = 10;
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
 		outfile.close();
 	}

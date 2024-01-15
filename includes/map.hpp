@@ -339,14 +339,15 @@ namespace ft {
             _it = find(k);
             if (_it == end())
                 throw (ft::out_of_range("this element isn't on the map\n"));
-            return (*_it).second;
+            return _it->second;
         }
 
         const mapped_type &at(const key_type &k) const {
-            _it = find(k);
-            if (_it == end())
+			const_iterator cit;
+            cit = find(k);
+            if (cit == end())
                 throw (ft::out_of_range("this element isn't on the map\n"));
-            return (*_it).second;
+            return cit->second;
         }
 
         mapped_type &operator[](const key_type &k) {
@@ -473,16 +474,14 @@ namespace ft {
         void                        erase(iterator first, iterator last)
         {
 			while (first != last)
-            {
                 erase(first++);
-			}
         }
         void                        swap(map &other) {
             node<value_type>* tempRoot = _root;
             node<value_type>* tempLeaf = _leaf;
             size_type			tempSize = _size;
             allocator_type		tempAlloc = _alloc;
-            key_type			tempCompare = _compare;
+            key_compare			tempCompare = _compare;
 
             _root = other._root;
             _size = other._size;
@@ -1118,9 +1117,8 @@ namespace ft {
         }
 
         void                        erase(iterator position) {
-            node<value_type>* nodeToDel = _findNode(position->first, _root);
-            if (nodeToDel) {
-                deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(nodeToDel, &_root, _allocNode,
+            if (position != end()) {
+                deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(position.base(), &_root, _allocNode,
                     _alloc);
                 if (!--_size) {
                     _root = 0;
@@ -1134,7 +1132,6 @@ namespace ft {
             }
         }
         size_type                   erase(const key_type& k) {
-            node<value_type>* n = _findNode(k, _root);
             size_type delCount;
 
             delCount = 0;
@@ -1169,7 +1166,7 @@ namespace ft {
             node<value_type>* tempLeaf = _leaf;
             size_type			tempSize = _size;
             allocator_type		tempAlloc = _alloc;
-            key_type			tempCompare = _compare;
+            key_compare			tempCompare = _compare;
 
             _root = other._root;
             _size = other._size;

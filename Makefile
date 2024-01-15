@@ -7,6 +7,7 @@ PATH_OBJS_STD	=	obj_std
 PATH_INCLUDES	=	includes
 
 LST_SRCS		=	containers.cpp\
+					utils.cpp\
 					exception.cpp\
 					vector_tests.cpp\
 					stack_tests.cpp\
@@ -18,8 +19,7 @@ LST_SRCS		=	containers.cpp\
 					multimap_tests.cpp\
 					set_tests.cpp\
 					multiset_tests.cpp\
-					list_tests\
-					utils.cpp
+					list_tests.cpp
 LST_OBJS		=	${LST_SRCS:.cpp=.o}
 LST_DEP			=	${LST_SRCS:.cpp=.d}
 LST_INCLUDES	=	algorithm.hpp\

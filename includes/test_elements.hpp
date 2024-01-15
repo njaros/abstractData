@@ -4,11 +4,15 @@
 #include <fstream>
 #include <iostream>
 #include <cstddef>
+#include <memory>
+#include <utility>
+#include <../includes/utility.hpp>
 
 // COMMON TOOLS
 
-std::string	itoa(long long nb);
-long long pow(long long a, long long b);
+std::string	myItoa(long long nb);
+long long myPow(long long a, long long b);
+double myFabs(double d);
 
 template < class T >
 typename T::size_type getRandom(typename T::size_type& seed, typename T::size_type modulo)
@@ -28,6 +32,20 @@ typename T::size_type getRandom(typename T::size_type& seed, typename T::size_ty
 // END OF COMMON TOOLS
 
 // COMMON TESTS LIBRARY
+
+template <class T, class U>
+std::ostream&	operator<<(std::ostream& o, const ft::pair<T, U>& p)
+	{
+		o << '(' << p.first << ", " << p.second << ')';
+		return o;
+	}
+
+template <class T, class U>
+	std::ostream&	operator<<(std::ostream& o, const std::pair<T, U>& p)
+	{
+		o << '(' << p.first << ", " << p.second << ')';
+		return o;
+	}
 
 template < class T >
 class dummyAllocator
@@ -91,14 +109,28 @@ class dummyAllocator
 	pointer dummyValue;
 };
 
-template < typename Pair, typename T1 = typename Pair::first_type, typename T2 = typename Pair::second_type > 
-std::ostream&	operator<<(std::ostream& o, const Pair& p)
+template < typename T >
+class dummyAllocator2 : public std::allocator< T >
 {
-	T1 first = p.first;
-	T2 second = p.second;
-	o << '(' << first << ", " << second << ')';
-	return o;
-}
+	public :
+
+	int i;
+
+	dummyAllocator2() : std::allocator<T>()
+	{
+		i = 0;
+	}
+
+	dummyAllocator2(int nb) : std::allocator<T>()
+	{
+		i = nb;
+	}
+
+	dummyAllocator2(const dummyAllocator2& o) : std::allocator<T>(o)
+	{
+		i = o.i;
+	}
+};
 
 template < typename T >
 void	displayData(const T& container, std::ostream& stream, typename T::size_type eltsPerLine)
@@ -207,7 +239,7 @@ template <class Cont> void randomIteratorTests(std::ofstream& outfile)
 		
 	for (int i = 0; i < 20; ++i)
 	{
-		v.push_back(itoa(i));
+		v.push_back(myItoa(i));
 	}
 
 	const Cont const_v(v);
@@ -385,7 +417,6 @@ void bidirectionalIteratorTests(Cont& c, std::ofstream& outfile)
 	const Cont c2(c);
 		
 	Cit cit = c2.begin();
-	Cit citRange = c.end() - 3;
 	it = c.begin();
 
 	outfile << "++, --, *(), *++, *-- const_iterator tests\n\n";
@@ -429,7 +460,7 @@ template <class Cont> void ReverseRandomIteratorTests(std::ofstream& outfile)
 		
 	for (int i = 0; i < 20; ++i)
 	{
-		v.push_back(itoa(i));
+		v.push_back(myItoa(i));
 	}
 
 	const Cont const_v(v);
@@ -597,9 +628,8 @@ void bidirectionalReverseIteratorTests(Cont& c, std::ofstream& outfile)
 	It it;
 	const Cont c2(c);
 		
-	Cit cit = c2.begin();
-	Cit citRange = c.end() - 3;
-	it = c.begin();
+	Cit cit = c2.rbegin();
+	it = c.rbegin();
 
 	outfile << "++, --, *(), *++, *-- reverse_const_iterator tests\n\n";
 	outfile << *++cit << " must be equal to " << *cit++ << '\n';
@@ -609,8 +639,8 @@ void bidirectionalReverseIteratorTests(Cont& c, std::ofstream& outfile)
 	outfile << *++it << " must be equal to " << *it++ << '\n';
 	outfile << *--it << " must be equal to " << *it-- << '\n';
 
-	it = c.end();
-	cit = c2.end();
+	it = c.rend();
+	cit = c2.rend();
 	Cit cit2(it);
 	Cit cit3(cit2);
 	outfile << "\niterator and const_reverse_iterator comparisons : \n\n";
@@ -621,8 +651,8 @@ void bidirectionalReverseIteratorTests(Cont& c, std::ofstream& outfile)
 	outfile << "is " << *it << " == " << *--cit2 << " ? " << (it == cit2) << '\n';
 	outfile << "is " << *--cit << " != " << *--cit2 << " ? " << (cit != cit2) << '\n';
 	outfile << "is " << *--cit << " != " << *cit2 << " ? " << (cit != cit2) << '\n';
-	it = c.begin();
-	cit = c2.begin();
+	it = c.rbegin();
+	cit = c2.rbegin();
 	cit2 = it;
 	cit3 = it;
 	outfile << "is " << *cit << " != " << *cit2 << " ? " << (cit != cit2) << '\n';
@@ -640,7 +670,7 @@ void stack_tests(const std::string& currentPath);
 void queue_tests(const std::string& currentPath);
 void priority_queue_tests(const std::string& currentPath);
 void map_tests(const std::string& currentPath, std::ostream& except);
-void multimap_tests(const std::string& currentPath, std::ostream& except);
+void multimap_tests(const std::string& currentPath);
 void set_tests(const std::string& currentPath);
 void multiset_tests(const std::string& currentPath);
 void list_tests(const std::string& currentPath, std::ostream& except);

@@ -320,7 +320,7 @@ namespace ft {
 			node<value_type>* tempLeaf = _leaf;
 			size_type			tempSize = _size;
 			allocator_type		tempAlloc = _alloc;
-			key_type			tempCompare = _compare;
+			key_compare			tempCompare = _compare;
 
 			_root = other._root;
 			_size = other._size;
@@ -784,7 +784,7 @@ namespace ft {
 
 		iterator                    insert(iterator hint, const value_type& data) {
 			if (!_root)
-				return iterator(insert(data).first);
+				return insert(data);
 			bool    highest = false;
 			bool    smallest = false;
 			_it = begin();
@@ -809,7 +809,7 @@ namespace ft {
 			++_size;
 			iterator    inserted(recursiveInsertMultiset(hint.base(), newNode<value_type, \
 				std::allocator< node < value_type> >, allocator_type>(data, _allocNode, _alloc), \
-				_compare, smallest, highest).first);
+				_compare, smallest, highest));
 			fixTree(inserted.base(), &_root);
 			return (inserted);
 		}
@@ -823,23 +823,21 @@ namespace ft {
 		}
 
 		void                        erase(iterator position) {
-			node<value_type>* nodeToDel = _findNode(*position, _root);
-			if (nodeToDel) {
-				deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(
-					nodeToDel, &_root, _allocNode, _alloc);
-				if (!--_size) {
-					_root = 0;
-					_leaf->left = 0;
-					_leaf->right = 0;
-				}
-				else {
-					_leaf->father = getMaxNode(_root);
-					_leaf->left = getMinNode(_root);
-				}
+			if (position == end())
+				return;
+			deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(
+				position.base(), &_root, _allocNode, _alloc);
+			if (!--_size) {
+				_root = 0;
+				_leaf->left = 0;
+				_leaf->right = 0;
+			}
+			else {
+				_leaf->father = getMaxNode(_root);
+				_leaf->left = getMinNode(_root);
 			}
 		}
 		size_type                   erase(const key_type& k) {
-			node<value_type>* n = _findNode(k, _root);
 			size_type	delCount;
 
 			delCount = 0;
@@ -874,7 +872,7 @@ namespace ft {
 			node<value_type>*	tempLeaf = _leaf;
 			size_type			tempSize = _size;
 			allocator_type		tempAlloc = _alloc;
-			key_type			tempCompare = _compare;
+			key_compare			tempCompare = _compare;
 
 			_root = other._root;
 			_size = other._size;

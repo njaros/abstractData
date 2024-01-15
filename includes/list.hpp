@@ -2,6 +2,10 @@
 #define LIST_HPP_ABSTRACT_DATA_BY_LE_N
 
 # include <memory>
+# include "iterator.hpp"
+# include "reverse_iterator.hpp"
+# include "functional.hpp"
+# include "algorithm.hpp"
 
 namespace ft
 {
@@ -10,14 +14,14 @@ namespace ft
 
 	public:
 
-		typedef	T	value_type;
-		typedef Alloc	allocator_type;
-		typedef T& reference;
-		typedef const reference	const_reference;
-		typedef T* pointer;
-		typedef const pointer	const_pointer;
-		typedef typename Alloc::difference_type	difference_type;
-		typedef typename Alloc::size_type	size_type;
+		typedef 			Alloc	allocator_type;
+		typedef typename	Alloc::value_type	value_type;
+		typedef typename	Alloc::reference reference;
+		typedef typename	Alloc::const_reference	const_reference;
+		typedef typename	Alloc::pointer pointer;
+		typedef typename	Alloc::const_pointer	const_pointer;
+		typedef typename	Alloc::difference_type	difference_type;
+		typedef typename	Alloc::size_type	size_type;
 
 		struct Node
 		{
@@ -33,7 +37,7 @@ namespace ft
 
 		public:
 
-			MyIt() : _n(nullptr) {}
+			MyIt() : _n(0) {}
 			MyIt(Node* n) : _n(n) {}
 			MyIt(const MyIt& o) : _n(o._n) {}
 			MyIt(const MyCIt& o) : _n(o.base()) {}
@@ -116,7 +120,7 @@ namespace ft
 
 		public:
 
-			MyCIt() : _n(nullptr) {}
+			MyCIt() : _n(0) {}
 			MyCIt(Node* n) : _n(n) {}
 			MyCIt(const MyIt& o) : _n(o.base()) {}
 			MyCIt(const MyCIt& o) : _n(o._n) {}
@@ -228,7 +232,7 @@ namespace ft
 			nullNode = _allocN.allocate(1);
 			nullNode->n = nullNode;
 			nullNode->p = nullNode;
-			nullNode->content = nullptr;
+			nullNode->content = 0;
 			return nullNode;
 		}
 
@@ -336,8 +340,8 @@ namespace ft
 			const_iterator current;
 			const_iterator previous;
 
-			current = begin();
-			previous = begin();
+			current = l.begin();
+			previous = l.begin();
 			++current;
 			while (current != end())
 			{
@@ -360,14 +364,14 @@ namespace ft
 			first = _end;
 			for (typename ft::list<value_type>::const_iterator cit = o.begin(); cit != o.end(); ++cit)
 			{
-				newNode = _getNewNode(first, nullptr, *cit);
+				newNode = _getNewNode(first, 0, *cit);
 				first->n = newNode;
 				first = newNode;
 			}
 			first->n = _end;
 			_end->p = first;
 		}
-		explicit list(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
+		explicit list(size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
 			: _end(_getNewNullNode()), _size(n), _alloc(alloc)
 		{
 			Node* newNode;
@@ -378,7 +382,7 @@ namespace ft
 			first = _end;
 			while (n--)
 			{
-				newNode = _getNewNode(first, nullptr, val);
+				newNode = _getNewNode(first, 0, val);
 				first->n = newNode;
 				first = newNode;
 			}
@@ -397,13 +401,11 @@ namespace ft
 			dist = ft::distance(first, last);
 			if (dist < 0)
 				throw (ft::length_error("ft::list::rangeConstructor: Input last must be greater then first"));
-			if (dist >= _allocMaxSize.max_size())
-				throw (ft::length_error("ft::list::rangeConstructor: they're is too much elements"));
 			_size = dist;
 			firstNode = _end;
 			while (first != last)
 			{
-				newNode = _getNewNode(firstNode, nullptr, *first);
+				newNode = _getNewNode(firstNode, 0, *first);
 				++first;
 				firstNode->n = newNode;
 				firstNode = newNode;
@@ -441,7 +443,7 @@ namespace ft
 				}
 				else
 				{
-					tmp = _getNewNode(first, nullptr, *cit);
+					tmp = _getNewNode(first, 0, *cit);
 					first->n = tmp;
 					first = tmp;
 				}
@@ -498,9 +500,6 @@ namespace ft
 			dist = ft::distance(first, last);
 			if (dist < 0)
 				throw (ft::length_error("ft::list::assign : last input must be greater than first input"));
-			if (dist >= _allocMaxSize.max_size())
-				throw (ft::length_error("ft::list::assign : they're is too much elements"));
-
 			_size = (size_type)dist;
 			if (!_size)
 			{
@@ -518,7 +517,7 @@ namespace ft
 				}
 				else
 				{
-					tmp = _getNewNode(firstNode, nullptr, *first);
+					tmp = _getNewNode(firstNode, 0, *first);
 					firstNode->n = tmp;
 					firstNode = tmp;
 				}
@@ -537,7 +536,7 @@ namespace ft
 				firstNode->n = _end;
 			_end->p = firstNode;
 		}
-		void	assign(size_type n, const value_type& val)
+		void	assign(size_type n, const value_type& val = value_type())
 		{
 			Node* tmp;
 			Node* firstNode;
@@ -562,11 +561,10 @@ namespace ft
 				}
 				else
 				{
-					tmp = _getNewNode(firstNode, nullptr, val);
+					tmp = _getNewNode(firstNode, 0, val);
 					firstNode->n = tmp;
 					firstNode = tmp;
 				}
-				++firstNode;
 			}
 			if (firstNode->n)
 			{
@@ -677,7 +675,7 @@ namespace ft
 			insert(begin(), val);
 		}
 
-		void	resize(size_type n, const value_type& val)
+		void	resize(size_type n, const value_type& val = value_type())
 		{
 			if (n >= _allocMaxSize.max_size())
 				throw (ft::length_error("ft::list::resize : size too high."));
@@ -768,9 +766,12 @@ namespace ft
 			Node* afterInsert;
 			difference_type	dist;
 
+			if (start == end)
+				return;
+
 			//Extraction from x
-			first = start->base();
-			last = end->base()->p;
+			first = start.base();
+			last = end.base()->p;
 			dist = ft::distance(start, end);
 			x._size -= dist;
 			first->p->n = last->n;
@@ -778,8 +779,8 @@ namespace ft
 
 			//Insertion to self
 			_size += dist;
-			beforeInsert = position->base()->p;
-			afterInsert = position->base();
+			beforeInsert = position.base()->p;
+			afterInsert = position.base();
 			beforeInsert->n = first;
 			first->p = beforeInsert;
 			afterInsert->p = last;
@@ -818,12 +819,20 @@ namespace ft
 		void	unique()
 		{
 			iterator current;
+			iterator previous;
 
 			current = begin();
+			previous = begin();
+			++current;
 			while (current != end())
 			{
-				if (*current == ++(*current))
+				if (*current == *previous)
 					current = erase(current);
+				else
+				{
+					++current;
+					++previous;
+				}
 			}
 		}
 
@@ -852,7 +861,6 @@ namespace ft
 		void	merge(list& x, Compare comp)
 		{
 			Node* start;
-			Node* last;
 			Node* selfIdx;
 			Node* tmp;
 

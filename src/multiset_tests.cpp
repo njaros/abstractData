@@ -25,30 +25,30 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "constructor.log";
 		outfile.open(fileName.c_str());
 
-		multiset_tests<std::string> me;
-		displayV2(me, "multiset_tests default constructor", outfile);
+		multiset<std::string> me;
+		displayV2(me, "multiset default constructor", outfile);
 
 		me.insert("pouet");
 		me.insert("lol");
 		me.insert("gigi");
 		me.insert("0");
 
-		const multiset_tests<std::string> mc(me);
-		displayV2(mc, "const multiset_tests copy constructor", outfile, 2);
+		const multiset<std::string> mc(me);
+		displayV2(mc, "const multiset copy constructor", outfile, 2);
 
-		outfile << "must be false : " << &(*(mc.begin())) == &(*(me.begin())) << '\n';
+		outfile << "must be false : " << (&(*(mc.begin())) == &(*(me.begin()))) << '\n';
 
-		multiset_tests<std::string> mc2(mc);
-		displayV2(mc2, "multiset_tests copy constructor with a const multiset_tests as parameter", outfile, 2);
+		multiset<std::string> mc2(mc);
+		displayV2(mc2, "multiset copy constructor with a const multiset as parameter", outfile, 2);
 
-		outfile << "must be false : " << &(*(mc.begin())) == &(*(mc2.begin())) << '\n';
+		outfile << "must be false : " << (&(*(mc.begin())) == &(*(mc2.begin()))) << '\n';
 
-		multiset_tests<std::string> mr(++mc.begin(), mc.end());
-		displayV2(mr, "multiset_tests range constructor with a const multiset_tests iterators as parameters", outfile, 3);
+		multiset<std::string> mr(++mc.begin(), mc.end());
+		displayV2(mr, "multiset range constructor with a const multiset iterators as parameters", outfile, 3);
 		
-		const multiset_tests<std::string> mce;
+		const multiset<std::string> mce;
 
-		multiset_tests<std::string> me3;
+		multiset<std::string> me3;
 
 		me = mce;
 		displayV2(me, "operator= notEmpty = constEmpty", outfile, 2);
@@ -69,7 +69,7 @@ void	multiset_tests(const std::string& currentPath)
 		me = me3;
 		displayV2(me, "operator= notEmpty = notEmpty", outfile, 2);
 
-		outfile << "must be false " << &(*(me.begin())) == &(*(me3.begin())) << '\n';
+		outfile << "must be false " << (&(*(me.begin())) == &(*(me3.begin()))) << '\n';
 
 		outfile.close();
 	}
@@ -80,22 +80,22 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "iterator.log";
 		outfile.open(fileName.c_str());
 
-		multiset_tests<std::string> m;
+		multiset<std::string> m;
 		for (long long i = 0; i < 9; ++i)
-			m.insert(itoa(pow(10, i)));
+			m.insert(myItoa(myPow(10, i)));
 
 		bidirectionalIteratorTests(m, outfile);
 		bidirectionalReverseIteratorTests(m, outfile);
 
-		const multiset_tests<std::string> m2(m);
-		multiset_tests<std::string>::iterator it;
-		multiset_tests<std::string>::const_iterator cit;
+		const multiset<std::string> m2(m);
+		multiset<std::string>::iterator it;
+		multiset<std::string>::const_iterator cit;
 		
 		cit = m2.begin();
 		outfile << *cit << '\n';
 		++cit;
 		outfile << cit++->size() << '\n';
-		outfile << *cit->size() << '\n';
+		outfile << cit->size() << '\n';
 
 		cit = m2.end();
 		--cit;
@@ -118,7 +118,6 @@ void	multiset_tests(const std::string& currentPath)
 		outfile << it--->size() << '\n';
 		outfile << it->size() << '\n';
 
-		it->second = "pouet";
 		outfile << *it << '\n';
 
 		outfile.close();
@@ -130,19 +129,18 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "insert.log";
 		outfile.open(fileName.c_str());
 
-		pair<multiset_tests<int>::iterator, bool> insertResult;
-		multiset_tests<int>::iterator hint;
-		multiset_tests<int> me;
-		multiset_tests<int> range;
+		multiset<int>::iterator insertResult;
+		multiset<int>::iterator hint;
+		multiset<int> me;
+		multiset<int> range;
 
 		outfile << "single element inserts :\n\n";
 		for (int i = -20; i <= 20; ++i)
 		{
 			insertResult = me.insert(i * i);
-			outfile << "inserting " << p << " => succeed ? " << insertResult.second << ". "
-					<< *(insertResult.first) << '\n';			
+			outfile << "inserting " << i * i << " => succeed ? true : " << *insertResult << '\n';			
 		}
-		displayV2(me, "multiset_tests view after inserts", outfile, 5);
+		displayV2(me, "multiset view after inserts", outfile, 5);
 
 		hint = me.begin();
 		hint = me.insert(hint, 5);
@@ -158,9 +156,12 @@ void	multiset_tests(const std::string& currentPath)
 		displayV2(me, "hint insert with same key", outfile, 5);
 
 		for (int i = 0; i < 30; ++i)
-			range[i] = -i;
+		{
+			range.insert(i);
+			range.insert(i);
+		}
 		me.insert(range.find(7), range.find(27));
-		displayV2(me, "range insert", outfile, 7);
+		displayV2(me, "range insert", outfile, 20);
 
 		outfile.close();
 	}
@@ -168,10 +169,14 @@ void	multiset_tests(const std::string& currentPath)
 	//ERASE
 
 	{
-		multiset_tests<int> m;
-		multiset_tests<int>::size_type seed;
-		multiset_tests<int>::size_type count;
-		multiset_tests<int>::size_type eraseCount;
+		fileName = currentPath + "erase.log";
+		outfile.open(fileName.c_str());
+
+		multiset<int> m;
+		multiset<int>::iterator it;
+		multiset<int>::size_type seed;
+		multiset<int>::size_type count;
+		multiset<int>::size_type eraseCount;
 		bool started = false;
 
 		seed = 0;
@@ -187,7 +192,7 @@ void	multiset_tests(const std::string& currentPath)
 		{
 			started = true;
 			++count;
-			eraseCount += m.erase(getRandom< multiset_tests<int> >(seed, 50));
+			eraseCount += m.erase(getRandom< multiset<int> >(seed, 50));
 		}
 		outfile << "number of erase attempts : " << count << " | truely erased : " << eraseCount << '\n';
 		displayV2(m, "erase by key", outfile, 6);
@@ -200,7 +205,9 @@ void	multiset_tests(const std::string& currentPath)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			m.erase(m.find(getRandom< multiset_tests<int> >(seed, 50)));
+			it = m.find(getRandom< multiset<int> >(seed, 50));
+			if (it != m.end())
+			m.erase(it);
 		}
 
 		displayV2(m, "erase by iterator", outfile, 6);
@@ -209,12 +216,15 @@ void	multiset_tests(const std::string& currentPath)
 			m.insert(i);
 
 		m.erase(m.find(4), m.find(490));
+
 		displayV2(m, "erase by range", outfile, 4);
 
 		m.erase(m.find(3), m.end());
+
 		displayV2(m, "erase by range, end() included", outfile, 4);
 
 		m.erase(m.begin(), m.find(1));
+
 		displayV2(m, "erase by range, begin() included, 1 element", outfile, 4);
 
 		m.erase(2);
@@ -230,7 +240,7 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "clear.log";
 		outfile.open(fileName.c_str());
 
-		multiset_tests<std::string> m;
+		multiset<std::string> m;
 
 		m.insert("biere");
 		m.insert("biere");
@@ -246,10 +256,9 @@ void	multiset_tests(const std::string& currentPath)
 		m.insert("42");
 		m.insert("Saint Etienne");
 		m.insert("Saint Etienne");
-		m.insert("multiset_tests");
+		m.insert("multiset");
 
-		displayV2(m, "reuse of cleared multiset_tests", outfile);
-
+		displayV2(m, "reuse of cleared multiset", outfile);
 		outfile.close();
 	}
 
@@ -259,11 +268,11 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "swap.log";
 		outfile.open(fileName.c_str());
 
-		multiset_tests<std::string> m1;
-		multiset_tests<std::string> m2;
+		multiset<std::string> m1;
+		multiset<std::string> m2;
 
-		std::string* ptr1;
-		std::string* ptr2;
+		const std::string* ptr1;
+		const std::string* ptr2;
 
 		m1.insert("chou");
 		m1.insert("carotte");
@@ -288,7 +297,7 @@ void	multiset_tests(const std::string& currentPath)
 		
 		ptr2 = &(*(m2.find("lapin")));
 
-		outfile << "ptr1 == ptr2 ? " << ptr1 == ptr2 << '\n';
+		outfile << "ptr1 == ptr2 ? " << (ptr1 == ptr2) << '\n';
 
 		swap(m1, m2);
 
@@ -304,12 +313,16 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "observer.log";
 		outfile.open(fileName.c_str());
 
-		multiset_tests<int, greater<int> > m;
+		multiset<int, greater<int> > m;
 
-		m[1] = 4;
-		m[3] = 3;
-		m[9] = 0;
-		m[12] = 4;
+		m.insert(1);
+		m.insert(3);
+		m.insert(9);
+		m.insert(12);
+		m.insert(1);
+		m.insert(3);
+		m.insert(9);
+		m.insert(12);
 
 		outfile << m.value_comp()(*(m.find(12)), *(m.find(9))) << ' ' <<
 			m.value_comp()(*(m.find(1)), *(m.find(9))) << ' ' <<
@@ -321,12 +334,16 @@ void	multiset_tests(const std::string& currentPath)
 			m.key_comp()(12, 9) << ' ' <<
 			m.key_comp()(1, 2) << '\n';
 
-		multiset_tests<int> m2;
+		multiset<int> m2;
 
-		m2[1] = 4;
-		m2[3] = 3;
-		m2[9] = 0;
-		m2[12] = 4;
+		m2.insert(1);
+		m2.insert(3);
+		m2.insert(9);
+		m2.insert(12);
+		m2.insert(1);
+		m2.insert(3);
+		m2.insert(9);
+		m2.insert(12);
 
 		outfile << m2.value_comp()(*(m2.find(12)), *(m2.find(9))) << ' ' <<
 			m2.value_comp()(*(m2.find(1)), *(m2.find(9))) << ' ' <<
@@ -348,14 +365,14 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "operation.log";
 		outfile.open(fileName.c_str());
 
-		multiset_tests<int>::size_type count = 0;
+		multiset<int>::size_type count = 0;
 
-		multiset_tests<int>::iterator it;
-		multiset_tests<int>::iterator it2;
-		multiset_tests<int>::const_iterator cit;
-		multiset_tests<int>::const_iterator cit2;
+		multiset<int>::iterator it;
+		multiset<int>::iterator it2;
+		multiset<int>::const_iterator cit;
+		multiset<int>::const_iterator cit2;
 
-		multiset_tests<int> m;
+		multiset<int> m;
 		for (int i = 0; i < 501; i += 5)
 		{
 			m.insert(i + 2);
@@ -363,18 +380,18 @@ void	multiset_tests(const std::string& currentPath)
 			m.insert(i + 2);
 			m.insert(i + 3);
 		}
-		const multiset_tests<int> m2(m);
+		const multiset<int> m2(m);
 
-		outfile << "====find====\n\n"
+		outfile << "====find====\n\n";
 
 		cit = m.find(1);
-		outfile << cit == m.end() << '\n';
+		outfile << (cit == m.end()) << '\n';
 
 		it = m.find(1);
-		outfile << it == cit << '\n';
+		outfile << (it == cit) << '\n';
 
 		cit = m2.find(1);
-		outfile << cit == m2.end() << '\n';
+		outfile << (cit == m2.end()) << '\n';
 
 		it = m.find(3);
 		outfile << *it << '\n';
@@ -388,7 +405,7 @@ void	multiset_tests(const std::string& currentPath)
 		outfile << *it << " muse be same as " << *(m.find(3)) << '\n';
 
 
-		outfile << "\n====count====\n\n"
+		outfile << "\n====count====\n\n";
 		for (int i = 0; i < 501; ++i)
 		{
 			count += m.count(i);
@@ -430,8 +447,8 @@ void	multiset_tests(const std::string& currentPath)
 		cit = m2.equal_range(103).first;
 		cit2 = m2.equal_range(103).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(10).first;
 		it2 = m.equal_range(10).second;
@@ -439,8 +456,8 @@ void	multiset_tests(const std::string& currentPath)
 		cit = m2.equal_range(100).first;
 		cit2 = m2.equal_range(100).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(401).first;
 		it2 = m.equal_range(401).second;
@@ -448,8 +465,8 @@ void	multiset_tests(const std::string& currentPath)
 		cit = m2.equal_range(101).first;
 		cit2 = m2.equal_range(101).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(4000).first;
 		it2 = m.equal_range(4000).second;
@@ -457,10 +474,10 @@ void	multiset_tests(const std::string& currentPath)
 		cit = m2.equal_range(10000).first;
 		cit2 = m2.equal_range(10000).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
-		outfile << it == m.end() << ' ' << cit == m2.end() << '\n';
+		outfile << (it == m.end()) << ' ' << (cit == m2.end()) << '\n';
 
 		outfile.close();
 	}
@@ -471,12 +488,9 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "get_allocator.log";
 		outfile.open(fileName.c_str());
 
-		char adr = 'o';
-		char otherchar = 'u';
-		dummyAllocator<char> dumb(&adr);
-		multiset_tests<char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
-		dummyAllocator<char> cpy = m.get_allocator();
-		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
+		multiset<char> m;
+		std::allocator<char> cpy = m.get_allocator();
+		// must not crash
 
 		outfile.close();
 	}
@@ -487,10 +501,10 @@ void	multiset_tests(const std::string& currentPath)
 		fileName = currentPath + "relational.log";
 		outfile.open(fileName.c_str());
 
-		multiset_tests<int> m1;
-		multiset_tests<int> m2;
-		multiset_tests<int> m3;
-		multiset_tests<int> m4;
+		multiset<int> m1;
+		multiset<int> m2;
+		multiset<int> m3;
+		multiset<int> m4;
 
 		for (int i = 0; i < 10; ++i)
 		{
@@ -512,23 +526,23 @@ void	multiset_tests(const std::string& currentPath)
 		m4.erase(9);
 		m4.insert(-1);
 		m4.insert(-1);
-		const multiset_tests<int> mc1(m1);
+		const multiset<int> mc1(m1);
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
 		m1.insert(10);
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
 		outfile.close();
 	}

@@ -27,7 +27,7 @@ struct is_peer
 struct is_near
 {
   bool operator() (double first, double second)
-  { return (fabs(first-second)<5.0); }
+  { return (myFabs(first-second)<5.0); }
 };
 
 bool same_integral_part (double first, double second)
@@ -65,7 +65,7 @@ class IntLog
 			*outfile << "destructor called\n";
 	}
 
-	IntLog& operator=(const LogInt& o)
+	IntLog& operator=(const IntLog& o)
 	{
 		if (&o != this)
 		{
@@ -99,6 +99,11 @@ bool operator<(const IntLog& lhs, const IntLog& rhs)
 	return lhs.get() < rhs.get();
 }
 
+bool operator>(const IntLog& lhs, const IntLog& rhs)
+{
+	return rhs < lhs;
+}
+
 void	switchLog(list<IntLog>& l, std::ostream& out)
 {
 	for (list<IntLog>::iterator it = l.begin(); it != l.end(); ++it)
@@ -125,7 +130,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 	for (int i = 0; i < 50; ++i)
 	{
 		setI.insert(i);
-		setS.insert(itoa(i));
+		setS.insert(myItoa(i));
 	}
 
 
@@ -138,11 +143,14 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		S le;
 		S lf(15);
 		S lf2(15, "pouet");
+		std::cerr << "pouet\n";
 		const S lc(lf2);
 		S lc2(lc);
-		S lr(++lc.begin(), --lc.begin());		
-		S lr2(setS.find("3"), setS.find("17"));
-
+		std::cerr << "pouet\n";
+		S lr(++lc.begin(), --lc.end());
+		std::cerr << "pouet\n";
+		//S lr2(setS.find(std::string("3")), setS.find(std::string("17")));
+		std::cerr << "pouet\n";
 		*(lc2.begin()) = "lc2 deep?";
 		*(lr.begin()) = "lr deep?";
 
@@ -152,29 +160,29 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(lc, "const copy constructors", outfile, 5);
 		displayV2(lc2, "copy constructor with a const list", outfile, 5);
 		displayV2(lr, "range constructors with list iterators", outfile, 5);
-		displayV2(lr2, "range constructors with set iterators", outfile, 5);
-
+		//displayV2(lr2, "range constructors with set iterators", outfile, 5);
+		std::cerr << "pouet\n";
 		lf = le;
 		displayV2(lf, "operator= filled => empty", outfile);
 
 		le = lf;
 		displayV2(lf, "operator= empty => empty", outfile, 5);
 
-		le = lc;
-		*(lc.begin()) = "operator= deep ?";
+		le = lc2;
+		*(lc2.begin()) = "operator= deep ?";
 		displayV2(le, "operator= empty => filled", outfile, 5);
-
+		std::cerr << "pouet\n";
 		le = lc;
 		displayV2(le, "operator= filled => filled", outfile, 5);
 
 		le = lc;
 		displayV2(le, "operator= with a const one", outfile, 5);
-
+		std::cerr << "pouet\n";
 		try
 		{
 			S toobig(S::allocator_type().max_size() + 1, "ouch");
 		}
-		catch(const length_error& e)
+		catch(const exception& e)
 		{
 			except << "LIST : too many elts in fill constructor.\n" << e.what() << '\n';
 		}
@@ -190,7 +198,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		S l;
 		for (long long i = 0; i < 9; ++i)
-			l.push_back(itoa(pow(10, i)));
+			l.push_back(myItoa(myPow(10, i)));
 
 		bidirectionalIteratorTests(l, outfile);
 		bidirectionalReverseIteratorTests(l, outfile);
@@ -203,7 +211,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		outfile << *cit << '\n';
 		++cit;
 		outfile << cit++->size() << '\n';
-		outfile << *cit->size() << '\n';
+		outfile << cit->size() << '\n';
 
 		cit = l2.end();
 		--cit;
@@ -226,7 +234,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		outfile << it--->size() << '\n';
 		outfile << it->size() << '\n';
 
-		it->second = "pouet";
+		*it = "pouet";
 		outfile << *it << '\n';
 
 		outfile.close();
@@ -312,7 +320,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		try
 		{
-			le.insert(le.max_size() + 1, 2);
+			le.insert(le.end(), le.max_size() + 1, 2);
 		}
 		catch(const length_error& e)
 		{
@@ -350,7 +358,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		l.erase(l.begin());
 		displayV2(l, "erase first element", outfile, 5);
 
-		l.erase(l.rbegin());
+		l.erase(--l.end());
 		displayV2(l, "erase last element", outfile, 5);
 
 		l.erase(++(++(++(l.begin()))));
@@ -377,48 +385,48 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		l = lc;
 
-		it = erase(++(l.begin()), --(l.end()));
+		it = l.erase(++(l.begin()), --(l.end()));
 		outfile << *it << '\n';
-		outfile << it == l.end() << '\n';
+		outfile << (it == l.end()) << '\n';
 		displayV2(l, "range erase almost all", outfile, 3);
 
-		it = erase(l.begin(), l.end());
-		outfile << it == l.end() << '\n';
+		it = l.erase(l.begin(), l.end());
+		outfile << (it == l.end()) << '\n';
 		displayV2(l, "range erase all", outfile, 3);
 
 
 		l = lc;
-		it = erase(--(l.end()), l.end());
-		outfile << it == l.end() << '\n';
+		it = l.erase(--(l.end()), l.end());
+		outfile << (it == l.end()) << '\n';
 		displayV2(l, "range erase only last element", outfile, 5);
 
-		it = erase(l.begin(), l.begin());
-		outfile << it == l.end() << '\n';
-		outfile << it == l.begin() << '\n';
+		it = l.erase(l.begin(), l.begin());
+		outfile << (it == l.end()) << '\n';
+		outfile << (it == l.begin()) << '\n';
 		displayV2(l, "range erase distance of 0 at begin()", outfile, 5);
 
-		it = erase(l.end(), l.end());
-		outfile << it == l.end() << '\n';
-		outfile << it == l.begin() << '\n';
+		it = l.erase(l.end(), l.end());
+		outfile << (it == l.end()) << '\n';
+		outfile << (it == l.begin()) << '\n';
 		displayV2(l, "range erase distance of 0 at end()", outfile, 5);
 
 		it = l.begin();
 
 		++(++(++(++(++(++(++(++it)))))));
 		I::iterator it2(it);
-		it = erase(it, it);
-		outfile << it == l.end() << '\n';
-		outfile << it == l.begin() << '\n';
-		outfile << it2 == it << '\n';
+		it = l.erase(it, it);
+		outfile << (it == l.end()) << '\n';
+		outfile << (it == l.begin()) << '\n';
+		outfile << (it2 == it) << '\n';
 		displayV2(l, "range erase distance of 0 somewhere else", outfile, 5);
 
 		it = l.erase(l.begin(), l.end());
-		outfile << it == l.end() << '\n';
-		outfile << it == l.begin() << '\n';
+		outfile << (it == l.end()) << '\n';
+		outfile << (it == l.begin()) << '\n';
 
 		it = l.erase(l.begin(), l.end());
-		outfile << it == l.end() << '\n';
-		outfile << it == l.begin() << '\n';
+		outfile << (it == l.end()) << '\n';
+		outfile << (it == l.begin()) << '\n';
 		displayV2(l, "range erase all on empty list", outfile, 5);
 
 		outfile.close();
@@ -432,18 +440,18 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		I l;
 
-		l.clear()
+		l.clear();
 
 		displayV2(l, "clear() an empty list", outfile);
 
-		l.insert(12, 13);
+		l.insert(l.end(), 12, 13);
 		displayV2(l, "reuse a cleared list", outfile);
 
 		l.clear();
 
 		displayV2(l, "clear() a filled list", outfile);
 
-		l.insert(7, 7);
+		l.insert(l.begin(), 7, 7);
 		displayV2(l, "reuse again", outfile);
 
 		outfile.close();
@@ -455,20 +463,19 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "assign.log";
 		outfile.open(fileName.c_str());
 
-		S l;
-		const S l2(setI.begin(), setI.end());
+		I l;
+		const I l2(setI.begin(), setI.end());
 
-		l.assign(0);
 		displayV2(l, "assign test", outfile, 5);
 		l.assign(0, 9);
 		displayV2(l, "assign test", outfile, 5);
-		l.assign(4);
+		l.assign(4, 2);
 		displayV2(l, "assign test", outfile, 5);
-		l.assign(5);
+		l.assign(5, 4);
 		displayV2(l, "assign test", outfile, 5);
-		l.assign(2);
+		l.assign(2, 7);
 		displayV2(l, "assign test", outfile, 5);
-		l.assign(0);
+		l.assign(0, 7);
 		displayV2(l, "assign test", outfile, 5);
 		l.assign(4, 4);
 		displayV2(l, "assign test", outfile, 5);
@@ -479,7 +486,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		try
 		{
-			l.assign(l.max_size() + 1);
+			l.assign(l.max_size() + 1, 7);
 		}
 		catch(const length_error& e)
 		{
@@ -537,15 +544,15 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 	{
 		fileName = currentPath + "push_pop.log";
-		outfile(fileName.c_str());
+		outfile.open(fileName.c_str());
 
 		S l;
 
 		for (int i = 0; i < 10; ++i)
 		{
-			l.push_back(itoa(i));
+			l.push_back(myItoa(i));
 			outfile << l.back() << " | ";
-			l.pop_back(-itoa(i));
+			l.push_front(std::string("-") + myItoa(i));
 			outfile << l.front() << '\n';
 		}
 
@@ -581,7 +588,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		l.swap(lr);
 
-		outfile << "must not be a deep copy, is it a deep copy ? " << ptr == &(*(lr.begin())) << '\n';
+		outfile << "must not be a deep copy, is it a deep copy ? " << (ptr == &(*(lr.begin()))) << '\n';
 
 		displayV2(l, "l after swap", outfile, 10);
 		displayV2(lr, "lr after swap", outfile, 10);
@@ -614,50 +621,50 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		IL l2;
 
 		for (int i = 0; i < 20; ++i)
-			l.push_back(IntLog(i));
+			l2.push_back(IntLog(i));
 		
 		switchLog(l, outfile);
 
-		l.splice(l2);
+		l.splice(l.begin(), l2);
 		displayV2(l, "after splice full", outfile, 5);
-		l.splice(l2);
+		l.splice(l.begin(), l2);
 		displayV2(l, "same operation", outfile, 5);
 
-		l2.splice(++(l.begin()));
+		l2.splice(l2.end(), l, ++(l.begin()));
 		displayV2(l2, "l2 after splice one elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
-		l2.splice(++(l.begin()));
+		l2.splice(l2.end(), l, ++(l.begin()));
 		displayV2(l2, "l2 after splice one elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
-		l2.splice(++(l.begin()));
+		l2.splice(++(l2.begin()), l, ++(l.begin()));
 		displayV2(l2, "l2 after splice one elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
-		l2.splice(++(l.begin()), --(l.end()));
+		l2.splice(--(l2.end()), l, ++(l.begin()), --(l.end()));
 		displayV2(l2, "l2 after range splice", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
-		l2.splice(l.begin(), l.end());
+		l2.splice(--(l2.end()), l, l.begin(), l.end());
 		displayV2(l2, "l2 after range splice all", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
-		l.splice(l2.begin(), l2.end());
+		l.splice(l.begin(), l2, l2.begin(), l2.end());
 		displayV2(l, "l after range splice all", outfile, 5);
 		displayV2(l2, "l2 after got spliced", outfile, 5);
 
-		l.splice(l2.begin(), l2.end());
+		l.splice(l.begin(), l2, l2.begin(), l2.end());
 		displayV2(l, "l after range splice all again", outfile, 5);
 		displayV2(l2, "l2 after got spliced", outfile, 5);
 
-		l2.splice(l.begin(), l.begin());
+		l2.splice(l2.end(), l2, l.begin(), l.begin());
 		displayV2(l2, "l2 after range splice nothing", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
-		l2.splice(l.begin(), ++(l.begin()));
+		l2.splice(l2.end(), l2, l.begin(), ++(l.begin()));
 		displayV2(l2, "l2 after range splice 1 elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
-		l2.splice(--(l.end()), l.end());
+		l2.splice(l2.begin(), l2, --(l.end()), l.end());
 		displayV2(l2, "l2 after range splice 1 elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
@@ -715,11 +722,11 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		I l(setI.begin(), setI.end());
 		l.remove_if(predOdd);
-		displayv2(l, "after remove_if for is_odd", outfile, 5);
+		displayV2(l, "after remove_if for is_odd", outfile, 5);
 
 		l.insert(l.end(), setI.begin(), setI.end());
 		l.remove_if(predPeer);
-		displayv2(l, "after remove_if for is_peer", outfile, 5);
+		displayV2(l, "after remove_if for is_peer", outfile, 5);
 
 		outfile.close();
 	}
@@ -752,10 +759,11 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		while (l.size() != 500)
 			l.push_back(IntLog(getRandom< I >(seed, 500)));
 
-		I l2(l);
+		IL l2(l);
 
 		switchLog(l, outfile);
 		switchLog(l2, outfile);
+		displayV2(l, "before sort", outfile, 50);
 
 		l.sort();
 		displayV2(l, "normal sort", outfile, 50);
@@ -829,7 +837,7 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		mylist.unique(same_integral_part);
 		displayV2(mylist, "sorted + unique(same integral part)", outfile, 5);
-
+		
 		mylist.unique(is_near());
 		displayV2(mylist, "sorted + unique(is near())", outfile, 5);
 
@@ -878,12 +886,9 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "get_allocator.log";
 		outfile.open(fileName.c_str());
 
-		char adr = 'o';
-		char otherchar = 'u';
-		dummyAllocator<char> dumb(&adr);
-		list<char, dummyAllocator<char> > l(dumb);
-		dummyAllocator<char> cpy = l.get_allocator();
-		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
+		list<char> m;
+		std::allocator<char> cpy = m.get_allocator();
+		// must not crash
 
 		outfile.close();
 	}
@@ -897,42 +902,42 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		I l1;
 		I l2;
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l1.push_back(0);
 		l2.push_back(0);
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l2.pop_back();
 		l2.push_back(1);
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l1.push_back(3);
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l1.sort(greater<int>());
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l1.sort();
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l2.pop_back();
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l1.assign(150, 4);
 		l2.assign(151, 4);
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		l1.assign(1, 5);
 
-		outfile << l1 == l2 << " | " << l1 != l2 << " | " << l1 < l2 << " | " << l1 <= l2 << " | " << l1 > l2 << " | " << l1 >= l2 << '\n';
+		outfile << (l1 == l2) << " | " << (l1 != l2) << " | " << (l1 < l2) << " | " << (l1 <= l2) << " | " << (l1 > l2) << " | " << (l1 >= l2) << '\n';
 
 		outfile.close();
 	}

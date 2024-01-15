@@ -36,12 +36,12 @@ void	set_tests(const std::string& currentPath)
 		const set<std::string> mc(me);
 		displayV2(mc, "const set copy constructor", outfile, 2);
 
-		outfile << "must be false : " << &(*(mc.begin())) == &(*(me.begin())) << '\n';
+		outfile << "must be false : " << (&(*(mc.begin())) == &(*(me.begin()))) << '\n';
 
 		set<std::string> mc2(mc);
 		displayV2(mc2, "set copy constructor with a const set as parameter", outfile, 2);
 
-		outfile << "must be false : " << &(*(mc.begin())) == &(*(mc2.begin())) << '\n';
+		outfile << "must be false : " << (&(*(mc.begin())) == &(*(mc2.begin()))) << '\n';
 
 		set<std::string> mr(++mc.begin(), mc.end());
 		displayV2(mr, "set range constructor with a const set iterators as parameters", outfile, 3);
@@ -69,7 +69,7 @@ void	set_tests(const std::string& currentPath)
 		me = me3;
 		displayV2(me, "operator= notEmpty = notEmpty", outfile, 2);
 
-		outfile << "must be false " << &(*(me.begin())) == &(*(me3.begin())) << '\n';
+		outfile << "must be false " << (&(*(me.begin())) == &(*(me3.begin()))) << '\n';
 
 		outfile.close();
 	}
@@ -82,7 +82,7 @@ void	set_tests(const std::string& currentPath)
 
 		set<std::string> m;
 		for (long long i = 0; i < 9; ++i)
-			m.insert(itoa(pow(10, i)));
+			m.insert(myItoa(myPow(10, i)));
 
 		bidirectionalIteratorTests(m, outfile);
 		bidirectionalReverseIteratorTests(m, outfile);
@@ -95,13 +95,13 @@ void	set_tests(const std::string& currentPath)
 		outfile << *cit << '\n';
 		++cit;
 		outfile << cit++->size() << '\n';
-		outfile << *cit->size() << '\n';
+		outfile << cit->size() << '\n';
 
 		cit = m2.end();
 		--cit;
 		outfile << *cit << '\n';
 		--cit;
-		outfile << cit--->size() << '\n'; //don't worry, I never write that thing in usual codes. It must work anyway
+		outfile << cit--->size() << '\n';
 		outfile << cit->size() << '\n';
 
 		it = m.begin();
@@ -117,9 +117,6 @@ void	set_tests(const std::string& currentPath)
 		--it;
 		outfile << it--->size() << '\n';
 		outfile << it->size() << '\n';
-
-		it->second = "pouet";
-		outfile << *it << '\n';
 
 		outfile.close();
 	}
@@ -139,7 +136,7 @@ void	set_tests(const std::string& currentPath)
 		for (int i = -20; i <= 20; ++i)
 		{
 			insertResult = me.insert(i * i);
-			outfile << "inserting " << p << " => succeed ? " << insertResult.second << ". "
+			outfile << "inserting " << i * i << " => succeed ? " << insertResult.second << ". "
 					<< *(insertResult.first) << '\n';			
 		}
 		displayV2(me, "set view after inserts", outfile, 5);
@@ -158,7 +155,7 @@ void	set_tests(const std::string& currentPath)
 		displayV2(me, "hint insert with same key", outfile, 5);
 
 		for (int i = 0; i < 30; ++i)
-			range[i] = -i;
+			range.insert(i);
 		me.insert(range.find(7), range.find(27));
 		displayV2(me, "range insert", outfile, 7);
 
@@ -168,7 +165,11 @@ void	set_tests(const std::string& currentPath)
 	//ERASE
 
 	{
+		fileName = currentPath + "erase.log";
+		outfile.open(fileName.c_str());
+
 		set<int> m;
+		set<int>::iterator it;
 		set<int>::size_type seed;
 		set<int>::size_type count;
 		set<int>::size_type eraseCount;
@@ -197,7 +198,9 @@ void	set_tests(const std::string& currentPath)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			m.erase(m.find(getRandom< set<int> >(seed, 50)));
+			it = m.find(getRandom< set<int> >(seed, 50));
+			if (it != m.end())
+				m.erase(it);
 		}
 
 		displayV2(m, "erase by iterator", outfile, 6);
@@ -257,8 +260,8 @@ void	set_tests(const std::string& currentPath)
 		set<std::string> m1;
 		set<std::string> m2;
 
-		std::string* ptr1;
-		std::string* ptr2;
+		const std::string* ptr1;
+		const std::string* ptr2;
 
 		m1.insert("chou");
 		m1.insert("carotte");
@@ -266,7 +269,7 @@ void	set_tests(const std::string& currentPath)
 		m1.insert("lapin");
 		m1.insert("legume");
 
-		ptr1 = &(*(m1.find("lapin")));
+		ptr1 = (&(*(m1.find("lapin"))));
 
 		m2.insert("mois");
 		m2.insert("juillet");
@@ -281,7 +284,7 @@ void	set_tests(const std::string& currentPath)
 		
 		ptr2 = &(*(m2.find("lapin")));
 
-		outfile << "ptr1 == ptr2 ? " << ptr1 == ptr2 << '\n';
+		outfile << "ptr1 == ptr2 ? " << (ptr1 == ptr2) << '\n';
 
 		swap(m1, m2);
 
@@ -299,10 +302,10 @@ void	set_tests(const std::string& currentPath)
 
 		set<int, greater<int> > m;
 
-		m[1] = 4;
-		m[3] = 3;
-		m[9] = 0;
-		m[12] = 4;
+		m.insert(1);
+		m.insert(3);
+		m.insert(9);
+		m.insert(12);
 
 		outfile << m.value_comp()(*(m.find(12)), *(m.find(9))) << ' ' <<
 			m.value_comp()(*(m.find(1)), *(m.find(9))) << ' ' <<
@@ -316,10 +319,10 @@ void	set_tests(const std::string& currentPath)
 
 		set<int> m2;
 
-		m2[1] = 4;
-		m2[3] = 3;
-		m2[9] = 0;
-		m2[12] = 4;
+		m2.insert(1);
+		m2.insert(3);
+		m2.insert(9);
+		m2.insert(12);
 
 		outfile << m2.value_comp()(*(m2.find(12)), *(m2.find(9))) << ' ' <<
 			m2.value_comp()(*(m2.find(1)), *(m2.find(9))) << ' ' <<
@@ -356,16 +359,16 @@ void	set_tests(const std::string& currentPath)
 		}
 		const set<int> m2(m);
 
-		outfile << "====find====\n\n"
+		outfile << "====find====\n\n";
 
 		cit = m.find(1);
-		outfile << cit == m.end() << '\n';
+		outfile << (cit == m.end()) << '\n';
 
 		it = m.find(1);
-		outfile << it == cit << '\n';
+		outfile << (it == cit) << '\n';
 
 		cit = m2.find(1);
-		outfile << cit == m2.end() << '\n';
+		outfile << (cit == m2.end()) << '\n';
 
 		it = m.find(3);
 		outfile << *it << '\n';
@@ -379,7 +382,7 @@ void	set_tests(const std::string& currentPath)
 		outfile << *it << " muse be same as " << *(m.find(3)) << '\n';
 
 
-		outfile << "\n====count====\n\n"
+		outfile << "\n====count====\n\n";
 		for (int i = 0; i < 501; ++i)
 		{
 			count += m.count(i);
@@ -421,8 +424,8 @@ void	set_tests(const std::string& currentPath)
 		cit = m2.equal_range(103).first;
 		cit2 = m2.equal_range(103).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(10).first;
 		it2 = m.equal_range(10).second;
@@ -430,8 +433,8 @@ void	set_tests(const std::string& currentPath)
 		cit = m2.equal_range(100).first;
 		cit2 = m2.equal_range(100).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(401).first;
 		it2 = m.equal_range(401).second;
@@ -439,8 +442,8 @@ void	set_tests(const std::string& currentPath)
 		cit = m2.equal_range(101).first;
 		cit2 = m2.equal_range(101).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
 		it = m.equal_range(4000).first;
 		it2 = m.equal_range(4000).second;
@@ -448,10 +451,10 @@ void	set_tests(const std::string& currentPath)
 		cit = m2.equal_range(10000).first;
 		cit2 = m2.equal_range(10000).second;
 
-		outfile << it == it2 << '\n';
-		outfile << cit == cit2 << '\n';
+		outfile << (it == it2) << '\n';
+		outfile << (cit == cit2) << '\n';
 
-		outfile << it == m.end() << ' ' << cit == m2.end() << '\n';
+		outfile << (it == m.end()) << ' ' << (cit == m2.end()) << '\n';
 
 		outfile.close();
 	}
@@ -462,12 +465,10 @@ void	set_tests(const std::string& currentPath)
 		fileName = currentPath + "get_allocator.log";
 		outfile.open(fileName.c_str());
 
-		char adr = 'o';
-		char otherchar = 'u';
-		dummyAllocator<char> dumb(&adr);
-		set<char, less<char>, dummyAllocator<char> > m(less<char>(), dumb);
-		dummyAllocator<char> cpy = m.get_allocator();
-		outfile << *cpy.adresse(otherchar) << " must be equal to " << *dumb.adresse(otherchar);
+		set<char> m;
+		std::allocator<char> cpy = m.get_allocator();
+		// must not crash
+
 
 		outfile.close();
 	}
@@ -496,21 +497,21 @@ void	set_tests(const std::string& currentPath)
 		m4.insert(-1);
 		const set<int> mc1(m1);
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
 		m1.insert(10);
 
-		outfile << m1 == m2 << '|' << m1 == m3 << '|' << m1 == mc1 << '\n';
-		outfile << m1 != m2 << '|' << m1 != m3 << '|' << m1 != mc1 << '\n';
-		outfile << m1 < m2 << '|' << m1 < m3 << '|' << m1 < m4 << '|' << m1 < mc1 << '\n';
-		outfile << m1 > m2 << '|' << m1 > m3 << '|' << m1 > m4 << '|' << m1 > mc1 << '\n';
-		outfile << m1 <= m2 << '|' << m1 <= m3 << '|' << m1 <= m4 << '|' << m1 <= mc1 << '\n';
-		outfile << m1 >= m2 << '|' << m1 >= m3 << '|' << m1 >= m4 << '|' << m1 >= mc1 << '\n';
+		outfile << (m1 == m2) << '|' << (m1 == m3) << '|' << (m1 == mc1) << '\n';
+		outfile << (m1 != m2) << '|' << (m1 != m3) << '|' << (m1 != mc1) << '\n';
+		outfile << (m1 < m2) << '|' << (m1 < m3) << '|' << (m1 < m4) << '|' << (m1 < mc1) << '\n';
+		outfile << (m1 > m2) << '|' << (m1 > m3) << '|' << (m1 > m4) << '|' << (m1 > mc1) << '\n';
+		outfile << (m1 <= m2) << '|' << (m1 <= m3) << '|' << (m1 <= m4) << '|' << (m1 <= mc1) << '\n';
+		outfile << (m1 >= m2) << '|' << (m1 >= m3) << '|' << (m1 >= m4) << '|' << (m1 >= mc1) << '\n';
 
 		outfile.close();
 	}

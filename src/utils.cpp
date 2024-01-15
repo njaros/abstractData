@@ -8,7 +8,7 @@ void	_itoaRecu(std::string& str, long long nb)
 	str += nb % 10 + '0';
 }
 
-std::string	itoa(long long nb)
+std::string	myItoa(long long nb)
 {
 	std::string str;
 
@@ -16,7 +16,7 @@ std::string	itoa(long long nb)
 	return str;
 }
 
-long long pow(long long a, long long b)
+long long myPow(long long a, long long b)
 {
 	long long ret = 1;
 
@@ -26,4 +26,11 @@ long long pow(long long a, long long b)
 	while (b--)
 		ret *= a;
 	return ret;
+}
+
+double myFabs(double d)
+{
+	if (d < 0)
+		return -d;
+	return d;
 }
