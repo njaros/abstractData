@@ -224,7 +224,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		
 		map<int, int> m;
 		map<int, int>::iterator it;
-		map<int, int>::size_type seed;
+		size_t seed;
 		map<int, int>::size_type count;
 		map<int, int>::size_type eraseCount;
 		bool started = false;
@@ -239,7 +239,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		{
 			started = true;
 			++count;
-			eraseCount += m.erase(getRandom< map<int, int> >(seed, 50));
+			eraseCount += m.erase(getRandom(seed, 50));
 		}
 		outfile << "number of erase attempts : " << count << " | truely erased : " << eraseCount << '\n';
 		displayV2(m, "erase by key", outfile, 6);
@@ -252,7 +252,7 @@ void	map_tests(const std::string& currentPath, std::ostream& except)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			it = m.find(getRandom< map<int, int> >(seed, 50));
+			it = m.find(getRandom(seed, 50));
 			if (it != m.end())
 				m.erase(it);
 		}

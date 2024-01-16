@@ -34,3 +34,15 @@ double myFabs(double d)
 		return -d;
 	return d;
 }
+
+size_t getRandom(size_t& seed, size_t modulo)
+		{
+			size_t toReturn;
+			if (!modulo)
+				return modulo;
+			if (!seed)
+				seed = ~0;
+			toReturn = seed % modulo;
+			seed /= modulo;
+			return toReturn;
+		}

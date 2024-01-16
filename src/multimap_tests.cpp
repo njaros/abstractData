@@ -184,7 +184,7 @@ void	multimap_tests(const std::string& currentPath)
 		fileName = currentPath + "erase.log";
 		outfile.open(fileName.c_str());
 		multimap<int, int> m;
-		multimap<int, int>::size_type seed;
+		size_t seed;
 		multimap<int, int>::size_type count;
 		multimap<int, int>::size_type eraseCount;
 		multimap<int, int>::iterator it;
@@ -203,7 +203,7 @@ void	multimap_tests(const std::string& currentPath)
 		{
 			started = true;
 			++count;
-			eraseCount += m.erase(getRandom< multimap<int, int> >(seed, 50));
+			eraseCount += m.erase(getRandom(seed, 50));
 		}
 		outfile << "number of erase attempts : " << count << " | truely erased : " << eraseCount << '\n';
 		displayV2(m, "erase by key", outfile, 6);
@@ -216,14 +216,14 @@ void	multimap_tests(const std::string& currentPath)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			it = m.find(getRandom< multimap<int, int> >(seed, 50));
+			it = m.find(getRandom(seed, 50));
 			if (it != m.end())
 				m.erase(it);
 		}
 		displayV2(m, "erase by iterator", outfile, 6);
 
 		for (int i = 0; i < 500; ++i)
-			m.insert(mpair(1, 1));
+			m.insert(mpair(i, i));
 
 		m.erase(m.find(4), m.find(490));
 		displayV2(m, "erase by range", outfile, 4);
@@ -231,11 +231,14 @@ void	multimap_tests(const std::string& currentPath)
 		m.erase(m.find(3), m.end());
 		displayV2(m, "erase by range, end() included", outfile, 4);
 
-		m.erase(m.begin(), m.find(1));
+		m.erase(m.begin(), ++m.begin());
 		displayV2(m, "erase by range, begin() included, 1 element", outfile, 4);
 
 		m.erase(2);
 		m.erase(1);
+		displayV2(m, "rest 0", outfile);
+
+		m.erase(0);
 		displayV2(m, "nothing left", outfile);
 
 		outfile.close();
@@ -404,11 +407,16 @@ void	multimap_tests(const std::string& currentPath)
 
 		outfile << *it << " muse be same as " << *(m.find(3)) << '\n';
 
-
 		outfile << "\n====count====\n\n";
 		for (int i = 0; i < 501; ++i)
 		{
 			count += m.count(i);
+		}
+		outfile << count << '\n';
+
+		count = 0;
+		for (int i = 0; i < 501; ++i)
+		{
 			count += m2.count(i);
 		}
 		outfile << count << '\n';

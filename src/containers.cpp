@@ -331,7 +331,7 @@ int main()
 	multiset_tests(filePath(ctxPath, "multiset"));
 
 	mkdir(dirName(mainPath, ctxPath, "list").c_str(), 0777);
-	list_tests(filePath(ctxPath, "list"), exceptionFile);
+	list_tests(filePath(ctxPath, "list"));
 	/*
 	std::cout << "------exceptions tests------\n\n\n";
 	{

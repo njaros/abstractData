@@ -25,6 +25,16 @@
 
 namespace ft
 {
+
+	template <class K>
+	struct isChar : public false_type {};
+
+	template <>
+	struct isChar<char> : public true_type {};
+
+	template <class K>
+	struct is_char : public isChar<K> {};
+
 	template< class T, class Alloc = std::allocator<T> >
 	class deque
 	{
@@ -558,15 +568,6 @@ namespace ft
 		}
 
 		//DEBUG UTILITIES
-
-		template <class K>
-		struct isChar : public false_type {};
-
-		template<>
-		struct isChar<char> : public true_type {};
-
-		template <class K>
-		struct is_char : public isChar<T> {};
 
 		template <class K>
 		typename enable_if<is_char<K>::value, void>::type

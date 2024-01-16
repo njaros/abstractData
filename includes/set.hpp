@@ -817,8 +817,7 @@ namespace ft {
 		template< class InputIterator >
 		void                        insert(InputIterator first, InputIterator last) {
 			while (first != last) {
-				insert(*first);
-				first++;
+				insert(*(first++));
 			}
 		}
 
@@ -905,10 +904,23 @@ namespace ft {
 
 		iterator            find(const key_type& k) {
 			node<value_type>* search = _root;
+			iterator current;
+			iterator previous;
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
-					return (iterator(search));
+					{
+						current = iterator(search);
+						previous = current;
+						while (current != end() &&
+							!_compare(*current, k) &&
+							!_compare(k, *current))
+							{
+								previous = current;
+								--current;
+							}
+						return previous;
+					}
 				if (_compare(*(search->content), k))
 					search = search->right;
 				else
@@ -918,10 +930,23 @@ namespace ft {
 		}
 		const_iterator      find(const key_type& k) const {
 			node<value_type>* search = _root;
+			const_iterator current;
+			const_iterator previous;
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
-					return (const_iterator(search));
+					{
+						current = const_iterator(search);
+						previous = current;
+						while (current != end() &&
+							!_compare(*current, k) &&
+							!_compare(k, *current))
+							{
+								previous = current;
+								--current;
+							}
+						return previous;
+					}
 				if (_compare(*(search->content), k))
 					search = search->right;
 				else
@@ -934,7 +959,7 @@ namespace ft {
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
-					return 1 + _count(k, search->right) + _count(k, search->left);
+					return 1 + _countUp(k, ++iterator(search)) + _countDown(k, --iterator(search));
 				if (_compare(*(search->content), k))
 					search = search->right;
 				else
@@ -1092,12 +1117,18 @@ namespace ft {
 				deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(found, &_root, _allocNode, _alloc);
 			return 1;
 		}
-		size_type	_count(const key_type& k, node<value_type>* current)	const
-		{
-			if (isNotLeaf(current) && !_compare(*(current->content), k) && !_compare(k, *(current->content)))
-				return 1 + _count(k, current->right) + _count(k, current->left);
-			return 0;
-		}
+		size_type   _countUp(const key_type& k, iterator current)	const
+        {
+            if (current != end() && !_compare(*current, k) && !_compare(k, *current))
+                return (1 + _countUp(k, ++current));
+            return 0;
+        }
+        size_type   _countDown(const key_type& k, iterator current)	const
+        {
+            if (current != end() && !_compare(*current, k) && !_compare(k, *current))
+                return (1 + _countDown(k, --current));
+            return 0;
+        }
 
 	};
 

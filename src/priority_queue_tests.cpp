@@ -58,11 +58,11 @@ void priority_queue_tests(const std::string& currentPath)
 		outfile.open(fileName.c_str());
 		vector<int> v;
 		deque<int> d;
-		vector<int>::size_type seed = 0;
+		size_t seed = 0;
 		for (int i = 0; i < 30; ++i)
 		{
-			v.push_back(getRandom< vector<int> >(seed, 25));
-			d.push_front(getRandom< deque<int> >(seed, 15));
+			v.push_back(getRandom(seed, 25));
+			d.push_front(getRandom(seed, 15));
 		}
 		priority_queue<std::string> ve;
 		priority_queue<int, vector<int>, greater<int> > vgf(greater<int>(), v);
@@ -89,7 +89,7 @@ void priority_queue_tests(const std::string& currentPath)
 
 		while (de.size() < 30)
 		{
-			de.push(getRandom< deque<int> >(seed, 78));
+			de.push(getRandom(seed, 78));
 			outfile << de.top() << '\n';
 		}
 		outfile << "\n\n";

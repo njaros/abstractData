@@ -792,7 +792,7 @@ node<T> *getMinNodeNoLeaf(node<T> *root)
 }
 
 template <typename T >
-size_t  recursiveGetHigh(node<T> *n, size_t t)
+size_t  recursiveGetHigh(const node<T> *n, size_t t)
 {
     if (isLeaf(n))
         return (t);
@@ -800,7 +800,7 @@ size_t  recursiveGetHigh(node<T> *n, size_t t)
 }
 
 template < typename T >
-size_t  getHigh(node<T> *root)
+size_t  getHigh(const node<T> *root)
 {
     if (!root)
         return (0);
@@ -830,7 +830,7 @@ std::string	size_tToString(const Size s)
 }
 
 template < typename  T >
-void recursiveDisplayTree(node<T> *n, size_t size, size_t depth, ft::vector<std::string> &lines) {
+void recursiveDisplayTree(const node<T> *n, size_t size, size_t depth, ft::vector<std::string> &lines) {
     if (isLeaf(n)) {
         if (depth <= size) {
             size_t toBlank = 1;
@@ -874,7 +874,7 @@ void recursiveDisplayTree(node<T> *n, size_t size, size_t depth, ft::vector<std:
 }
 
 template < typename T >
-void displayTree(node<T> *n) {
+void displayTree(const node<T> *n) {
     size_t size = getHigh(n);
 
     ft::vector<std::string> lines(size);
@@ -888,7 +888,7 @@ void displayTree(node<T> *n) {
 }
 
 template < typename  T >
-void recursiveDisplayTreeSet(node<T> *n, size_t size, size_t depth, ft::vector<std::string> &lines) {
+void recursiveDisplayTreeSet(const node<T> *n, size_t size, size_t depth, ft::vector<std::string> &lines) {
     if (isLeaf(n)) {
         if (depth <= size) {
             size_t toBlank = 1;

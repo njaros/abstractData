@@ -13,21 +13,7 @@
 std::string	myItoa(long long nb);
 long long myPow(long long a, long long b);
 double myFabs(double d);
-
-template < class T >
-typename T::size_type getRandom(typename T::size_type& seed, typename T::size_type modulo)
-		{
-			typename T::size_type toReturn;
-			typename T::allocator_type alloc;
-
-			if (!modulo)
-				return modulo;
-			if (!seed)
-				seed = alloc.max_size();
-			toReturn = seed % modulo;
-			seed /= modulo;
-			return toReturn;
-		}
+size_t getRandom(size_t& seed, size_t modulo);
 
 // END OF COMMON TOOLS
 
@@ -673,6 +659,6 @@ void map_tests(const std::string& currentPath, std::ostream& except);
 void multimap_tests(const std::string& currentPath);
 void set_tests(const std::string& currentPath);
 void multiset_tests(const std::string& currentPath);
-void list_tests(const std::string& currentPath, std::ostream& except);
+void list_tests(const std::string& currentPath);
 
 #endif

@@ -170,7 +170,7 @@ void	set_tests(const std::string& currentPath)
 
 		set<int> m;
 		set<int>::iterator it;
-		set<int>::size_type seed;
+		size_t seed;
 		set<int>::size_type count;
 		set<int>::size_type eraseCount;
 		bool started = false;
@@ -185,7 +185,7 @@ void	set_tests(const std::string& currentPath)
 		{
 			started = true;
 			++count;
-			eraseCount += m.erase(getRandom< set<int> >(seed, 50));
+			eraseCount += m.erase(getRandom(seed, 50));
 		}
 		outfile << "number of erase attempts : " << count << " | truely erased : " << eraseCount << '\n';
 		displayV2(m, "erase by key", outfile, 6);
@@ -198,7 +198,7 @@ void	set_tests(const std::string& currentPath)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			it = m.find(getRandom< set<int> >(seed, 50));
+			it = m.find(getRandom(seed, 50));
 			if (it != m.end())
 				m.erase(it);
 		}

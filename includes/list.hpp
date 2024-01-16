@@ -280,41 +280,28 @@ namespace ft
 				nextFirst = first;
 
 			lastFirstElt = middle->p;
-			while (1)
+			while (middle != last)
 			{
 				tmp = middle;
-				//[oaooo][boooo] on avance a tant que b n'est pas inserable, ie b >= a
+				//[oaooo][boooo] on avance a tant que b n'est pas inserable, ie b > a
 				// ->
-				while (first != middle && !comp(*(middle->content), *(first->content))) //!pred(b, a) == b >= a
+				while (comp(*(first->content), *(middle->content)))
 					first = first->n;
 				if (first == middle)
 					return nextFirst;
-				//ici je decompte tout les element qui suivent b inserable avant a, ie tant que b->n < a, on avance b
-				while (middle->n != last && comp(*(middle->n->content), *(first->content)))
+				//ici je decompte tout les element qui suivent b inserable avant a, ie tant que b->n <= a, on avance b
+				while (middle->n != last && !comp(*(first->content), *(middle->n->content)))
 					middle = middle->n;
-				//cas 1
-				//si j'ai le dernier element de middle (ie last->p) alors j'insere et on se casse
-				if (middle == last->p)
-				{
-					last->p = lastFirstElt;
-					lastFirstElt->n = last;
-					tmp->p = first->p;
-					first->p->n = tmp;
-					middle->n = first;
-					first->p = middle;
-					return nextFirst;
-				}
-				//cas 2
-				//je n'ai pas le dernier elt de middle, j'insere et j'incremente middle
+				//je colle les bouts comme il faut et j'incremente middle
 				middle->n->p = lastFirstElt;
 				lastFirstElt->n = middle->n;
 				tmp->p = first->p;
 				first->p->n = tmp;
-				tmp = middle;
-				middle = middle->n;
-				tmp->n = first;
-				first->p = tmp;
+				middle->n = first;
+				first->p = middle;
+				middle = lastFirstElt->n;
 			}
+			return nextFirst;
 		}
 
 		template < class Compare >
@@ -343,7 +330,7 @@ namespace ft
 			current = l.begin();
 			previous = l.begin();
 			++current;
-			while (current != end())
+			while (current != l.end())
 			{
 				if (comp(*(current++), *(previous++)))
 					return false;
@@ -460,6 +447,7 @@ namespace ft
 			else
 				first->n = _end;
 			_end->p = first;
+			_size = other._size;
 			return *this;
 		}
 
@@ -681,7 +669,7 @@ namespace ft
 				throw (ft::length_error("ft::list::resize : size too high."));
 			if (n < _size)
 			{
-				while (n++ < _size)
+				while (n < _size)
 					pop_back();
 			}
 			else if (n > _size)
@@ -876,7 +864,7 @@ namespace ft
 					while (selfIdx != _end && !comp(*(start->content), *(selfIdx->content)))
 						selfIdx = selfIdx->n;
 					tmp = start;
-					while (start->n != x._end && (selfIdx == _end || comp(*(start->n->content), *(selfIdx->content))))
+					while (start->n != x._end && (selfIdx == _end || !comp(*(selfIdx->content), *(start->n->content))))
 						start = start->n;
 
 					selfIdx->p->n = tmp;
@@ -884,10 +872,8 @@ namespace ft
 					selfIdx->p = start;
 
 					tmp = start;
-					if (start != x._end)
-						start = start->n;
+					start = start->n;
 					tmp->n = selfIdx;
-					selfIdx = selfIdx->n;
 				}
 				_size += x._size;
 				x._size = 0;

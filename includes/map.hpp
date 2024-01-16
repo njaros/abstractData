@@ -338,7 +338,7 @@ namespace ft {
         mapped_type &at(const key_type &k) {
             _it = find(k);
             if (_it == end())
-                throw (ft::out_of_range("this element isn't on the map\n"));
+                throw (ft::out_of_range("this element isn't on the map."));
             return _it->second;
         }
 
@@ -346,7 +346,7 @@ namespace ft {
 			const_iterator cit;
             cit = find(k);
             if (cit == end())
-                throw (ft::out_of_range("this element isn't on the map\n"));
+                throw (ft::out_of_range("this element isn't on the map."));
             return cit->second;
         }
 
@@ -1079,21 +1079,19 @@ namespace ft {
             _it = begin();
             if (_compare(data.first, _it->first)) {
                 smallest = true;
-                hint = _it;
             }
             else if (equalIterator(_it, --end()) && _compare(_it->first, data.first)) {
                 highest = true;
-                hint = _it;
             }
-            else if (_compare(data.first, hint->first)) {
-                --hint;
-                while (_compare(data.first, hint->first))
-                    --hint;
+            if (_compare(data.first, hint->first))
+            {
+                if (_compare(data.first, getPredecessor(hint.base())->content->first))
+                    hint = iterator(_root);
             }
-            else if (!_compare(data.first, hint->first)) {
-                ++hint;
-                while (!_compare(data.first, hint->first))
-                    ++hint;
+            else if (!_compare(data.first, hint->first))
+            {
+                if (_compare(getSuccessor(hint.base())->content->first, data.first))
+                    hint = iterator(_root);
             }
             ++_size;
             iterator    inserted(recursiveInsertMultimap(hint.base(),
@@ -1202,6 +1200,8 @@ namespace ft {
 
         iterator            find(const key_type& k) {
             node<value_type>* search = _root;
+            iterator current;
+            iterator previous;
             while (isNotLeaf(search))
             {
                 if (_compare(search->content->first, k))
@@ -1209,12 +1209,25 @@ namespace ft {
                 else if (_compare(k, search->content->first))
                     search = search->left;
                 else
-                    return (iterator(search));
+                {
+						current = iterator(search);
+						previous = current;
+						while (current != end() &&
+							!_compare(current->first, k) &&
+							!_compare(k, current->first))
+							{
+								previous = current;
+								--current;
+							}
+						return previous;
+					}
             }
             return (iterator(search));
         }
         const_iterator      find(const key_type& k) const {
             node<value_type>* search = _root;
+            const_iterator current;
+            const_iterator previous;
             while (isNotLeaf(search))
             {
                 if (_compare(search->content->first, k))
@@ -1222,7 +1235,18 @@ namespace ft {
                 else if (_compare(k, search->content->first))
                     search = search->left;
                 else
-                    return (const_iterator(search));
+                {
+					current = const_iterator(search);
+					previous = current;
+					while (current != end() &&
+						!_compare(current->first, k) &&
+						!_compare(k, current->first))
+						{
+							previous = current;
+							--current;
+						}
+					return previous;
+				}
             }
             return (const_iterator(search));
         }
@@ -1230,12 +1254,12 @@ namespace ft {
             node<value_type>* search = _root;
             while (isNotLeaf(search))
             {
-                if (!_compare(search->content->first, k) && !_compare(k, search->content->first))
-                    return 1 + _count(k, search->right) + _count(k, search->left);
                 if (_compare(search->content->first, k))
                     search = search->right;
-                else
+                else if (_compare(k, search->content->first))
                     search = search->left;
+                else
+                    return (1 + _countUp(k, ++iterator(search)) + _countDown(k, --iterator(search)));
             }
             return (0);
         }
@@ -1308,7 +1332,7 @@ namespace ft {
 
         // AN ADD ONLY FOR THE PROJECT DEFENSE
 
-        void    display() { displayTree(_root); }
+        void    display() const { displayTree(_root); }
 
         // MY VARIABLES I USED TO BUILD MY MAP
 
@@ -1391,10 +1415,16 @@ namespace ft {
                 deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(found, &_root, _allocNode, _alloc);
             return 1;
         }
-        size_type   _count(const key_type& k, node<value_type>* current)	const
+        size_type   _countUp(const key_type& k, iterator current)	const
         {
-            if (isNotLeaf(current) && !_compare(current->content->first, k) && !_compare(k, current->content->first))
-                return 1 + _count(k, current->right) + _count(k, current->left);
+            if (current != end() && !_compare(current->first, k) && !_compare(k, current->first))
+                return (1 + _countUp(k, ++current));
+            return 0;
+        }
+        size_type   _countDown(const key_type& k, iterator current)	const
+        {
+            if (current != end() && !_compare(current->first, k) && !_compare(k, current->first))
+                return (1 + _countDown(k, --current));
             return 0;
         }
 

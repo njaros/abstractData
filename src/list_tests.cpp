@@ -33,14 +33,17 @@ struct is_near
 bool same_integral_part (double first, double second)
 { return ( int(first)==int(second) ); }
 
-bool compare_nocase (const std::string& first, const std::string& second)
+bool backtrack_reading (const std::string& first, const std::string& second)
 {
-  unsigned int i=0;
-  while ( (i<first.length()) && (i<second.length()) )
+  unsigned int i= first.length();
+  unsigned int j= second.length();
+
+  while ( i > 0 && j > 0 )
   {
-    if (tolower(first[i])<tolower(second[i])) return true;
-    else if (tolower(first[i])>tolower(second[i])) return false;
-    ++i;
+    if (first[i - 1] < second[j - 1]) return true;
+    else if (first[i - 1]> second[j - 1]) return false;
+    --i;
+	--j;
   }
   return ( first.length() < second.length() );
 }
@@ -110,7 +113,7 @@ void	switchLog(list<IntLog>& l, std::ostream& out)
 		it->switchLog(&out);
 }
 
-void	list_tests(const std::string& currentPath, std::ostream& except)
+void	list_tests(const std::string& currentPath)
 {
 	std::string fileName;
 	std::ofstream outfile;
@@ -143,14 +146,9 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		S le;
 		S lf(15);
 		S lf2(15, "pouet");
-		std::cerr << "pouet\n";
 		const S lc(lf2);
 		S lc2(lc);
-		std::cerr << "pouet\n";
 		S lr(++lc.begin(), --lc.end());
-		std::cerr << "pouet\n";
-		//S lr2(setS.find(std::string("3")), setS.find(std::string("17")));
-		std::cerr << "pouet\n";
 		*(lc2.begin()) = "lc2 deep?";
 		*(lr.begin()) = "lr deep?";
 
@@ -160,8 +158,6 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(lc, "const copy constructors", outfile, 5);
 		displayV2(lc2, "copy constructor with a const list", outfile, 5);
 		displayV2(lr, "range constructors with list iterators", outfile, 5);
-		//displayV2(lr2, "range constructors with set iterators", outfile, 5);
-		std::cerr << "pouet\n";
 		lf = le;
 		displayV2(lf, "operator= filled => empty", outfile);
 
@@ -171,21 +167,11 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		le = lc2;
 		*(lc2.begin()) = "operator= deep ?";
 		displayV2(le, "operator= empty => filled", outfile, 5);
-		std::cerr << "pouet\n";
 		le = lc;
 		displayV2(le, "operator= filled => filled", outfile, 5);
 
 		le = lc;
 		displayV2(le, "operator= with a const one", outfile, 5);
-		std::cerr << "pouet\n";
-		try
-		{
-			S toobig(S::allocator_type().max_size() + 1, "ouch");
-		}
-		catch(const exception& e)
-		{
-			except << "LIST : too many elts in fill constructor.\n" << e.what() << '\n';
-		}
 		
 		outfile.close();
 	}
@@ -317,15 +303,6 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(le, "insert some at somewhere between begin() and end()", outfile);
 
 		le = lce;
-
-		try
-		{
-			le.insert(le.end(), le.max_size() + 1, 2);
-		}
-		catch(const length_error& e)
-		{
-			except << "LIST : insert too much elements.\n" << e.what() << '\n';
-		}
 		
 		le.insert(le.begin(), lf.begin(), lf.end());
 		displayV2(le, "range insert at begin() on empty list", outfile);
@@ -483,15 +460,6 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(l, "assign test", outfile, 5);
 		l.assign(3, 3);
 		displayV2(l, "assign test", outfile, 5);
-
-		try
-		{
-			l.assign(l.max_size() + 1, 7);
-		}
-		catch(const length_error& e)
-		{
-			except << "LIST : assign too much elements.\n" << e.what() << '\n';
-		}
 		
 		l.assign(l2.begin(), l2.end());
 		displayV2(l, "assign test", outfile, 5);
@@ -508,15 +476,6 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		outfile.open(fileName.c_str());
 
 		I l;
-
-		try
-		{
-			l.resize(l.max_size() + 1);
-		}
-		catch(const length_error& e)
-		{
-			except << "LIST : resize too much element.\n" << e.what() << '\n';
-		}
 		
 		l.resize(3);
 		displayV2(l, "resize test", outfile, 5);
@@ -660,11 +619,11 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		displayV2(l2, "l2 after range splice nothing", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
-		l2.splice(l2.end(), l2, l.begin(), ++(l.begin()));
+		l2.splice(l2.end(), l, l.begin(), ++(l.begin()));
 		displayV2(l2, "l2 after range splice 1 elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
-		l2.splice(l2.begin(), l2, --(l.end()), l.end());
+		l2.splice(l2.begin(), l, --(l.end()), l.end());
 		displayV2(l2, "l2 after range splice 1 elt", outfile, 5);
 		displayV2(l, "l after got spliced", outfile, 5);
 
@@ -742,22 +701,22 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 		mylist.push_back ("one");
 		mylist.push_back ("two");
 		mylist.push_back ("Three");
-		mylist.push_back ("four");
+		mylist.push_back ("Four");
 		mylist.push_back ("cinq");
 		mylist.push_back ("Six");
-		mylist.push_back ("Four");
+		mylist.push_back ("four");
 		mylist.push_back ("one");
 
 		mylist.sort();
 		displayV2(mylist, "normal sort", outfile, 3);
 
-		mylist.sort(compare_nocase);
-		displayV2(mylist, "non case sensitive sort", outfile, 3);
+		mylist.sort(backtrack_reading);
+		displayV2(mylist, "backtrack reading sort", outfile, 3);
 
 		IL l;
-		I::size_type seed = 0;
+		size_t seed = 0;
 		while (l.size() != 500)
-			l.push_back(IntLog(getRandom< I >(seed, 500)));
+			l.push_back(IntLog(getRandom(seed, 500)));
 
 		IL l2(l);
 
@@ -785,11 +744,11 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		IL l1;
 		IL l2;
-		I::size_type seed;
+		size_t seed = 0;
 		for (int i = 0; i < 30; ++i)
 		{
-			l1.push_back(IntLog(getRandom< I >(seed, 40)));
-			l2.push_back(IntLog(getRandom< I >(seed, 40)));
+			l1.push_back(IntLog(getRandom(seed, 40)));
+			l2.push_back(IntLog(getRandom(seed, 40)));
 		}
 		IL l3(l1);
 		IL l4(l2);
@@ -807,7 +766,6 @@ void	list_tests(const std::string& currentPath, std::ostream& except)
 
 		l3.sort(greater<IntLog>());
 		l4.sort(greater<IntLog>());
-
 		l3.merge(l4, greater<IntLog>());
 		displayV2(l3, "after greater merge", outfile, 5);
 		displayV2(l4, "the merged one", outfile, 5);

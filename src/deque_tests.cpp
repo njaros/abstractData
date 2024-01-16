@@ -179,7 +179,7 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 
 		//RANDOM INSERTS - deque inserts can have too many cases of failure, that's why I choose to do those random inserts
 		typedef deque<char> D;
-		D::size_type seed = 0;
+		size_t seed = 0;
 		D::size_type pos;
 		D::size_type len;
 		D::size_type debug;
@@ -192,23 +192,23 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 
 		for (int c = 0; c < 127; ++c)
 		{
-			len = getRandom< D >(seed, maxRangeInsert);
+			len = getRandom(seed, maxRangeInsert);
 
-			pos = getRandom< D >(seed, d1.size());
+			pos = getRandom(seed, d1.size());
 			d1.insert(d1.begin() + pos, len, c);
-			pos = getRandom< D >(seed, d1.size());
+			pos = getRandom(seed, d1.size());
 			d1.insert(d1.begin() + pos, c);
 
-			pos = getRandom< D >(seed, d2.size());
+			pos = getRandom(seed, d2.size());
 			d2.insert(d2.begin() + pos, len, c);
-			pos = getRandom< D >(seed, d2.size());
+			pos = getRandom(seed, d2.size());
 			d2.insert(d2.begin() + pos, c);
 
-			debug = getRandom< D >(seed, d2.size());
+			debug = getRandom(seed, d2.size());
 			rangePos.insert(d2.begin() + debug);
-			debug = getRandom< D >(seed, d2.size());
+			debug = getRandom(seed, d2.size());
 			rangePos.insert(d2.begin() + debug);
-			pos = getRandom< D >(seed, d3.size());
+			pos = getRandom(seed, d3.size());
 			d3.insert(d3.begin() + pos, *(rangePos.begin()), *(++rangePos.begin()));
 			rangePos.clear();
 		}
@@ -224,7 +224,7 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 
 		//SAME WITH BIGGER DATA WHERE CHUNKSIZE == 1
 
-		Strs::size_type seedS = 0;
+		size_t seedS = 0;
 		Strs::size_type posS;
 		Strs::size_type lenS;
 		multiset<Strs::const_iterator> rangePosS;
@@ -238,22 +238,22 @@ void deque_tests(const std::string& currentPath, std::ostream& except)
 		{
 			for (int c = 0; c < 38; ++c)
 			{
-				lenS = getRandom< Strs >(seedS, maxRangeInsertS);
+				lenS = getRandom(seedS, maxRangeInsertS);
 
-				posS = getRandom< Strs >(seedS, s1.size());
+				posS = getRandom(seedS, s1.size());
 				s1.insert(s1.begin() + posS, lenS, myItoa(c));
-				posS = getRandom< Strs >(seedS, s1.size());
+				posS = getRandom(seedS, s1.size());
 				s1.insert(s1.begin() + posS, myItoa(c));
 
-				posS = getRandom< Strs >(seedS, s2.size());
+				posS = getRandom(seedS, s2.size());
 				s2.insert(s2.begin() + posS, lenS, myItoa(c));
-				posS = getRandom< Strs >(seedS, s2.size());
+				posS = getRandom(seedS, s2.size());
 				s2.insert(s2.begin() + posS, myItoa(c));
 
-				rangePosS.insert(s2.begin() + getRandom< Strs >(seedS, s2.size()));
-				rangePosS.insert(s2.begin() + getRandom< Strs >(seedS, s2.size()));
+				rangePosS.insert(s2.begin() + getRandom(seedS, s2.size()));
+				rangePosS.insert(s2.begin() + getRandom(seedS, s2.size()));
 
-				posS = getRandom< Strs >(seedS, s3.size());
+				posS = getRandom(seedS, s3.size());
 				s3.insert(s3.begin() + posS, *(rangePosS.begin()), *(++rangePosS.begin()));
 				rangePosS.clear();
 			}

@@ -174,7 +174,7 @@ void	multiset_tests(const std::string& currentPath)
 
 		multiset<int> m;
 		multiset<int>::iterator it;
-		multiset<int>::size_type seed;
+		size_t seed;
 		multiset<int>::size_type count;
 		multiset<int>::size_type eraseCount;
 		bool started = false;
@@ -192,7 +192,7 @@ void	multiset_tests(const std::string& currentPath)
 		{
 			started = true;
 			++count;
-			eraseCount += m.erase(getRandom< multiset<int> >(seed, 50));
+			eraseCount += m.erase(getRandom(seed, 50));
 		}
 		outfile << "number of erase attempts : " << count << " | truely erased : " << eraseCount << '\n';
 		displayV2(m, "erase by key", outfile, 6);
@@ -205,7 +205,7 @@ void	multiset_tests(const std::string& currentPath)
 		while (m.size() > 30 && (seed || !started))
 		{
 			started = true;
-			it = m.find(getRandom< multiset<int> >(seed, 50));
+			it = m.find(getRandom(seed, 50));
 			if (it != m.end())
 			m.erase(it);
 		}
