@@ -40,8 +40,8 @@ namespace ft
 
 		typedef T													value_type;
 		typedef Alloc												allocator_type;
-		typedef T* pointer;
-		typedef const T* const_pointer;
+		typedef typename Alloc::pointer								pointer;
+		typedef typename Alloc::const_pointer						const_pointer;
 		typedef T& reference;
 		typedef const T& const_reference;
 		typedef typename Alloc::difference_type						difference_type;
@@ -50,7 +50,7 @@ namespace ft
 		// CLASS ITERATOR AND HIS TYPEDEFS
 
 		class MyConstIterator;
-		class MyIterator : public ft::iterator< ft::random_access_iterator_tag, value_type >
+		class MyIterator : public ft::iterator< ft::random_access_iterator_tag, value_type, difference_type, pointer, reference >
 		{
 		public:
 
@@ -217,7 +217,7 @@ namespace ft
 
 		};
 
-		class MyConstIterator : public ft::iterator< ft::random_access_iterator_tag, const value_type >
+		class MyConstIterator : public ft::iterator< ft::random_access_iterator_tag, const value_type, difference_type, const_pointer, const_reference >
 		{
 		private:
 
@@ -686,33 +686,43 @@ namespace ft
 		}
 		iterator		insert(iterator position, const value_type& val)
 		{
-			_ptr = position.base();
-			if (!_ptr && !_firstPtr)
+			if (position < begin() || position > end())
+				throw (out_of_range("ft::vector::insert : this iterator is out of range\n"));
+			
+			pointer ptr = position.base();
+			if (!ptr && !_firstPtr)
+			{
 				this->push_back(val);
+				return begin();
+			}
 			else
 			{
 				if (_size + 1 > _capacity) {
 					size_type diff = position - begin();
 					checkCapacityAvailable(1);
 					position = begin() + diff;
-					_ptr = position.base();
+					ptr = position.base();
 				}
 				if (position != end())
 				{
 					copyBlock(position, this->end(), position + 1);
-					_alloc.destroy(_ptr);
 				}
-				_alloc.construct(_ptr, val);
+				_alloc.construct(&*position, val);
 				_size += 1;
 			}
 			return (position);
 		}
 		iterator		insert(iterator position, size_type n, const value_type& val)
 		{
+			if (position < begin() || position > end())
+				throw (out_of_range("ft::vector::insert(fill) : this iterator is out of range\n"));
 			if (!n)
 				return (position);
 			if (!position.operator->() && !_firstPtr)
+			{
 				this->assign(n, val);
+				return begin();
+			}
 			else {
 				if (_size + n > _capacity) {
 					typename ft::iterator_traits<iterator>::difference_type diff = ft::distance<iterator>(begin(),
@@ -722,8 +732,6 @@ namespace ft
 				}
 				copyBlock(position, this->end(), position + n);
 				for (size_type i = 0; i < n; ++i) {
-					if (position < end())
-						_alloc.destroy(position.base());
 					_alloc.construct(position.base(), val);
 					position++;
 				}
@@ -735,15 +743,21 @@ namespace ft
 		iterator		insert(iterator position, InputIterator first, InputIterator last, \
 			typename ft::enable_if< !ft::is_integral< InputIterator >::value >::type* = 0)
 		{
+			if (position < begin() || position > end())
+				throw (out_of_range("ft::vector::insert(range) : this iterator is out of range\n"));
 			typename ft::iterator_traits<InputIterator>::difference_type addSize = ft::distance<InputIterator>(first, last);
+
 			if (!addSize)
 				return position;
 			if (!position.operator->() && !_firstPtr) {
 				reserve(addSize);
 				_it = begin();
 				while (first != last)
+				{
 					_alloc.construct(_it++.operator->(), *first++);
+				}
 				_size = _capacity;
+				return (begin());
 			}
 			else
 			{
@@ -755,8 +769,6 @@ namespace ft
 				copyBlock(position, this->end(), position + addSize);
 				while (first != last)
 				{
-					if (position < end())
-						_alloc.destroy(position.operator->());
 					_alloc.construct(position.operator->(), *first);
 					first++;
 					position++;
@@ -770,8 +782,6 @@ namespace ft
 			_alloc.destroy(position.base());
 			copyBlock(position + 1, end(), position);
 			_size -= 1;
-			if (position != end())
-				_alloc.destroy(end().base());
 			return (position);
 		}
 
@@ -791,10 +801,6 @@ namespace ft
 				copyBlock(last, this->end(), first);
 				_it = this->end() - 1;
 				_size -= delSize;
-				if (first != this->end()) {
-					while (delSize--)
-						_alloc.destroy(&(*_it--));
-				}
 				return (first);
 			}
 			else
@@ -875,8 +881,8 @@ namespace ft
 			{
 				while (start != last)
 				{
-					_alloc.destroy(here.base());
 					_alloc.construct(here.base(), *start);
+					_alloc.destroy(start.base());
 					here++;
 					start++;
 				}
@@ -886,9 +892,8 @@ namespace ft
 				here += last - start - 1;
 				while (last-- != start)
 				{
-					if (here < end())
-						_alloc.destroy(here.base());
 					_alloc.construct(here.base(), *last);
+					_alloc.destroy(last.base());
 					here--;
 				}
 			}

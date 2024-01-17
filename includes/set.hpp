@@ -20,21 +20,21 @@ namespace ft {
 
 		// TYPEDEFS
 
-		typedef Key                                 key_type;
-		typedef Key                                 value_type;
-		typedef size_t                              size_type;
-		typedef ptrdiff_t                           difference_type;
-		typedef Compare                             key_compare;
-		typedef Compare                             value_compare;
-		typedef Allocator                           allocator_type;
-		typedef value_type& reference;
-		typedef const value_type& const_reference;
-		typedef value_type* pointer;
-		typedef const value_type* const_pointer;
+		typedef Key									key_type;
+		typedef Key									value_type;
+		typedef Allocator							allocator_type;
+		typedef typename Allocator::size_type		size_type;
+		typedef typename Allocator::difference_type	difference_type;
+		typedef Compare							 	key_compare;
+		typedef Compare							 	value_compare;
+		typedef value_type&							reference;
+		typedef const value_type&					const_reference;
+		typedef typename Allocator::pointer			pointer;
+		typedef typename Allocator::const_pointer	const_pointer;
 
 		// ITERATOR CLASS AND HIS TYPEDEFS
 
-		class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type> {
+		class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type, difference_type, const_pointer, const_reference> {
 
 			node<value_type>* _p;
 
@@ -163,33 +163,33 @@ namespace ft {
 
 		// ITERATOR FUNCTIONS
 
-		iterator                begin()
+		iterator				begin()
 		{
 			if (!_root)
 				return (end());
 			return (iterator(getMinNode(_root)));
 		}
-		const_iterator          begin() const
+		const_iterator		  begin() const
 		{
 			if (!_root)
 				return (end());
 			return (const_iterator(getMinNode(_root)));
 		}
-		iterator                end()
+		iterator				end()
 		{
 			return (iterator(_leaf));
 		}
-		const_iterator          end()   const
+		const_iterator		  end()   const
 		{
 			return (const_iterator(_leaf));
 		}
-		reverse_iterator        rbegin() {
+		reverse_iterator		rbegin() {
 			return (reverse_iterator(end()));
 		}
 		const_reverse_iterator  rbegin() const {
 			return (const_reverse_iterator(end()));
 		}
-		reverse_iterator        rend() {
+		reverse_iterator		rend() {
 			return (reverse_iterator(begin()));
 		}
 		const_reverse_iterator  rend() const {
@@ -198,13 +198,13 @@ namespace ft {
 
 		// CAPACITY
 
-		bool        empty()     const { return (!_root); }
-		size_type   size()      const { return (_size); }
+		bool		empty()	 const { return (!_root); }
+		size_type   size()	  const { return (_size); }
 		size_type   max_size()  const { return (_maxSizeAlloc.max_size()); }
 
 		// MODIFIERS
 
-		ft::pair<iterator, bool>    insert(const_reference data)
+		ft::pair<iterator, bool>	insert(const_reference data)
 		{
 			if (!_root) {
 				_root = insertNodeSet<value_type, Compare>(&_root,
@@ -232,11 +232,11 @@ namespace ft {
 			}
 		}
 
-		iterator                    insert(iterator hint, const value_type& data) {
-			if (!_root)
+		iterator					insert(iterator hint, const value_type& data) {
+			if (!_root || hint == end())
 				return iterator(insert(data).first);
-			bool    highest = false;
-			bool    smallest = false;
+			bool	highest = false;
+			bool	smallest = false;
 			_it = begin();
 			if (_compare(data, *_it)) {
 				smallest = true;
@@ -246,35 +246,40 @@ namespace ft {
 				highest = true;
 				hint = _it;
 			}
-			else if (_compare(data, *hint)) {
-				--hint;
-				while (_compare(data, *hint))
+			else if (_compare(data, *hint))
+			{
+				if (_compare(data, *(getPredecessor(hint.base())->content)))
+					hint = iterator(_root);
+				else if (hint.base()->father == getPredecessor(hint.base()))
 					--hint;
 			}
-			else if (_compare(*hint, data)) {
-				++hint;
-				while (_compare(*hint, data))
+			else if (_compare(*hint, data))
+			{
+				if (_compare(*(getSuccessor(hint.base())->content), data))
+					hint = iterator(_root);
+				else if (hint.base()->father == getSuccessor(hint.base()))
 					++hint;
 			}
-			if (!_compare(*hint, data) && !_compare(data, *hint))
+			else
 				return (hint);
 			++_size;
-			iterator    inserted(recursiveInsertSet(hint.base(), newNode<value_type, \
+			iterator	inserted(recursiveInsertSet(hint.base(), newNode<value_type, \
 				std::allocator< node < value_type> >, allocator_type>(data, _allocNode, _alloc), \
 				_compare, smallest, highest).first);
 			fixTree(inserted.base(), &_root);
+			_root = getRoot(_root);
 			return (inserted);
 		}
 
 		template< class InputIterator >
-		void                        insert(InputIterator first, InputIterator last) {
+		void						insert(InputIterator first, InputIterator last) {
 			while (first != last) {
 				insert(*first);
 				first++;
 			}
 		}
 
-		void                        erase(iterator position) {
+		void						erase(iterator position) {
 			node<value_type>* nodeToDel = _findNode(*position, _root);
 			if (nodeToDel) {
 				deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(
@@ -290,7 +295,7 @@ namespace ft {
 				}
 			}
 		}
-		size_type                   erase(const key_type& k) {
+		size_type				   erase(const key_type& k) {
 			node<value_type>* n = _findNode(k, _root);
 
 			if (!n)
@@ -308,14 +313,14 @@ namespace ft {
 			}
 			return (1);
 		}
-		void                        erase(iterator first, iterator last)
+		void						erase(iterator first, iterator last)
 		{
 			while (first != last)
 			{
 				erase(first++);
 			}
 		}
-		void                        swap(set& other) {
+		void						swap(set& other) {
 			node<value_type>* tempRoot = _root;
 			node<value_type>* tempLeaf = _leaf;
 			size_type			tempSize = _size;
@@ -334,7 +339,7 @@ namespace ft {
 			other._alloc = tempAlloc;
 			other._compare = tempCompare;
 		}
-		void                        clear() {
+		void						clear() {
 			if (_root) {
 				recursiveBurnTheTree<value_type, std::allocator<node<value_type> >, allocator_type>(_root, _allocNode, _alloc);
 				_root = 0;
@@ -346,13 +351,16 @@ namespace ft {
 
 		// OBSERVERS
 
-		key_compare     key_comp()      const { return (_compare); }
-		value_compare   value_comp()    const { return (_compare); }
+		key_compare	 key_comp()	  const { return (_compare); }
+		value_compare   value_comp()	const { return (_compare); }
 
 		// OPERATIONS
 
-		iterator            find(const key_type& k) {
+		iterator			find(const key_type& k) {
 			node<value_type>* search = _root;
+
+			if (!search)
+				return end();
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
@@ -364,8 +372,11 @@ namespace ft {
 			}
 			return (iterator(search));
 		}
-		const_iterator      find(const key_type& k) const {
+		const_iterator	  find(const key_type& k) const {
 			node<value_type>* search = _root;
+
+			if (!search)
+				return end();
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
@@ -377,8 +388,11 @@ namespace ft {
 			}
 			return (const_iterator(search));
 		}
-		size_type           count(const key_type& k)	const {
+		size_type		   count(const key_type& k)	const {
 			node<value_type>* search = _root;
+
+			if (!search)
+				return 0;
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
@@ -390,10 +404,11 @@ namespace ft {
 			}
 			return (0);
 		}
-		iterator            lower_bound(const key_type& k) {
+		iterator			lower_bound(const key_type& k) {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (_compare(*(begin->content), k))
 					begin = begin->right;
@@ -404,10 +419,11 @@ namespace ft {
 			}
 			return (iterator(begin));
 		}
-		const_iterator      lower_bound(const key_type& k)  const {
+		const_iterator	  lower_bound(const key_type& k)  const {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (const_iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (_compare(*(begin->content), k))
 					begin = begin->right;
@@ -418,10 +434,11 @@ namespace ft {
 			}
 			return (const_iterator(begin));
 		}
-		iterator            upper_bound(const key_type& k) {
+		iterator			upper_bound(const key_type& k) {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (!_compare(k, *(begin->content)))
 					begin = begin->right;
@@ -432,10 +449,11 @@ namespace ft {
 			}
 			return (iterator(begin));
 		}
-		const_iterator      upper_bound(const key_type& k)  const {
+		const_iterator	  upper_bound(const key_type& k)  const {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (const_iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (!_compare(k, *(begin->content)))
 					begin = begin->right;
@@ -446,10 +464,10 @@ namespace ft {
 			}
 			return (const_iterator(begin));
 		}
-		ft::pair<iterator, iterator>    equal_range(const key_type& k) {
+		ft::pair<iterator, iterator>	equal_range(const key_type& k) {
 			return (ft::make_pair<iterator, iterator>(lower_bound(k), upper_bound(k)));
 		}
-		ft::pair<const_iterator, const_iterator>    equal_range(const key_type& k)  const {
+		ft::pair<const_iterator, const_iterator>	equal_range(const key_type& k)  const {
 			return (ft::make_pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k)));
 		}
 
@@ -467,11 +485,11 @@ namespace ft {
 
 		node<value_type>* _root;
 		node<value_type>* _leaf;
-		size_type                           _size;
-		iterator                            _it;
-		allocator_type                      _alloc;
+		size_type						   _size;
+		iterator							_it;
+		allocator_type					  _alloc;
 		_nodeAllocator_type					_allocNode;
-		key_compare                         _compare;
+		key_compare						 _compare;
 		ft::pair< node<value_type>*, bool > _insertValue;
 
 		struct maxSizeElt
@@ -486,15 +504,16 @@ namespace ft {
 
 		std::allocator<maxSizeElt>	_maxSizeAlloc;
 
-		void    _copyTree(node<value_type>** root, node<value_type>* other, node<value_type>* father) {
+		void	_copyTree(node<value_type>** root, node<value_type>* other, node<value_type>* father) {
 			if (isLeaf(other))
 				return;
 			*root = newNode(*(other->content), _allocNode, _alloc);
+			(*root)->color = other->color; 
 			(*root)->father = father;
 			_copyTree(&((*root)->left), other->left, *root);
 			_copyTree(&((*root)->right), other->right, *root);
 		}
-		void    _recursiveDoTheLeafs(node<value_type>* root, node<value_type>* leaf) {
+		void	_recursiveDoTheLeafs(node<value_type>* root, node<value_type>* leaf) {
 			if (!root->right)
 				root->right = leaf;
 			else
@@ -504,7 +523,7 @@ namespace ft {
 			else
 				_recursiveDoTheLeafs(root->left, leaf);
 		}
-		void    _doTheLeafs(node<value_type>* root) {
+		void	_doTheLeafs(node<value_type>* root) {
 			if (!root)
 				return;
 			_leaf->father = getMaxNodeNoLeaf(root);
@@ -514,6 +533,8 @@ namespace ft {
 		node<value_type>* _findNode(const key_type& k, node<value_type>* n) const
 		{
 			node<value_type>* search = n;
+			if (!search)
+				return NULL;
 			while (isNotLeaf(search))
 			{
 				if (_compare(*(search->content), k))
@@ -525,7 +546,7 @@ namespace ft {
 			}
 			return (NULL);
 		}
-		bool    equalIterator(iterator& it, iterator& end)
+		bool	equalIterator(iterator& it, iterator& end)
 		{
 			it = end;
 			return (true);
@@ -579,21 +600,21 @@ namespace ft {
 
 		// TYPEDEFS
 
-		typedef Key                                 key_type;
-		typedef Key                                 value_type;
-		typedef size_t                              size_type;
-		typedef ptrdiff_t                           difference_type;
-		typedef Compare                             key_compare;
-		typedef Compare                             value_compare;
-		typedef Allocator                           allocator_type;
-		typedef value_type& reference;
-		typedef const value_type& const_reference;
-		typedef value_type* pointer;
-		typedef const value_type* const_pointer;
+		typedef Allocator							allocator_type;
+		typedef Key									key_type;
+		typedef Key									value_type;
+		typedef typename Allocator::size_type		size_type;
+		typedef typename Allocator::difference_type	difference_type;
+		typedef Compare								key_compare;
+		typedef Compare								value_compare;
+		typedef value_type&							reference;
+		typedef const value_type&					const_reference;
+		typedef typename Allocator::pointer pointer;
+		typedef typename Allocator::const_pointer const_pointer;
 
 		// ITERATOR CLASS AND HIS TYPEDEFS
 
-		class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type> {
+		class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type, difference_type, const_pointer, const_reference> {
 
 			node<value_type>* _p;
 
@@ -722,33 +743,33 @@ namespace ft {
 
 		// ITERATOR FUNCTIONS
 
-		iterator                begin()
+		iterator				begin()
 		{
 			if (!_root)
 				return (end());
 			return (iterator(getMinNode(_root)));
 		}
-		const_iterator          begin() const
+		const_iterator		  begin() const
 		{
 			if (!_root)
 				return (end());
 			return (const_iterator(getMinNode(_root)));
 		}
-		iterator                end()
+		iterator				end()
 		{
 			return (iterator(_leaf));
 		}
-		const_iterator          end()   const
+		const_iterator		  end()   const
 		{
 			return (const_iterator(_leaf));
 		}
-		reverse_iterator        rbegin() {
+		reverse_iterator		rbegin() {
 			return (reverse_iterator(end()));
 		}
 		const_reverse_iterator  rbegin() const {
 			return (const_reverse_iterator(end()));
 		}
-		reverse_iterator        rend() {
+		reverse_iterator		rend() {
 			return (reverse_iterator(begin()));
 		}
 		const_reverse_iterator  rend() const {
@@ -757,8 +778,8 @@ namespace ft {
 
 		// CAPACITY
 
-		bool        empty()     const { return (!_root); }
-		size_type   size()      const { return (_size); }
+		bool		empty()	 const { return (!_root); }
+		size_type   size()	  const { return (_size); }
 		size_type   max_size()  const { return (_maxSizeAlloc.max_size()); }
 
 		// MODIFIERS
@@ -782,32 +803,34 @@ namespace ft {
 			return _it;
 		}
 
-		iterator                    insert(iterator hint, const value_type& data) {
-			if (!_root)
+		iterator					insert(iterator hint, const value_type& data) {
+			if (!_root || hint == end())
 				return insert(data);
-			bool    highest = false;
-			bool    smallest = false;
+			bool	highest = false;
+			bool	smallest = false;
 			_it = begin();
 			if (_compare(data, *_it)) {
 				smallest = true;
-				hint = _it;
 			}
 			else if (equalIterator(_it, --end()) && _compare(*_it, data)) {
 				highest = true;
-				hint = _it;
 			}
-			else if (_compare(data, *hint)) {
-				--hint;
-				while (_compare(data, *hint))
+			if (_compare(data, *hint))
+			{
+				if (_compare(data, *(getPredecessor(hint.base())->content)))
+					hint = iterator(_root);
+				else if (hint.base()->father == getPredecessor(hint.base()))
 					--hint;
 			}
-			else if (!_compare(data, *hint)) {
-				++hint;
-				while (!_compare(data, *hint))
+			else if (!_compare(data, *hint))
+			{
+				if (_compare(*(getSuccessor(hint.base())->content), data))
+					hint = iterator(_root);
+				else if (hint.base()->father == getSuccessor(hint.base()))
 					++hint;
 			}
 			++_size;
-			iterator    inserted(recursiveInsertMultiset(hint.base(), newNode<value_type, \
+			iterator	inserted(recursiveInsertMultiset(hint.base(), newNode<value_type, \
 				std::allocator< node < value_type> >, allocator_type>(data, _allocNode, _alloc), \
 				_compare, smallest, highest));
 			fixTree(inserted.base(), &_root);
@@ -815,13 +838,13 @@ namespace ft {
 		}
 
 		template< class InputIterator >
-		void                        insert(InputIterator first, InputIterator last) {
+		void						insert(InputIterator first, InputIterator last) {
 			while (first != last) {
 				insert(*(first++));
 			}
 		}
 
-		void                        erase(iterator position) {
+		void						erase(iterator position) {
 			if (position == end())
 				return;
 			deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(
@@ -836,14 +859,16 @@ namespace ft {
 				_leaf->left = getMinNode(_root);
 			}
 		}
-		size_type                   erase(const key_type& k) {
+		size_type				   erase(const key_type& k) {
 			size_type	delCount;
+			iterator	found;
 
 			delCount = 0;
-			while (_erase(k))
+			found = find(k);
+			while (found != end() && !_compare(k, *found) && !_compare(*found, k))
 			{
 				++delCount;
-				--_size;
+				erase(found++);
 			}
 			if (!delCount)
 				return delCount;
@@ -859,14 +884,14 @@ namespace ft {
 			}
 			return delCount;
 		}
-		void                        erase(iterator first, iterator last)
+		void						erase(iterator first, iterator last)
 		{
 			while (first != last)
 			{
 				erase(first++);
 			}
 		}
-		void                        swap(multiset& other) {
+		void						swap(multiset& other) {
 			node<value_type>*	tempRoot = _root;
 			node<value_type>*	tempLeaf = _leaf;
 			size_type			tempSize = _size;
@@ -885,7 +910,7 @@ namespace ft {
 			other._alloc = tempAlloc;
 			other._compare = tempCompare;
 		}
-		void                        clear() {
+		void						clear() {
 			if (_root) {
 				recursiveBurnTheTree<value_type, std::allocator<node<value_type> >, allocator_type>(_root, _allocNode, _alloc);
 				_root = 0;
@@ -897,15 +922,17 @@ namespace ft {
 
 		// OBSERVERS
 
-		key_compare     key_comp()      const { return (_compare); }
-		value_compare   value_comp()    const { return (_compare); }
+		key_compare	 key_comp()	  const { return (_compare); }
+		value_compare   value_comp()	const { return (_compare); }
 
 		// OPERATIONS
 
-		iterator            find(const key_type& k) {
+		iterator			find(const key_type& k) {
 			node<value_type>* search = _root;
 			iterator current;
 			iterator previous;
+			if (!search)
+                return end();
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
@@ -928,10 +955,12 @@ namespace ft {
 			}
 			return (iterator(search));
 		}
-		const_iterator      find(const key_type& k) const {
+		const_iterator	  find(const key_type& k) const {
 			node<value_type>* search = _root;
 			const_iterator current;
 			const_iterator previous;
+			if (!search)
+                return end();
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
@@ -954,8 +983,11 @@ namespace ft {
 			}
 			return (const_iterator(search));
 		}
-		size_type           count(const key_type& k)	const {
+		size_type		   count(const key_type& k)	const {
 			node<value_type>* search = _root;
+
+			if (!search)
+                return 0;
 			while (isNotLeaf(search))
 			{
 				if (!_compare(*(search->content), k) && !_compare(k, *(search->content)))
@@ -967,10 +999,11 @@ namespace ft {
 			}
 			return (0);
 		}
-		iterator            lower_bound(const key_type& k) {
+		iterator			lower_bound(const key_type& k) {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (_compare(*(begin->content), k))
 					begin = begin->right;
@@ -981,10 +1014,11 @@ namespace ft {
 			}
 			return (iterator(begin));
 		}
-		const_iterator      lower_bound(const key_type& k)  const {
+		const_iterator	  lower_bound(const key_type& k)  const {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (const_iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (_compare(*(begin->content), k))
 					begin = begin->right;
@@ -995,10 +1029,11 @@ namespace ft {
 			}
 			return (const_iterator(begin));
 		}
-		iterator            upper_bound(const key_type& k) {
+		iterator			upper_bound(const key_type& k) {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (!_compare(k, *(begin->content)))
 					begin = begin->right;
@@ -1009,10 +1044,11 @@ namespace ft {
 			}
 			return (iterator(begin));
 		}
-		const_iterator      upper_bound(const key_type& k)  const {
+		const_iterator	  upper_bound(const key_type& k)  const {
 			node<value_type>* begin = _root;
+
 			if (!begin)
-				return (const_iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (!_compare(k, *(begin->content)))
 					begin = begin->right;
@@ -1023,10 +1059,10 @@ namespace ft {
 			}
 			return (const_iterator(begin));
 		}
-		ft::pair<iterator, iterator>    equal_range(const key_type& k) {
+		ft::pair<iterator, iterator>	equal_range(const key_type& k) {
 			return (ft::make_pair<iterator, iterator>(lower_bound(k), upper_bound(k)));
 		}
-		ft::pair<const_iterator, const_iterator>    equal_range(const key_type& k)  const {
+		ft::pair<const_iterator, const_iterator>	equal_range(const key_type& k)  const {
 			return (ft::make_pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k)));
 		}
 
@@ -1044,11 +1080,11 @@ namespace ft {
 
 		node<value_type>* _root;
 		node<value_type>* _leaf;
-		size_type                           _size;
-		iterator                            _it;
-		allocator_type                      _alloc;
+		size_type						   _size;
+		iterator							_it;
+		allocator_type					  _alloc;
 		_nodeAllocator_type					_allocNode;
-		key_compare                         _compare;
+		key_compare						 _compare;
 		ft::pair< node<value_type>*, bool > _insertValue;
 
 		struct maxSizeElt
@@ -1063,15 +1099,16 @@ namespace ft {
 
 		std::allocator<maxSizeElt>	_maxSizeAlloc;
 
-		void    _copyTree(node<value_type>** root, node<value_type>* other, node<value_type>* father) {
+		void	_copyTree(node<value_type>** root, node<value_type>* other, node<value_type>* father) {
 			if (isLeaf(other))
 				return;
 			*root = newNode(*(other->content), _allocNode, _alloc);
 			(*root)->father = father;
+			(*root)->color = other->color;
 			_copyTree(&((*root)->left), other->left, *root);
 			_copyTree(&((*root)->right), other->right, *root);
 		}
-		void    _recursiveDoTheLeafs(node<value_type>* root, node<value_type>* leaf) {
+		void	_recursiveDoTheLeafs(node<value_type>* root, node<value_type>* leaf) {
 			if (!root->right)
 				root->right = leaf;
 			else
@@ -1081,7 +1118,7 @@ namespace ft {
 			else
 				_recursiveDoTheLeafs(root->left, leaf);
 		}
-		void    _doTheLeafs(node<value_type>* root) {
+		void	_doTheLeafs(node<value_type>* root) {
 			if (!root)
 				return;
 			_leaf->father = getMaxNodeNoLeaf(root);
@@ -1091,6 +1128,8 @@ namespace ft {
 		node<value_type>* _findNode(const key_type& k, node<value_type>* n) const
 		{
 			node<value_type>* search = n;
+			if (!search)
+				return NULL;
 			while (isNotLeaf(search))
 			{
 				if (_compare(*(search->content), k))
@@ -1102,33 +1141,23 @@ namespace ft {
 			}
 			return (NULL);
 		}
-		bool    equalIterator(iterator& it, iterator& end)
+		bool	equalIterator(iterator& it, iterator& end)
 		{
 			it = end;
 			return (true);
 		}
-		bool	_erase(const key_type& k)
-		{
-			node<value_type>* found = _findNode(k, _root);
-
-			if (!found)
-				return 0;
-			else
-				deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(found, &_root, _allocNode, _alloc);
-			return 1;
-		}
 		size_type   _countUp(const key_type& k, iterator current)	const
-        {
-            if (current != end() && !_compare(*current, k) && !_compare(k, *current))
-                return (1 + _countUp(k, ++current));
-            return 0;
-        }
-        size_type   _countDown(const key_type& k, iterator current)	const
-        {
-            if (current != end() && !_compare(*current, k) && !_compare(k, *current))
-                return (1 + _countDown(k, --current));
-            return 0;
-        }
+		{
+			if (current != end() && !_compare(*current, k) && !_compare(k, *current))
+				return (1 + _countUp(k, ++current));
+			return 0;
+		}
+		size_type   _countDown(const key_type& k, iterator current)	const
+		{
+			if (current != end() && !_compare(*current, k) && !_compare(k, *current))
+				return (1 + _countDown(k, --current));
+			return 0;
+		}
 
 	};
 

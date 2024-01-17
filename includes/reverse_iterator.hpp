@@ -25,7 +25,7 @@ namespace ft {
         reverse_iterator(const reverse_iterator<Iter> &other) : _revIt(other.base()) {}
 
 		iterator_type		base() const {return (_revIt);}
-		reference			operator*()	const {return *(--base());}
+		reference			operator*() {return *(--base());}
 		reverse_iterator	operator+(difference_type n) const {
 			return reverse_iterator(_revIt.operator-(n));
 		}

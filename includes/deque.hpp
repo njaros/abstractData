@@ -48,14 +48,14 @@ namespace ft
 
 	public:
 
-		typedef T			value_type;
-		typedef Alloc		allocator_type;
-		typedef T& reference;
-		typedef const T& const_reference;
-		typedef T* pointer;
-		typedef const T* const_pointer;
-		typedef ptrdiff_t	difference_type;
-		typedef size_t		size_type;
+		typedef T								value_type;
+		typedef Alloc							allocator_type;
+		typedef T&								reference;
+		typedef const T&						const_reference;
+		typedef typename Alloc::pointer			pointer;
+		typedef typename Alloc::const_pointer	const_pointer;
+		typedef typename Alloc::difference_type	difference_type;
+		typedef typename Alloc::size_type		size_type;
 
 		//PRIVATE TYPEDEFS
 
@@ -93,7 +93,7 @@ namespace ft
 		//ITERATORS
 
 		class MyConstIterator;
-		class MyIterator : public ft::iterator< ft::random_access_iterator_tag, value_type >
+		class MyIterator : public ft::iterator< ft::random_access_iterator_tag, value_type, difference_type, pointer, reference >
 		{
 			friend class ft::deque<value_type>;
 			friend class MyConstIterator;
@@ -289,7 +289,7 @@ namespace ft
 			}
 		};
 
-		class MyConstIterator : public ft::iterator< ft::random_access_iterator_tag, const value_type >
+		class MyConstIterator : public ft::iterator< ft::random_access_iterator_tag, const value_type, difference_type, const_pointer, const_reference >
 		{
 			friend class ft::deque<value_type>;
 			friend class MyIterator;

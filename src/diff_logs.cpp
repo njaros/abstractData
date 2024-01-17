@@ -265,7 +265,7 @@ int main(void)
 	{
 		std::cout << 's';
 	}
-	std::cout << "on all tests.\n";
+	std::cout << " on all tests.\n";
 
 	return 0;
 }

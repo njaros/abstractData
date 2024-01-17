@@ -164,8 +164,7 @@ void	multimap_tests(const std::string& currentPath)
 		hint = me.insert(hint, p);
 		outfile << *hint << '\n';
 		displayV2(me, "more sense hint insert", outfile, 5);
-
-		p.second = 0;
+		
 		hint = me.insert(hint, p);
 		outfile << *hint << '\n';
 		displayV2(me, "hint insert with same key", outfile, 5);
@@ -372,6 +371,7 @@ void	multimap_tests(const std::string& currentPath)
 		multimap<int, int>::iterator it2;
 		multimap<int, int>::const_iterator cit;
 		multimap<int, int>::const_iterator cit2;
+		multimap<int, int> empty;
 
 		multimap<int, int> m;
 		for (int i = 0; i < 501; i += 5)
@@ -384,6 +384,11 @@ void	multimap_tests(const std::string& currentPath)
 		const multimap<int, int> m2(m);
 
 		outfile << "====find====\n\n";
+
+		it = empty.find(3);
+		outfile << "find with empty map succeed ? " << (it == empty.end()) << '\n';
+		cit = empty.find(3);
+		outfile << "sure ? " << (cit == empty.end()) << '\n';
 
 		cit = m.find(1);
 		outfile << (cit == m.end()) << '\n';
@@ -421,7 +426,14 @@ void	multimap_tests(const std::string& currentPath)
 		}
 		outfile << count << '\n';
 
+		outfile << "count with empty map : " << empty.count(34) << '\n';
+
 		outfile << "\n====lower_bound====\n\n";
+
+		it = empty.lower_bound(3);
+		outfile << "lower_bound with empty map succeed ? " << (it == empty.end()) << '\n';
+		cit = empty.lower_bound(3);
+		outfile << "sure ? " << (cit == empty.end()) << '\n';
 
 		m.lower_bound(0)->second = -58;
 
@@ -437,6 +449,11 @@ void	multimap_tests(const std::string& currentPath)
 
 		outfile << "\n====upper_bound====\n\n";
 
+		it = empty.upper_bound(3);
+		outfile << "upper_bound with empty map succeed ? " << (it == empty.end()) << '\n';
+		cit = empty.upper_bound(3);
+		outfile << "sure ? " << (cit == empty.end()) << '\n';
+
 		m.upper_bound(2)->second = 789;
 
 		outfile << *(m.upper_bound(2)) << '\n';
@@ -450,6 +467,15 @@ void	multimap_tests(const std::string& currentPath)
 		outfile << *(m2.upper_bound(7)) << '\n';
 
 		outfile << "\n====equal_range====\n\n";
+
+		it = empty.equal_range(3).first;
+		outfile << "equal_range with empty map succeed ? " << (it == empty.end()) << '\n';
+		cit = empty.equal_range(3).first;
+		outfile << "sure ? " << (cit == empty.end()) << '\n';
+		it = empty.equal_range(3).second;
+		outfile << "equal_range with empty map succeed ? " << (it == empty.end()) << '\n';
+		cit = empty.equal_range(3).second;
+		outfile << "sure ? " << (cit == empty.end()) << '\n';
 
 		count = 0;
 

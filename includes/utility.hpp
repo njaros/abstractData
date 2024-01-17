@@ -17,7 +17,6 @@ namespace ft
 {
 
 template < class T1, class T2 >
-
 class pair
 {
 
@@ -31,10 +30,11 @@ class pair
 
 		pair() : first(T1()), second(T2()) {}
 		template<class U, class V> 
-		explicit pair( const pair< U, V >& other ) : first(other.first), second(other.second) {}
+		pair( const pair< U, V >& other ) : first(other.first), second(other.second) {}
 		pair( const first_type &a, const second_type &b ) : first(a), second(b) {}
 
-		pair	&operator=( const pair &other )
+		template<class U, class V> 
+		pair	&operator=( const pair<U, V> &other )
 		{
 			first = other.first;
 			second = other.second;

@@ -31,7 +31,7 @@ namespace ft
 		};
 
 		class MyCIt;
-		class MyIt : public ft::iterator<ft::bidirectional_iterator_tag, value_type>
+		class MyIt : public ft::iterator<ft::bidirectional_iterator_tag, value_type, difference_type, pointer, reference>
 		{
 			Node* _n;
 
@@ -114,7 +114,7 @@ namespace ft
 			}
 		};
 
-		class MyCIt : public ft::iterator<ft::bidirectional_iterator_tag, const value_type>
+		class MyCIt : public ft::iterator<ft::bidirectional_iterator_tag, const value_type, difference_type, const_pointer, const_reference>
 		{
 			Node* _n;
 

@@ -45,7 +45,7 @@ namespace ft {
 
 // ITERATOR CLASS AND HIS TYPEDEFS
 		class MyConstIterator;
-        class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, value_type> {
+        class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, value_type, difference_type, pointer, reference> {
 
         private :
 
@@ -130,7 +130,7 @@ namespace ft {
 
         };
 
-		class MyConstIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type> {
+		class MyConstIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type, difference_type, const_pointer, const_reference> {
 
 		private :
 
@@ -390,7 +390,7 @@ namespace ft {
             return insert(ft::make_pair<const key_type, mapped_type>(k, m));
         }
         iterator                    insert(iterator hint, const value_type &data) {
-			if (!_root)
+			if (!_root || hint == end())
 				return iterator(insert(data).first);
             bool    highest = false;
             bool    smallest = false;
@@ -403,16 +403,20 @@ namespace ft {
                 highest = true;
                 hint = _it;
             }
-            else if (_compare(data.first, hint->first)) {
-                --hint;
-                while (_compare(data.first, hint->first))
-                    --hint;
-            }
-            else if (_compare(hint->first, data.first)) {
-                ++hint;
-                while (_compare(hint->first, data.first))
-                    ++hint;
-            }
+            else if (_compare(data.first, hint->first))
+			{
+				if (_compare(data.first, getPredecessor(hint.base())->content->first))
+					hint = iterator(_root);
+				else if (hint.base()->father == getPredecessor(hint.base()))
+					--hint;
+			}
+			else if (_compare(hint->first, data.first))
+			{
+				if (_compare(getSuccessor(hint.base())->content->first, data.first))
+					hint = iterator(_root);
+				else if (hint.base()->father == getSuccessor(hint.base()))
+					++hint;
+			}
             if (!_compare(hint->first, data.first) && !_compare(data.first, hint->first))
                 return (hint);
             ++_size;
@@ -516,6 +520,9 @@ namespace ft {
 
         iterator            find(const key_type &k) {
             node<value_type>    *search = _root;
+
+            if (!search)
+                return end();
             while (isNotLeaf(search))
             {
                 if (_compare(search->content->first, k))
@@ -527,8 +534,12 @@ namespace ft {
             }
             return (iterator(search));
         }
+
         const_iterator      find(const key_type &k) const {
 			node<value_type>    *search = _root;
+
+            if (!search)
+                return end();
             while (isNotLeaf(search))
             {
 				if (_compare(search->content->first, k))
@@ -540,8 +551,12 @@ namespace ft {
             }
             return (const_iterator(search));
         }
+
         size_type           count(const key_type &k)	const {
             node<value_type>    *search = _root;
+
+            if (!search)
+                return 0;
             while (isNotLeaf(search))
             {
                 if (!_compare(search->content->first, k) && !_compare(k, search->content->first))
@@ -553,10 +568,12 @@ namespace ft {
             }
             return (0);
         }
+
         iterator            lower_bound(const key_type &k) {
 			node<value_type>	*begin = _root;
+
 			if (!begin)
-				return (iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (_compare(begin->content->first, k))
 					begin = begin->right;
@@ -567,10 +584,12 @@ namespace ft {
 			}
 			return (iterator(begin));
         }
+
         const_iterator      lower_bound(const key_type &k)  const {
 			node<value_type>	*begin = _root;
+
 			if (!begin)
-				return (const_iterator(begin));
+				return end();
             while (isNotLeaf(begin)) {
 				if (_compare(begin->content->first, k))
 					begin = begin->right;
@@ -581,10 +600,12 @@ namespace ft {
 			}
             return (const_iterator(begin));
         }
+
         iterator            upper_bound(const key_type &k) {
 			node<value_type>	*begin = _root;
+
 			if (!begin)
-				return (iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (!_compare(k, begin->content->first))
 					begin = begin->right;
@@ -595,10 +616,12 @@ namespace ft {
 			}
 			return (iterator(begin));
         }
+
         const_iterator      upper_bound(const key_type &k)  const {
 			node<value_type>	*begin = _root;
+
 			if (!begin)
-				return (const_iterator(begin));
+				return end();
 			while (isNotLeaf(begin)) {
 				if (!_compare(k, begin->content->first))
 					begin = begin->right;
@@ -656,6 +679,7 @@ namespace ft {
                 return ;
             *root = newNode(*(other->content), _allocNode, _alloc);
             (*root)->father = father;
+            (*root)->color = other->color;
             _copyTree(&((*root)->left), other->left, *root);
             _copyTree(&((*root)->right), other->right, *root);
         }
@@ -679,6 +703,8 @@ namespace ft {
         node<value_type>    *_findNode(const key_type &k, node<value_type> *n) const
         {
 			node<value_type>    *search = n;
+            if (!search)
+                return NULL;
 			while (isNotLeaf(search))
 			{
 				if (_compare(search->content->first, k))
@@ -759,7 +785,7 @@ namespace ft {
 
         // ITERATOR CLASS AND HIS TYPEDEFS
         class MyConstIterator;
-        class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, value_type> {
+        class MyIterator : public ft::iterator<ft::bidirectional_iterator_tag, value_type, difference_type, pointer, reference > {
 
         private:
 
@@ -844,7 +870,7 @@ namespace ft {
 
         };
 
-        class MyConstIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type> {
+        class MyConstIterator : public ft::iterator<ft::bidirectional_iterator_tag, const value_type, difference_type, const_pointer, const_reference > {
 
         private:
 
@@ -1072,7 +1098,7 @@ namespace ft {
             return insert(ft::make_pair<const key_type, mapped_type>(k, m));
         }
         iterator                    insert(iterator hint, const value_type& data) {
-            if (!_root)
+            if (!_root || hint == end())
                 return iterator(insert(data));
             bool    highest = false;
             bool    smallest = false;
@@ -1087,18 +1113,22 @@ namespace ft {
             {
                 if (_compare(data.first, getPredecessor(hint.base())->content->first))
                     hint = iterator(_root);
+                else if (hint.base()->father == getPredecessor(hint.base()))
+					--hint;
             }
             else if (!_compare(data.first, hint->first))
             {
                 if (_compare(getSuccessor(hint.base())->content->first, data.first))
                     hint = iterator(_root);
+                else if (hint.base()->father == getSuccessor(hint.base()))
+					++hint;
             }
             ++_size;
             iterator    inserted(recursiveInsertMultimap(hint.base(),
                 newNode<value_type, std::allocator< node < value_type> >, allocator_type>(data, _allocNode, _alloc),
                 _compare, smallest, highest));
             fixTree(inserted.base(), &_root);
-            return (inserted);
+            return inserted;
         }
         iterator                    insert(iterator hint, const ft::pair<key_type, mapped_type>& data)
         {
@@ -1129,17 +1159,21 @@ namespace ft {
                 }
             }
         }
-        size_type                   erase(const key_type& k) {
+        size_type                   erase(const key_type& k)
+        {
             size_type delCount;
+            iterator found;
 
             delCount = 0;
-            while (_erase(k))
+            found = find(k);
+            while (found != end() && !_compare(found->first, k) && !_compare(k, found->first))
             {
                 ++delCount;
-                --_size;
+                erase(found++);
             }
             if (!delCount)
                 return delCount;
+            
             if (!_size) {
                 _root = 0;
                 _leaf->left = 0;
@@ -1202,6 +1236,8 @@ namespace ft {
             node<value_type>* search = _root;
             iterator current;
             iterator previous;
+            if (!search)
+                return end();
             while (isNotLeaf(search))
             {
                 if (_compare(search->content->first, k))
@@ -1228,6 +1264,9 @@ namespace ft {
             node<value_type>* search = _root;
             const_iterator current;
             const_iterator previous;
+
+            if (!search)
+                return end();
             while (isNotLeaf(search))
             {
                 if (_compare(search->content->first, k))
@@ -1252,6 +1291,8 @@ namespace ft {
         }
         size_type           count(const key_type& k)	const {
             node<value_type>* search = _root;
+            if (!search)
+                return 0;
             while (isNotLeaf(search))
             {
                 if (_compare(search->content->first, k))
@@ -1266,8 +1307,8 @@ namespace ft {
         iterator            lower_bound(const key_type& k) {
             node<value_type>* begin = _root;
             if (!begin)
-                return (iterator(begin));
-            while (isNotLeaf(begin)) {
+                return end();
+            while (begin != _leaf) {
                 if (_compare(begin->content->first, k))
                     begin = begin->right;
                 else if (isNotLeaf(begin->left) && !_compare(getPredecessor(begin)->content->first, k))
@@ -1280,8 +1321,8 @@ namespace ft {
         const_iterator      lower_bound(const key_type& k)  const {
             node<value_type>* begin = _root;
             if (!begin)
-                return (const_iterator(begin));
-            while (isNotLeaf(begin)) {
+                return end();
+            while (begin != _leaf) {
                 if (_compare(begin->content->first, k))
                     begin = begin->right;
                 else if (isNotLeaf(begin->left) && !_compare(getPredecessor(begin)->content->first, k))
@@ -1294,8 +1335,8 @@ namespace ft {
         iterator            upper_bound(const key_type& k) {
             node<value_type>* begin = _root;
             if (!begin)
-                return (iterator(begin));
-            while (isNotLeaf(begin)) {
+                return end();
+            while (begin != _leaf) {
                 if (!_compare(k, begin->content->first))
                     begin = begin->right;
                 else if (isNotLeaf(begin->left) && _compare(k, getPredecessor(begin)->content->first))
@@ -1308,8 +1349,8 @@ namespace ft {
         const_iterator      upper_bound(const key_type& k)  const {
             node<value_type>* begin = _root;
             if (!begin)
-                return (const_iterator(begin));
-            while (isNotLeaf(begin)) {
+                return end();
+            while (begin != _leaf) {
                 if (!_compare(k, begin->content->first))
                     begin = begin->right;
                 else if (isNotLeaf(begin->left) && _compare(k, getPredecessor(begin)->content->first))
@@ -1366,6 +1407,7 @@ namespace ft {
                 return;
             *root = newNode(*(other->content), _allocNode, _alloc);
             (*root)->father = father;
+            (*root)->color = other->color;
             _copyTree(&((*root)->left), other->left, *root);
             _copyTree(&((*root)->right), other->right, *root);
         }
@@ -1389,6 +1431,8 @@ namespace ft {
         node<value_type>* _findNode(const key_type& k, node<value_type>* n) const
         {
             node<value_type>* search = n;
+            if (!search)
+                return NULL;
             while (isNotLeaf(search))
             {
                 if (_compare(search->content->first, k))
@@ -1404,16 +1448,6 @@ namespace ft {
         {
             it = end;
             return (true);
-        }
-        bool    _erase(const key_type& k)
-        {
-            node<value_type>* found = _findNode(k, _root);
-
-            if (!found)
-                return 0;
-            else
-                deleteNode<value_type, std::allocator<node<value_type> >, allocator_type>(found, &_root, _allocNode, _alloc);
-            return 1;
         }
         size_type   _countUp(const key_type& k, iterator current)	const
         {
