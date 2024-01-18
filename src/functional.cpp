@@ -1,6 +1,6 @@
 #include "../includes/functional.hpp"
 
-size_t	_do_hash_pls(const unsigned char* first, size_t len)
+size_t	ft::_do_hash_pls(const unsigned char* first, size_t len)
 {	
 	size_t h;
 	

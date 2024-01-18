@@ -11,3 +11,9 @@
 	#define FT 0
 	using namespace std;
 #endif
+
+void unordered_set_tests(const std::string& currentPath, std::ostream& except)
+{
+	(void) currentPath;
+	(void) except;
+}

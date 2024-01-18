@@ -60,6 +60,8 @@ namespace ft
 	* is_string
 	*/
 
+	size_t	_do_hash_pls(const unsigned char* first, size_t len);
+
 	//because of the -Werror flag, i need to split the FNV_offset_basis number in 2.
 	const size_t FNV_offset_basis_first_part = 7000000000000000000;
 	const size_t FNV_offset_basis_second_part= 7695981039346656037;
@@ -81,7 +83,6 @@ namespace ft
 
 	//_hash templated functions, one function for each type I have to be able to hash
 
-	size_t	_do_hash_pls(const unsigned char* first, size_t len);
 
 	template < class T >
 	typename ft::enable_if< ft::is_integral< T >::value, size_t >::type
@@ -90,7 +91,7 @@ namespace ft
 		const size_t	nbBytes = sizeof(elt);
 		unsigned char	bytes[nbBytes];
 
-		for (int i = 0; i < nbBytes; ++i)
+		for (size_t i = 0; i < nbBytes; ++i)
 		{
 			bytes[i] = (unsigned char)elt;
 			elt >>= 8;
@@ -102,13 +103,14 @@ namespace ft
 	typename ft::enable_if<ft::is_pointer< T >::value, size_t >::type
 		_hash(const T& elt)
 	{
+		__uint64_t		hashable = reinterpret_cast<__uint64_t>(elt);
 		const size_t	nbBytes = sizeof(elt);
 		unsigned char	bytes[nbBytes];
 		
-		for (int i = 0; i < nbBytes; ++i)
+		for (size_t i = 0; i < nbBytes; ++i)
 		{
-			bytes[i] = (unsigned char)elt;
-			elt >>= 8;
+			bytes[i] = (unsigned char)hashable;
+			hashable >>= 8;
 		}
 		return _do_hash_pls(bytes, nbBytes);
 	}
@@ -120,7 +122,7 @@ namespace ft
 		__uint32_t	toUInt32 = *reinterpret_cast<__uint32_t*>(&elt);
 		unsigned char		bytes[4];
 
-		for (int i = 0; i < 4; ++i)
+		for (size_t i = 0; i < 4; ++i)
 		{
 			bytes[i] = (unsigned char)toUInt32;
 			toUInt32 >>= 8;
@@ -135,7 +137,7 @@ namespace ft
 		__uint64_t		toUInt64 = *reinterpret_cast<__uint64_t*>(&elt);
 		unsigned char	bytes[8];
 
-		for (int i = 0; i < 8; ++i)
+		for (size_t i = 0; i < 8; ++i)
 		{
 			bytes[i] = (unsigned char)toUInt64;
 			toUInt64 >>= 8;
@@ -163,7 +165,7 @@ namespace ft
 	template < class T >
 	struct hash : public ft::unary_function< T, size_t >
 	{
-		size_t operator()(const T& elt) { return _hash(elt); }
+		size_t operator()(const T& elt) const { return _hash(elt); }
 	};
 }
 

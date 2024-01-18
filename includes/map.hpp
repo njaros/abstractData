@@ -383,12 +383,7 @@ namespace ft {
                 return (ft::make_pair<iterator, bool>(_it, _insertValue.second));
             }
         }
-        ft::pair<iterator, bool>    insert(const ft::pair<key_type, mapped_type> &data)
-        {
-            const key_type		&k = data.first;
-            const mapped_type	&m = data.second;
-            return insert(ft::make_pair<const key_type, mapped_type>(k, m));
-        }
+
         iterator                    insert(iterator hint, const value_type &data) {
 			if (!_root || hint == end())
 				return iterator(insert(data).first);
@@ -405,15 +400,15 @@ namespace ft {
             }
             else if (_compare(data.first, hint->first))
 			{
-				if (_compare(data.first, getPredecessor(hint.base())->content->first))
-					hint = iterator(_root);
+				if (!_compare(getPredecessor(hint.base())->content->first, data.first))
+					return (insert(data).first);
 				else if (hint.base()->father == getPredecessor(hint.base()))
 					--hint;
 			}
 			else if (_compare(hint->first, data.first))
 			{
-				if (_compare(getSuccessor(hint.base())->content->first, data.first))
-					hint = iterator(_root);
+				if (!_compare(data.first, getSuccessor(hint.base())->content->first))
+					return (insert(data).first);
 				else if (hint.base()->father == getSuccessor(hint.base()))
 					++hint;
 			}
@@ -426,12 +421,7 @@ namespace ft {
             fixTree(inserted.base(), &_root);
             return (inserted);
         }
-        iterator                    insert(iterator hint, const ft::pair<key_type, mapped_type> &data)
-        {
-            const key_type      &k = data.first;
-            const mapped_type   &m = data.second;
-            return insert(hint, ft::make_pair<const key_type, mapped_type>(k, m));
-        }
+
         template< class InputIterator >
         void                        insert(InputIterator first, InputIterator last) {
             while (first != last) {
@@ -1091,12 +1081,6 @@ namespace ft {
             _root = getRoot(_root);
             return _it;
         }
-        iterator   insert(const ft::pair<key_type, mapped_type>& data)
-        {
-            const key_type& k = data.first;
-            const mapped_type& m = data.second;
-            return insert(ft::make_pair<const key_type, mapped_type>(k, m));
-        }
         iterator                    insert(iterator hint, const value_type& data) {
             if (!_root || hint == end())
                 return iterator(insert(data));
@@ -1129,12 +1113,6 @@ namespace ft {
                 _compare, smallest, highest));
             fixTree(inserted.base(), &_root);
             return inserted;
-        }
-        iterator                    insert(iterator hint, const ft::pair<key_type, mapped_type>& data)
-        {
-            const key_type& k = data.first;
-            const mapped_type& m = data.second;
-            return insert(hint, ft::make_pair<const key_type, mapped_type>(k, m));
         }
         template< class InputIterator >
         void                        insert(InputIterator first, InputIterator last) {

@@ -65,12 +65,14 @@ int diff_files(const std::string& file1, const std::string& file2, std::ostream&
 {
 	int diffCount = 0;
 	unsigned int lineCount = 0;
-	std::ifstream in1(file1);
-	std::ifstream in2(file2);
+	std::ifstream in1;
+	std::ifstream in2;
 	std::string str1;
 	std::string str2;
 	bool isExceptFile = false;
 
+	in1.open(file1.c_str());
+	in2.open(file2.c_str());
 	if (in1.fail() || in2.fail())
 		return -1;
 
@@ -140,22 +142,26 @@ int diff_logs(const std::string& mainPath1, const std::string& mainPath2, std::o
 	if (!dp1 || !dp2)
 		return -1;
 
-	while (entry1 = readdir(dp1))
+	entry1 = readdir(dp1);
+	while (entry1)
 	{
 		fileInfo(entry1);
 		if (entry1->d_type == DT_DIR && strcmp(entry1->d_name, ".") && strcmp(entry1->d_name, ".."))
 			dirList1[entry1->d_name] = dirName(mainPath1, entry1->d_name);
 		else if (entry1->d_type == DT_REG)
 			fileList1[entry1->d_name] = dirName(mainPath1, entry1->d_name);
+		entry1 = readdir(dp1);
 	}
 
-	while (entry2 = readdir(dp2))
+	entry2 = readdir(dp2);
+	while (entry2)
 	{
 		fileInfo(entry2);
 		if (entry2->d_type == DT_DIR && strcmp(entry2->d_name, ".") && strcmp(entry2->d_name, ".."))
 			dirList2[entry2->d_name] = dirName(mainPath2, entry2->d_name);
 		else if (entry2->d_type == DT_REG)
 			fileList2[entry2->d_name] = dirName(mainPath2, entry2->d_name);
+		entry2 = readdir(dp2);
 	}
 
 	cit1 = dirList1.begin();
@@ -251,21 +257,37 @@ int main(void)
 	std::string pwd = get_current_dir_name();
 	std::string std = "std_logs";
 	std::string ft = "ft_logs";
+	std::string std_bonus = "std_logs_bonus";
+	std::string ft_bonus = "ft_logs_bonus";
 
 	diffCount = diff_logs(dirName(pwd, std), dirName(pwd, ft), std::cout);
 
 	if (diffCount == -1)
 	{
-		std::cout << "an error occured : " << errno << " : " << strerror(errno) << '\n';
-		return errno;
+		std::cout << "mandatory part : an error occured : " << errno << " : " << strerror(errno) << "\n\n";
 	}
 
-	std::cout << "theyre is " << diffCount << " difference";
-	if (diffCount > 1)
+	else
 	{
-		std::cout << 's';
+		std::cout << "mandatory part : theyre is " << diffCount << " difference";
+		if (diffCount > 1)
+		{
+			std::cout << 's';
+		}
+		std::cout << " on mandatory tests.\n\n";
 	}
-	std::cout << " on all tests.\n";
+
+	diffCount = diff_logs(dirName(pwd, std_bonus), dirName(pwd, ft_bonus), std::cout);
+
+	if (diffCount != -1)
+	{
+		std::cout << "bonus part : theyre is " << diffCount << " difference";
+		if (diffCount > 1)
+		{
+			std::cout << 's';
+		}
+		std::cout << " on bonus tests.\n\n";
+	}
 
 	return 0;
 }

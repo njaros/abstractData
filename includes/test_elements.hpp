@@ -7,6 +7,15 @@
 #include <memory>
 #include <utility>
 #include <../includes/utility.hpp>
+#if FT==1
+	#include "map.hpp"
+	#include "set.hpp"
+	using namespace ft;
+#else
+	#include <set>
+	#include <map>
+	using namespace std;
+#endif
 
 // COMMON TOOLS
 
@@ -145,6 +154,108 @@ void	displayData(const T& container, std::ostream& stream, typename T::size_type
 		++eltCount;
 	}
 	stream << "\n\n";
+}
+
+template < typename T >
+void	displayHashSet(T& container, const char* name, std::ostream& outfile)
+{
+	typename T::const_local_iterator clit;
+
+	outfile << "----------> " << name << " <---------\n";
+	outfile << "empty : " << container.empty() << '\n';
+	outfile << "size : " << container.size() << '\n';
+	outfile << "bucket count : " << container.bucket_count() << '\n';
+	outfile << "max_bucket count : " << container.max_bucket_count() << '\n';
+	if (!container.empty())
+	{
+		outfile << name << "content : \n";
+		for (size_t i = 0; i < container.bucket_count(); ++i)
+		{
+			if (container.bucket_size(i))
+			{
+				outfile << "bucket [" << i << "] : {";
+				clit = container.begin(i);
+				while (clit != container.end(i))
+				{
+					outfile << *clit;
+					if (++clit != container.end(i))
+						outfile << ", ";
+					else
+						outfile << "}\n";
+				}
+			}
+		}
+	}
+}
+
+template < typename T >
+void	displayHashMap(T& container, const char* name, std::ostream& outfile)
+{
+	typename T::const_local_iterator clit;
+
+	outfile << "----------> " << name << " <---------\n";
+	outfile << "empty : " << container.empty() << '\n';
+	outfile << "size : " << container.size() << '\n';
+	outfile << "bucket count : " << container.bucket_count() << '\n';
+	outfile << "max_bucket count : " << container.max_bucket_count() << '\n';
+	if (!container.empty())
+	{
+		outfile << name << "content : \n";
+		for (size_t i = 0; i < container.bucket_count(); ++i)
+		{
+			if (container.bucket_size(i))
+			{
+				outfile << "bucket [" << i << "] : {";
+				clit = container.begin(i);
+				while (clit != container.end(i))
+				{
+					outfile << *clit;
+					if (++clit != container.end(i))
+						outfile << ", ";
+					else
+						outfile << "}\n";
+				}
+			}
+		}
+	}
+}
+
+template < typename T >
+void	displayHashMapForTests(T& container, const char* name, std::ostream& outfile, typename T::size_type eltsPerLine = 1)
+{
+	typename T::const_local_iterator clit;
+	map<typename T::key_type, typename T::mapped_type> sort;
+
+	outfile << "----------> " << name << " <---------\n";
+	outfile << "empty : " << container.empty() << '\n';
+	outfile << "size : " << container.size() << '\n';
+	outfile << "max_size : " << container.max_size() << '\n';
+	if (eltsPerLine && !container.empty())
+	{
+		sort.insert(container.begin(), container.end());
+		displayData(sort, outfile, eltsPerLine);
+	}
+	else
+		outfile << '\n';
+}
+
+template < typename T >
+void	displayHashSetForTests(T& container, const char* name, std::ostream& outfile, typename T::size_type eltsPerLine = 1)
+{
+	typename T::const_local_iterator clit;
+	set<typename T::key_type> sort;
+
+	outfile << "----------> " << name << " <---------\n";
+	outfile << "empty : " << container.empty() << '\n';
+	outfile << "size : " << container.size() << '\n';
+	outfile << "max_size : " << container.max_size() << '\n';
+	if (eltsPerLine && !container.empty())
+	{
+		sort.insert(container.begin(), container.end());
+		displayData(sort, outfile, eltsPerLine);
+	}
+	else
+		outfile << '\n';
 }
 
 //std reallocation implementation defers according to OS used, so compare capacity is non sense.
@@ -647,7 +758,55 @@ void bidirectionalReverseIteratorTests(Cont& c, std::ofstream& outfile)
 	outfile << "is " << *cit2 << " != " << *cit3 << " ? " << (cit2 != cit3) << '\n';
 }
 
+template <class Cont>
+void forwardIteratorTests(Cont& c, std::ofstream& outfile)
+{
+	typedef typename Cont::iterator It;
+	typedef typename Cont::const_iterator Cit;
+
+	It it;
+	const Cont c2(c);
+		
+	Cit cit = c2.begin();
+	it = c.begin();
+
+	outfile << "++, *(), *++ const_iterator tests\n\n";
+	outfile << (*++cit == *cit++) << '\n';
+	outfile << (*cit++ == *cit++) << '\n';
+	outfile << (*cit++ == *++cit) << '\n';
+	outfile << (*++cit == *++cit) << '\n';
+
+	outfile << "\n++, *(), *++, iterator tests\n\n";
+	outfile << (*++it == *it++) << '\n';
+	outfile << (*it++ == *it++) << '\n';
+	outfile << (*it++ == *++it) << '\n';
+	outfile << (*++it == *++it) << '\n';
+
+	it = c.begin();
+	cit = c2.begin();
+	Cit cit2(it);
+	Cit cit3(cit2);
+	outfile << "\niterator and const_iterator comparisons : \n\n";
+	outfile << (*++cit == *++cit2) << "  " << (cit == cit2) << '\n';
+	outfile << (*++cit3 == *cit2) << "  " << (cit3 == cit2) << '\n';
+	outfile << (*++cit3 == *cit2) << "  " << (cit3 == cit2) << '\n';
+	outfile << (*++it == *cit2) << "  " << (it == cit2) << '\n';
+	outfile << (*it == *++cit2) << "  " << (it == cit2) << '\n';
+	outfile << (*++cit != *++cit2) << "  " << (cit != cit2) << '\n';
+	outfile << (*++cit != *cit2) << "  " << (cit != cit2) << '\n';
+	it = c.begin();
+	cit = c2.begin();
+	cit2 = it;
+	cit3 = it;
+	outfile << (*cit != *cit2) << "  " << (cit != cit2) << '\n';
+	outfile << (*it != *cit) << "  " << (it != cit) << '\n';
+	outfile << (*it != *cit2) << "  " << (it != cit2) << '\n';
+	outfile << (*cit2 != *cit3) << "  " << (cit2 != cit3) << '\n';
+}
+
 // END OF COMMON TESTS LIBRARY
+
+//MANDATORY TESTS
 
 void flat_basket_tests();
 void vector_tests(const std::string& currentPath, std::ostream& except);
@@ -660,5 +819,12 @@ void multimap_tests(const std::string& currentPath);
 void set_tests(const std::string& currentPath);
 void multiset_tests(const std::string& currentPath);
 void list_tests(const std::string& currentPath);
+
+//BONUS TESTS
+
+void unordered_map_tests(const std::string& currentPath, std::ostream& except);
+void unordered_set_tests(const std::string& currentPath, std::ostream& except);
+void unordered_multimap_tests(const std::string& currentPath, std::ostream& except);
+void unordered_multiset_tests(const std::string& currentPath, std::ostream& except);
 
 #endif

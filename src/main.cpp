@@ -9,54 +9,6 @@
 #include <iostream>
 #include <sys/time.h>
 
-template < typename T >
-void	displayHashSet(T& container, const char* name)
-{
-	typename T::const_local_iterator clit;
-
-	std::cout << name << " content :" << '\n';
-	for (size_t i = 0; i < container.bucket_count(); ++i)
-	{
-		if (container.bucket_size(i))
-		{
-			std::cout << "bucket [" << i << "] : {";
-			clit = container.begin(i);
-			while (clit != container.end(i))
-			{
-				std::cout << "(addr : " << &(*clit) << " | val : " << *clit << ')';
-				if (++clit != container.end(i))
-					std::cout << ", ";
-				else
-					std::cout << "}\n";
-			}
-		}
-	}
-}
-
-template < typename T >
-void	displayHashMap(T& container, const char* name)
-{
-	typename T::const_local_iterator clit;
-
-	std::cout << name << " content :" << '\n';
-	for (size_t i = 0; i < container.bucket_count(); ++i)
-	{
-		if (container.bucket_size(i))
-		{
-			std::cout << "bucket [" << i << "] : {";
-			clit = container.begin(i);
-			while (clit != container.end(i))
-			{
-				std::cout << "(addr : " << &(*clit) << " | val : " << clit->first << " => " << clit->second << ')';
-				if (++clit != container.end(i))
-					std::cout << ", ";
-				else
-					std::cout << "}\n";
-			}
-		}
-	}
-}
-
 std::string filePath(const std::string& ctx, const std::string& container)
 {
 	std::string ret(ctx);

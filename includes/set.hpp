@@ -248,15 +248,15 @@ namespace ft {
 			}
 			else if (_compare(data, *hint))
 			{
-				if (_compare(data, *(getPredecessor(hint.base())->content)))
-					hint = iterator(_root);
+				if (!_compare(*(getPredecessor(hint.base())->content), data))
+					return (insert(data).first);
 				else if (hint.base()->father == getPredecessor(hint.base()))
 					--hint;
 			}
 			else if (_compare(*hint, data))
 			{
-				if (_compare(*(getSuccessor(hint.base())->content), data))
-					hint = iterator(_root);
+				if (!_compare(data, *(getSuccessor(hint.base())->content)))
+					return (insert(data).first);
 				else if (hint.base()->father == getSuccessor(hint.base()))
 					++hint;
 			}

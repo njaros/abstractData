@@ -54,17 +54,17 @@ namespace ft
 		class _hTIt : public ft::iterator< ft::forward_iterator_tag, const value_type, difference_type, pointer, reference >
 		{
 
-			friend unordered_set;
+			friend class unordered_set;
 
 			const _table*			_ctx;
 			size_type				_tablePos;
 			const_local_iterator	_bucketPos;
 
-			_hTIt(_table* ctx, const size_type& tPos, const const_local_iterator& bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
+			_hTIt(const _table* ctx, const size_type& tPos, const const_local_iterator& bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
 
 		public:
 
-			_hTIt() : _ctx(nullptr), _tablePos(0), _bucketPos(const_local_iterator()) {}
+			_hTIt() : _ctx(0), _tablePos(0), _bucketPos(const_local_iterator()) {}
 			_hTIt(const _hTIt& o) : _ctx(o._ctx), _tablePos(o._tablePos), _bucketPos(o._bucketPos) {}
 			_hTIt& operator=(const _hTIt& o)
 			{
@@ -108,7 +108,7 @@ namespace ft
 							return *this;
 						}
 					}
-					_ctx = nullptr;
+					_ctx = 0;
 					_tablePos = 0;
 					_bucketPos = const_local_iterator();
 				}
@@ -119,7 +119,7 @@ namespace ft
 			{
 				_hTIt cpy(*this);
 
-				++_hTIt;
+				++(*this);
 				return cpy;
 			}
 		};
@@ -278,7 +278,7 @@ namespace ft
 			end = _t[hashValue].end();
 			for (const_local_iterator it = _t[hashValue].begin(); it != end; ++it)
 			{
-				if (_equal(*first, key))
+				if (_equal(*it, key))
 					return (iterator(&_t, hashValue, it));
 			}
 			return iterator(&_t, _t.size(), const_local_iterator());
@@ -293,7 +293,7 @@ namespace ft
 			end = _t[hashValue].end();
 			for (const_local_iterator it = _t[hashValue].begin(); it != end; ++it)
 			{
-				if (_equal(it->first, key))
+				if (_equal(*it, key))
 					return (const_iterator(&_t, hashValue, it));
 			}
 			return const_iterator(&_t, _t.size(), const_local_iterator());
@@ -323,15 +323,9 @@ namespace ft
 				if (_equal(k, lit->first))
 				{
 					ret.first = iterator(&_t, hashValue, lit++);
-					while (lit != _t[hashValue].end() && _equal(k.lit->first))
-						++lit;
-					if (lit == _t[hashValue].end())
-					{
-						ret.second = iterator(&_t, hashValue, --lit);
+					ret.second = ret.first;
+					while (ret.second != end() && _equal(k, *(ret.second)))
 						++ret.second;
-					}
-					else
-						ret.second = iterator(&_t, hashValue, lit);
 					return ret;
 				}
 			}
@@ -340,7 +334,7 @@ namespace ft
 
 		ft::pair<const_iterator, const_iterator>	equal_range(const key_type& k)	const
 		{
-			ft::pair<const_iterator, const_iterator> ret(const_iterator(), const_iterator());
+			ft::pair<const_iterator, const_iterator> ret(end(), end());
 			size_t	hashValue;
 
 			hashValue = hasher(k) % _t.size();
@@ -349,15 +343,9 @@ namespace ft
 				if (_equal(k, clit->first))
 				{
 					ret.first = const_iterator(&_t, hashValue, clit++);
-					while (clit != _t[hashValue].end() && _equal(k.clit->first))
-						++clit;
-					if (clit == _t[hashValue].end())
-					{
-						ret.second = const_iterator(&_t, hashValue, --clit);
+					ret.second = ret.first;
+					while (ret.second != end() && _equal(k, *(ret.second)))
 						++ret.second;
-					}
-					else
-						ret.second = const_iterator(&_t, hashValue, clit);
 					return ret;
 				}
 			}
@@ -381,6 +369,7 @@ namespace ft
 
 		iterator	insert(iterator hint, const value_type& val)
 		{
+			(void) hint;
 			return insert(val).first;
 		}
 
@@ -401,6 +390,7 @@ namespace ft
 				if (_equal(*lit, key))
 				{
 					--_size;
+					_t[hashValue].erase(lit);
 					return 1;
 				}
 			}
@@ -411,10 +401,10 @@ namespace ft
 		iterator	erase(iterator position)
 		{
 			if (position._ctx != &_t)
-				throw(ft::out_of_range("ft::unordered_set::_erase : iterator position doesn't belong to this instance."));
+				throw(ft::out_of_range("ft::unordered_set::erase : iterator position doesn't belong to this instance."));
 
 			if (position._tablePos >= _t.size())
-				throw(ft::out_of_range("ft::unordered_set::_erase : iterator position is out of border."));
+				throw(ft::out_of_range("ft::unordered_set::erase : iterator position is out of border."));
 
 			iterator toDel = position++;
 			_t[toDel._tablePos].erase(toDel._bucketPos);
@@ -425,14 +415,17 @@ namespace ft
 		iterator	erase(iterator first, iterator last)
 		{
 			while (first != last)
-				first = _erase(first);
+				first = erase(first);
 			return first;
 		}
 
 		void	clear()
 		{
 			_size = 0;
-			_t.clear();
+			for (_tableIterator it = _t.begin(); it != _t.end(); ++it)
+			{
+				it->clear();
+			}
 		}
 
 		void	swap(unordered_set& o)
@@ -475,7 +468,7 @@ namespace ft
 
 		float	load_factor() const
 		{
-			return _size / _table.size();
+			return _size / _t.size();
 		}
 
 		void	max_load_factor(float z)
@@ -483,7 +476,7 @@ namespace ft
 			if (z <= 0)
 				throw(ft::invalid_argument("ft::unordered_set::_max_load_factor : _maxLoadFactor can't be set to a negative value"));
 			_maxLoadFactor = z;
-			_maxLoad = size_type(float(_table.size()) * z);
+			_maxLoad = size_type(float(_t.size()) * z);
 		}
 
 		void	rehash(size_type n)
@@ -507,7 +500,7 @@ namespace ft
 
 		size_t bucket(const key_type& key)	const
 		{
-			return _hasher(key);
+			return _hasher(key) % _t.size();
 		}
 
 		size_type	bucket_count()	const
@@ -623,17 +616,17 @@ namespace ft
 		class _hTIt : public ft::iterator< ft::forward_iterator_tag, const value_type, difference_type, pointer, reference >
 		{
 
-			friend unordered_multiset;
+			friend class unordered_multiset;
 
 			const _table* _ctx;
 			size_type				_tablePos;
 			const_local_iterator		_bucketPos;
 
-			_hTIt(_table* ctx, const size_type& tPos, const const_local_iterator& bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
+			_hTIt(const _table* ctx, const size_type& tPos, const const_local_iterator& bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
 
 		public:
 
-			_hTIt() : _ctx(nullptr), _tablePos(0), _bucketPos(const_local_iterator()) {}
+			_hTIt() : _ctx(0), _tablePos(0), _bucketPos(const_local_iterator()) {}
 			_hTIt(const _hTIt& o) : _ctx(o._ctx), _tablePos(o._tablePos), _bucketPos(o._bucketPos) {}
 			_hTIt& operator=(const _hTIt& o)
 			{
@@ -677,7 +670,7 @@ namespace ft
 							return *this;
 						}
 					}
-					_ctx = nullptr;
+					_ctx = 0;
 					_tablePos = 0;
 					_bucketPos = const_local_iterator();
 				}
@@ -688,7 +681,7 @@ namespace ft
 			{
 				_hTIt cpy(*this);
 
-				++_hTIt;
+				++(*this);
 				return cpy;
 			}
 		};
@@ -858,7 +851,7 @@ namespace ft
 			end = _t[hashValue].end();
 			for (local_iterator it = _t[hashValue].begin(); it != end; ++it)
 			{
-				if (_equal(*first, key))
+				if (_equal(*it, key))
 					return (iterator(&_t, hashValue, it));
 			}
 			return iterator(&_t, _t.size(), local_iterator());
@@ -873,7 +866,7 @@ namespace ft
 			end = _t[hashValue].end();
 			for (const_local_iterator it = _t[hashValue].begin(); it != end; ++it)
 			{
-				if (_equal(*first, key))
+				if (_equal(*it, key))
 					return (const_iterator(&_t, hashValue, it));
 			}
 			return const_iterator(&_t, _t.size(), const_local_iterator());
@@ -903,9 +896,9 @@ namespace ft
 				if (_equal(k, lit->first))
 				{
 					ret.first = iterator(&_t, hashValue, lit++);
-					while (lit != _t[hashValue].end() && _equal(k.lit->first))
-						++lit;
-					ret.second = iterator(&_t, hashValue, lit);
+					ret.second = ret.first;
+					while (ret.second != end() && _equal(k, *(ret.second)))
+						++ret.second;
 					return ret;
 				}
 			}
@@ -914,7 +907,7 @@ namespace ft
 
 		ft::pair<const_iterator, const_iterator>	equal_range(const key_type& k)	const
 		{
-			ft::pair<const_iterator, const_iterator> ret(const_iterator(), const_iterator());
+			ft::pair<const_iterator, const_iterator> ret(end(), end());
 			size_t	hashValue;
 
 			hashValue = hasher(k) % _t.size();
@@ -923,9 +916,9 @@ namespace ft
 				if (_equal(k, clit->first))
 				{
 					ret.first = const_iterator(&_t, hashValue, clit++);
-					while (clit != _t[hashValue].end() && _equal(k.clit->first))
-						++clit;
-					ret.second = const_iterator(&_t, hashValue, clit);
+					ret.second = ret.first;
+					while (ret.second != end() && _equal(k, *(ret.second)))
+						++ret.second;
 					return ret;
 				}
 			}
@@ -976,10 +969,10 @@ namespace ft
 		iterator	erase(iterator position)
 		{
 			if (position._ctx != &_t)
-				throw(ft::out_of_range("ft::unordered_multiset::_erase : iterator position doesn't belong to this instance."));
+				throw(ft::out_of_range("ft::unordered_multiset::erase : iterator position doesn't belong to this instance."));
 
 			if (position._tablePos >= _t.size())
-				throw(ft::out_of_range("ft::unordered_multiset::_erase : iterator position is out of border."));
+				throw(ft::out_of_range("ft::unordered_multiset::erase : iterator position is out of border."));
 
 			iterator toDel = position++;
 			_t[toDel._tablePos].erase(toDel._bucketPos);
@@ -990,14 +983,17 @@ namespace ft
 		iterator	erase(iterator first, iterator last)
 		{
 			while (first != last)
-				first = _erase(first);
+				first = erase(first);
 			return first;
 		}
 
 		void	clear()
 		{
 			_size = 0;
-			_t.clear();
+			for (_tableIterator it = _t.begin(); it != _t.end(); ++it)
+			{
+				it->clear();
+			}
 		}
 
 		void	swap(unordered_multiset& o)
@@ -1040,7 +1036,7 @@ namespace ft
 
 		float	load_factor() const
 		{
-			return _size / _table.size();
+			return _size / _t.size();
 		}
 
 		void	max_load_factor(float z)
@@ -1048,7 +1044,7 @@ namespace ft
 			if (z <= 0)
 				throw(ft::invalid_argument("ft::unordered_multiset::_max_load_factor : _maxLoadFactor can't be set to a negative value"));
 			_maxLoadFactor = z;
-			_maxLoad = size_type(float(_table.size()) * z);
+			_maxLoad = size_type(float(_t.size()) * z);
 		}
 
 		void	rehash(size_type n)
@@ -1072,7 +1068,7 @@ namespace ft
 
 		size_t bucket(const key_type& key)	const
 		{
-			return _hasher(key);
+			return _hasher(key) % _t.size();
 		}
 
 		size_type	bucket_count()	const
@@ -1138,8 +1134,10 @@ namespace ft
 			// If one element doesn't have pair I return false;
 			while (rangeLhs.first != rangeLhs.second)
 			{
-				lhsL.push_back(&(*(rangeLhs.(first++))));
-				rhsL.push_back(&(*(rangeRhs.(first++))));
+				lhsL.push_back(&(*(rangeLhs.first)));
+				rhsL.push_back(&(*(rangeRhs.first)));
+				++rangeLhs.first;
+				++rangeRhs.first;
 			}
 			if (lhsL.size() != rhsL.size())
 				return false;
