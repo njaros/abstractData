@@ -4,6 +4,7 @@
 # include <memory>
 # include <cstddef>
 # include <cstring>
+# include <cmath>
 # include "list.hpp"
 # include "vector.hpp"
 # include "utility.hpp"
@@ -34,10 +35,16 @@ namespace ft
 		typedef typename Alloc::difference_type	difference_type;
 		typedef Pred		key_equal;
 		typedef Hash		hasher;
+
+	private :
+
 		typedef ft::list< value_type, Alloc >		_bucket;
 		typedef ft::vector< _bucket >				_table;
 		typedef typename _table::iterator			_tableIterator;
 		typedef typename _table::const_iterator		_tableConstIterator;
+
+	public :
+
 		typedef typename _bucket::iterator			local_iterator;
 		typedef typename _bucket::const_iterator	const_local_iterator;
 
@@ -457,7 +464,7 @@ namespace ft
 
 		ft::pair<const_iterator, const_iterator>	equal_range(const key_type& k)	const
 		{
-			ft::pair<const_iterator, const_iterator> ret(const_iterator(), const_iterator());
+			ft::pair<const_iterator, const_iterator> ret((const_iterator() ), (const_iterator() ) );
 			size_t	hashValue;
 
 			hashValue = _hasher(k) % _t.size();
@@ -613,7 +620,7 @@ namespace ft
 
 		float	load_factor() const
 		{
-			return _size / _t.size();
+			return static_cast<float>(_size) / _t.size();
 		}
 
 		void	max_load_factor(float z)
@@ -626,21 +633,26 @@ namespace ft
 
 		void	rehash(size_type n)
 		{
-			if (n > _t.size())
-				_rehash(n);
+			size_type newhashVal;
+			size_type minimum;
+
+			minimum = static_cast<size_type>(ceilf(static_cast<float>(_size) / _maxLoadFactor));
+			newhashVal = ft::max(n, minimum);
+			if (newhashVal != _t.size())
+				_rehash(newhashVal);
 		}
 
 		void	reserve(size_type n)
 		{
-			size_type	growth;
+			size_type newHashVal;
+			size_type minimum;
+			size_type asked;
 
-			if (n >= _maxLoad)
-			{
-				growth = 8 * _t.size();
-				while ((size_type)((float)growth * _maxLoadFactor) <= n)
-					growth *= 8;
-				_rehash(growth);
-			}
+			minimum = static_cast<size_type>(ceilf(static_cast<float>(_size) / _maxLoadFactor));
+			asked = static_cast<size_type>(ceilf(static_cast<float>(n) / _maxLoadFactor));
+			newHashVal = ft::max(asked, minimum);
+			if (newHashVal != _t.size())
+				_rehash(newHashVal);
 		}
 
 		size_t bucket(const key_type& key)	const
@@ -887,8 +899,6 @@ namespace ft
 			}
 			_hTCIt& operator=(const _hTIt& o)
 			{
-				if (&o == this)
-					return *this;
 				_ctx = o._ctx;
 				_tablePos = o._tablePos;
 				_bucketPos = o._bucketPos;
@@ -1082,14 +1092,15 @@ namespace ft
 		}
 
 		// Hint is a bucket iterator with a key equal to the key of val (only for multimap)
-		// I have to ensure that _size < _maxLoad
 		// if hint was given by user, i have to ensure val.first equal_to hint->first
 		// if one of two previous condition is wrong, I do normal insert
 		iterator	_insert(iterator hint, const value_type& val)
 		{
+			local_iterator inserted;
+
 			++_size;
-			_t[hint._tablePos].insert(hint._bucketPos, val);
-			return --hint;
+			inserted = _t[hint._tablePos].insert(hint._bucketPos, val);
+			return iterator(hint._ctx, hint._tablePos, inserted);
 		}
 
 	public:
@@ -1112,11 +1123,11 @@ namespace ft
 		iterator	find(const key_type& key)
 		{
 			size_t hashValue;
-			local_iterator end;
+			local_iterator endIt;
 
 			hashValue = _hasher(key) % _t.size();
-			end = _t[hashValue].end();
-			for (local_iterator it = _t[hashValue].begin(); it != end; ++it)
+			endIt = _t[hashValue].end();
+			for (local_iterator it = _t[hashValue].begin(); it != endIt; ++it)
 			{
 				if (_equal(it->first, key))
 					return (iterator(&_t, hashValue, it));
@@ -1127,11 +1138,11 @@ namespace ft
 		const_iterator	find(const key_type& key) const
 		{
 			size_t hashValue;
-			const_local_iterator end;
+			const_local_iterator endIt;
 
 			hashValue = _hasher(key) % _t.size();
-			end = _t[hashValue].end();
-			for (const_local_iterator it = _t[hashValue].begin(); it != end; ++it)
+			endIt = _t[hashValue].end();
+			for (const_local_iterator it = _t[hashValue].begin(); it != endIt; ++it)
 			{
 				if (_equal(it->first, key))
 					return (const_iterator(&_t, hashValue, it));
@@ -1157,14 +1168,14 @@ namespace ft
 			ft::pair<iterator, iterator> ret(end(), end());
 			size_t	hashValue;
 
-			hashValue = hasher(k) % _t.size();
+			hashValue = _hasher(k) % _t.size();
 			for (local_iterator lit = _t[hashValue].begin(); lit != _t[hashValue].end(); ++lit)
 			{
 				if (_equal(k, lit->first))
 				{
 					ret.first = iterator(&_t, hashValue, lit++);
 					ret.second = ret.first;
-					while (ret.second != end() && _equal(k, *(ret.second)))
+					while (ret.second != end() && _equal(k, ret.second->first))
 						++ret.second;
 					return ret;
 				}
@@ -1174,17 +1185,17 @@ namespace ft
 
 		ft::pair<const_iterator, const_iterator>	equal_range(const key_type& k)	const
 		{
-			ft::pair<const_iterator, const_iterator> ret(const_iterator(), const_iterator());
+			ft::pair<const_iterator, const_iterator> ret( (const_iterator() ), (const_iterator() ) );
 			size_t	hashValue;
 
-			hashValue = hasher(k) % _t.size();
+			hashValue = _hasher(k) % _t.size();
 			for (const_local_iterator clit = _t[hashValue].begin(); clit != _t[hashValue].end(); ++clit)
 			{
 				if (_equal(k, clit->first))
 				{
 					ret.first = const_iterator(&_t, hashValue, clit++);
 					ret.second = ret.first;
-					while (ret.second != end() && _equal(k, *(ret.second)))
+					while (ret.second != end() && _equal(k, ret.second->first))
 						++ret.second;
 					return ret;
 				}
@@ -1206,7 +1217,7 @@ namespace ft
 
 		iterator	insert(iterator hint, const value_type& val)
 		{
-			if (_size < _maxLoad && _equal(hint->first, val.first))
+			if (hint != end() && _equal(hint->first, val.first))
 				return _insert(hint, val);
 			return _insert(val);
 		}
@@ -1303,7 +1314,7 @@ namespace ft
 
 		float	load_factor() const
 		{
-			return _size / _t.size();
+			return static_cast<float>(_size) / _t.size();
 		}
 
 		void	max_load_factor(float z)
@@ -1316,21 +1327,26 @@ namespace ft
 
 		void	rehash(size_type n)
 		{
-			if (n > _t.size())
-				_rehash(n);
+			size_type newhashVal;
+			size_type minimum;
+
+			minimum = static_cast<size_type>(static_cast<float>(_size) / _maxLoadFactor);
+			newhashVal = ft::max(n, minimum);
+			if (newhashVal != _t.size())
+				_rehash(newhashVal);
 		}
 
 		void	reserve(size_type n)
 		{
-			size_type	growth;
+			size_type newHashVal;
+			size_type minimum;
+			size_type asked;
 
-			if (n >= _maxLoad)
-			{
-				growth = 8 * _t.size();
-				while ((size_type)((float)growth * _maxLoadFactor) <= n)
-					growth *= 8;
-				_rehash(growth);
-			}
+			minimum = static_cast<size_type>(ceilf(static_cast<float>(_size) / _maxLoadFactor));
+			asked = static_cast<size_type>(ceilf(static_cast<float>(n) / _maxLoadFactor));
+			newHashVal = ft::max(asked, minimum);
+			if (newHashVal != _t.size())
+				_rehash(newHashVal);
 		}
 
 		size_t bucket(const key_type& key)	const

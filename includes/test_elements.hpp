@@ -157,38 +157,6 @@ void	displayData(const T& container, std::ostream& stream, typename T::size_type
 }
 
 template < typename T >
-void	displayHashSet(T& container, const char* name, std::ostream& outfile)
-{
-	typename T::const_local_iterator clit;
-
-	outfile << "----------> " << name << " <---------\n";
-	outfile << "empty : " << container.empty() << '\n';
-	outfile << "size : " << container.size() << '\n';
-	outfile << "bucket count : " << container.bucket_count() << '\n';
-	outfile << "max_bucket count : " << container.max_bucket_count() << '\n';
-	if (!container.empty())
-	{
-		outfile << name << "content : \n";
-		for (size_t i = 0; i < container.bucket_count(); ++i)
-		{
-			if (container.bucket_size(i))
-			{
-				outfile << "bucket [" << i << "] : {";
-				clit = container.begin(i);
-				while (clit != container.end(i))
-				{
-					outfile << *clit;
-					if (++clit != container.end(i))
-						outfile << ", ";
-					else
-						outfile << "}\n";
-				}
-			}
-		}
-	}
-}
-
-template < typename T >
 void	displayHashMap(T& container, const char* name, std::ostream& outfile)
 {
 	typename T::const_local_iterator clit;
@@ -198,14 +166,16 @@ void	displayHashMap(T& container, const char* name, std::ostream& outfile)
 	outfile << "size : " << container.size() << '\n';
 	outfile << "bucket count : " << container.bucket_count() << '\n';
 	outfile << "max_bucket count : " << container.max_bucket_count() << '\n';
+	outfile << "load_factor : " << container.load_factor() << '\n';
+	outfile << "max_load_factor : " << container.max_load_factor() << '\n';
 	if (!container.empty())
 	{
-		outfile << name << "content : \n";
+		outfile << name << " content : \n";
 		for (size_t i = 0; i < container.bucket_count(); ++i)
 		{
 			if (container.bucket_size(i))
 			{
-				outfile << "bucket [" << i << "] : {";
+				outfile << "bucket[" << i << "] : {";
 				clit = container.begin(i);
 				while (clit != container.end(i))
 				{
@@ -218,32 +188,14 @@ void	displayHashMap(T& container, const char* name, std::ostream& outfile)
 			}
 		}
 	}
+	outfile << '\n';
 }
 
 template < typename T >
 void	displayHashMapForTests(T& container, const char* name, std::ostream& outfile, typename T::size_type eltsPerLine = 1)
 {
 	typename T::const_local_iterator clit;
-	map<typename T::key_type, typename T::mapped_type> sort;
-
-	outfile << "----------> " << name << " <---------\n";
-	outfile << "empty : " << container.empty() << '\n';
-	outfile << "size : " << container.size() << '\n';
-	outfile << "max_size : " << container.max_size() << '\n';
-	if (eltsPerLine && !container.empty())
-	{
-		sort.insert(container.begin(), container.end());
-		displayData(sort, outfile, eltsPerLine);
-	}
-	else
-		outfile << '\n';
-}
-
-template < typename T >
-void	displayHashSetForTests(T& container, const char* name, std::ostream& outfile, typename T::size_type eltsPerLine = 1)
-{
-	typename T::const_local_iterator clit;
-	set<typename T::key_type> sort;
+	multiset<typename T::value_type> sort;
 
 	outfile << "----------> " << name << " <---------\n";
 	outfile << "empty : " << container.empty() << '\n';
@@ -823,8 +775,8 @@ void list_tests(const std::string& currentPath);
 //BONUS TESTS
 
 void unordered_map_tests(const std::string& currentPath, std::ostream& except);
-void unordered_set_tests(const std::string& currentPath, std::ostream& except);
-void unordered_multimap_tests(const std::string& currentPath, std::ostream& except);
-void unordered_multiset_tests(const std::string& currentPath, std::ostream& except);
+void unordered_set_tests(const std::string& currentPath);
+void unordered_multimap_tests(const std::string& currentPath);
+void unordered_multiset_tests(const std::string& currentPath);
 
 #endif

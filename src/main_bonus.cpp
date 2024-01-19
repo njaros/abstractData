@@ -45,12 +45,15 @@ void displayTime(timeval t1, int idFT, const char* testName)
 
 int main()
 {
+	char* mainPathC;
 	std::string mainPath;
 	std::string ctxPath;
 	std::ofstream exceptionFile;
 	timeval t1;
 
-	mainPath = get_current_dir_name();
+	mainPathC = get_current_dir_name();
+	mainPath = mainPathC;
+	free(mainPathC);
 	mainPath += '/';
 	if (FT == 1)
 		ctxPath = "ft_logs_bonus";
@@ -67,17 +70,17 @@ int main()
 
 	gettimeofday(&t1, 0);
 	mkdir(dirName(mainPath, ctxPath, "unordered_set").c_str(), 0777);
-	unordered_set_tests(filePath(ctxPath, "unordered_set"), exceptionFile);
+	unordered_set_tests(filePath(ctxPath, "unordered_set"));
 	displayTime(t1, FT, "UNORDERED_SET");
 
 	gettimeofday(&t1, 0);
 	mkdir(dirName(mainPath, ctxPath, "unordered_multimap").c_str(), 0777);
-	unordered_multimap_tests(filePath(ctxPath, "unordered_multimap"), exceptionFile);
+	unordered_multimap_tests(filePath(ctxPath, "unordered_multimap"));
 	displayTime(t1, FT, "UNORDERED_MULTIMAP");
 
 	gettimeofday(&t1, 0);
 	mkdir(dirName(mainPath, ctxPath, "unordered_multiset").c_str(), 0777);
-	unordered_multiset_tests(filePath(ctxPath, "unordered_multiset"), exceptionFile);
+	unordered_multiset_tests(filePath(ctxPath, "unordered_multiset"));
 	displayTime(t1, FT, "UNORDERED_MULTISET");
 
 	exceptionFile.close();

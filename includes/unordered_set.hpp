@@ -4,6 +4,7 @@
 # include <memory>
 # include <cstddef>
 # include <cstring>
+# include <cmath>
 # include "list.hpp"
 # include "vector.hpp"
 # include "utility.hpp"
@@ -179,7 +180,7 @@ namespace ft
 		{
 			if (!_size)
 				return end();
-			for (size_type idx = 0; idx < _t.size(); ++_t)
+			for (size_type idx = 0; idx < _t.size(); ++idx)
 			{
 				if (!_t[idx].empty())
 					return iterator(&_t, idx, _t[idx].begin());
@@ -192,7 +193,7 @@ namespace ft
 		{
 			if (!_size)
 				return end();
-			for (size_type idx = 0; idx < _t.size(); ++_t)
+			for (size_type idx = 0; idx < _t.size(); ++idx)
 			{
 				if (!_t[idx].empty())
 					return const_iterator(&_t, idx, _t[idx].begin());
@@ -223,7 +224,7 @@ namespace ft
 					litTmp = lit;
 					++litTmp;
 
-					hashValue = _hasher(lit->first) % n;
+					hashValue = _hasher(*lit) % n;
 					swapper[hashValue].splice(swapper[hashValue].begin(), *tit, lit);
 
 					lit = litTmp;
@@ -272,31 +273,31 @@ namespace ft
 		iterator	find(const key_type& key)
 		{
 			size_t hashValue;
-			const_local_iterator end;
+			const_local_iterator endIt;
 
 			hashValue = _hasher(key) % _t.size();
-			end = _t[hashValue].end();
-			for (const_local_iterator it = _t[hashValue].begin(); it != end; ++it)
+			endIt = _t[hashValue].end();
+			for (const_local_iterator it = _t[hashValue].begin(); it != endIt; ++it)
 			{
 				if (_equal(*it, key))
 					return (iterator(&_t, hashValue, it));
 			}
-			return iterator(&_t, _t.size(), const_local_iterator());
+			return end();
 		}
 
 		const_iterator	find(const key_type& key) const
 		{
 			size_t hashValue;
-			const_local_iterator end;
+			const_local_iterator endIt;
 
 			hashValue = _hasher(key) % _t.size();
-			end = _t[hashValue].end();
-			for (const_local_iterator it = _t[hashValue].begin(); it != end; ++it)
+			endIt = _t[hashValue].end();
+			for (const_local_iterator it = _t[hashValue].begin(); it != endIt; ++it)
 			{
 				if (_equal(*it, key))
 					return (const_iterator(&_t, hashValue, it));
 			}
-			return const_iterator(&_t, _t.size(), const_local_iterator());
+			return end();
 		}
 
 		size_type	count(const key_type& key) const
@@ -306,7 +307,7 @@ namespace ft
 			hashValue = _hasher(key) % _t.size();
 			for (const_local_iterator clit = _t[hashValue].begin(); clit != _t[hashValue].end(); ++clit)
 			{
-				if (_equal(key, clit->first))
+				if (_equal(key, *clit))
 					return 1;
 			}
 			return 0;
@@ -314,15 +315,15 @@ namespace ft
 
 		ft::pair<iterator, iterator>	equal_range(const key_type& k)
 		{
-			ft::pair<iterator, iterator> ret(iterator(), iterator());
+			ft::pair<iterator, iterator> ret((iterator() ) , (iterator() ) );
 			size_t	hashValue;
 
-			hashValue = hasher(k) % _t.size();
+			hashValue = _hasher(k) % _t.size();
 			for (local_iterator lit = _t[hashValue].begin(); lit != _t[hashValue].end(); ++lit)
 			{
-				if (_equal(k, lit->first))
+				if (_equal(k, *lit))
 				{
-					ret.first = iterator(&_t, hashValue, lit++);
+					ret.first = iterator(&_t, hashValue, lit);
 					ret.second = ret.first;
 					while (ret.second != end() && _equal(k, *(ret.second)))
 						++ret.second;
@@ -337,12 +338,12 @@ namespace ft
 			ft::pair<const_iterator, const_iterator> ret(end(), end());
 			size_t	hashValue;
 
-			hashValue = hasher(k) % _t.size();
+			hashValue = _hasher(k) % _t.size();
 			for (const_local_iterator clit = _t[hashValue].begin(); clit != _t[hashValue].end(); ++clit)
 			{
-				if (_equal(k, clit->first))
+				if (_equal(k, *clit))
 				{
-					ret.first = const_iterator(&_t, hashValue, clit++);
+					ret.first = const_iterator(&_t, hashValue, clit);
 					ret.second = ret.first;
 					while (ret.second != end() && _equal(k, *(ret.second)))
 						++ret.second;
@@ -356,7 +357,7 @@ namespace ft
 
 		ft::pair<iterator, bool> insert(const value_type& val)
 		{
-			iterator found = find(val.first);
+			iterator found = find(val);
 			bool	inserted = false;
 
 			if (found == end())
@@ -468,7 +469,7 @@ namespace ft
 
 		float	load_factor() const
 		{
-			return _size / _t.size();
+			return static_cast<float>(_size) / _t.size();
 		}
 
 		void	max_load_factor(float z)
@@ -481,21 +482,26 @@ namespace ft
 
 		void	rehash(size_type n)
 		{
-			if (n > _t.size())
-				_rehash(n);
+			size_type newhashVal;
+			size_type minimum;
+
+			minimum = static_cast<size_type>(static_cast<float>(_size) / _maxLoadFactor);
+			newhashVal = ft::max(n, minimum);
+			if (newhashVal != _t.size())
+				_rehash(newhashVal);
 		}
 
 		void	reserve(size_type n)
 		{
-			size_type	growth;
+			size_type newHashVal;
+			size_type minimum;
+			size_type asked;
 
-			if (n >= _maxLoad)
-			{
-				growth = 8 * _t.size();
-				while ((size_type)((float)growth * _maxLoadFactor) <= n)
-					growth *= 8;
-				_rehash(growth);
-			}
+			minimum = static_cast<size_type>(ceilf(static_cast<float>(_size) / _maxLoadFactor));
+			asked = static_cast<size_type>(ceilf(static_cast<float>(n) / _maxLoadFactor));
+			newHashVal = ft::max(asked, minimum);
+			if (newHashVal != _t.size())
+				_rehash(newHashVal);
 		}
 
 		size_t bucket(const key_type& key)	const
@@ -741,7 +747,7 @@ namespace ft
 		{
 			if (!_size)
 				return end();
-			for (size_type idx = 0; idx < _t.size(); ++_t)
+			for (size_type idx = 0; idx < _t.size(); ++idx)
 			{
 				if (!_t[idx].empty())
 					return iterator(&_t, idx, _t[idx].begin());
@@ -754,7 +760,7 @@ namespace ft
 		{
 			if (!_size)
 				return end();
-			for (size_type idx = 0; idx < _t.size(); ++_t)
+			for (size_type idx = 0; idx < _t.size(); ++idx)
 			{
 				if (!_t[idx].empty())
 					return const_iterator(&_t, idx, _t[idx].begin());
@@ -785,7 +791,7 @@ namespace ft
 					litTmp = lit;
 					++litTmp;
 
-					hashValue = _hasher(lit->first) % n;
+					hashValue = _hasher(*lit) % n;
 					swapper[hashValue].splice(swapper[hashValue].begin(), *tit, lit);
 
 					lit = litTmp;
@@ -820,9 +826,11 @@ namespace ft
 		// if one of two previous condition is wrong, I do normal insert
 		iterator	_insert(iterator hint, const value_type& val)
 		{
+			local_iterator inserted;
+
 			++_size;
-			_t[hint._tablePos].insert(hint._bucketPos, val);
-			return --hint;
+			inserted = _t[hint._tablePos].insert(hint._bucketPos, val);
+			return iterator(hint._ctx, hint._tablePos, inserted);
 		}
 
 	public:
@@ -845,31 +853,31 @@ namespace ft
 		iterator	find(const key_type& key)
 		{
 			size_t hashValue;
-			local_iterator end;
+			local_iterator endIt;
 
 			hashValue = _hasher(key) % _t.size();
-			end = _t[hashValue].end();
-			for (local_iterator it = _t[hashValue].begin(); it != end; ++it)
+			endIt = _t[hashValue].end();
+			for (local_iterator it = _t[hashValue].begin(); it != endIt; ++it)
 			{
 				if (_equal(*it, key))
 					return (iterator(&_t, hashValue, it));
 			}
-			return iterator(&_t, _t.size(), local_iterator());
+			return end();
 		}
 
 		const_iterator	find(const key_type& key) const
 		{
 			size_t hashValue;
-			const_local_iterator end;
+			const_local_iterator endIt;
 
 			hashValue = _hasher(key) % _t.size();
-			end = _t[hashValue].end();
-			for (const_local_iterator it = _t[hashValue].begin(); it != end; ++it)
+			endIt = _t[hashValue].end();
+			for (const_local_iterator it = _t[hashValue].begin(); it != endIt; ++it)
 			{
 				if (_equal(*it, key))
 					return (const_iterator(&_t, hashValue, it));
 			}
-			return const_iterator(&_t, _t.size(), const_local_iterator());
+			return end();
 		}
 
 		size_type	count(const key_type& key) const
@@ -880,22 +888,22 @@ namespace ft
 			count = 0;
 			hashValue = _hasher(key) % _t.size();
 			for (const_local_iterator clit = _t[hashValue].begin(); clit != _t[hashValue].end(); ++clit)
-				count += _equal(key, clit->first);
+				count += _equal(key, *clit);
 
 			return count;
 		}
 
 		ft::pair<iterator, iterator>	equal_range(const key_type& k)
 		{
-			ft::pair<iterator, iterator> ret(iterator(), iterator());
+			ft::pair<iterator, iterator> ret( (iterator() ) , (iterator() ) );
 			size_t	hashValue;
 
-			hashValue = hasher(k) % _t.size();
+			hashValue = _hasher(k) % _t.size();
 			for (local_iterator lit = _t[hashValue].begin(); lit != _t[hashValue].end(); ++lit)
 			{
-				if (_equal(k, lit->first))
+				if (_equal(k, *lit))
 				{
-					ret.first = iterator(&_t, hashValue, lit++);
+					ret.first = iterator(&_t, hashValue, lit);
 					ret.second = ret.first;
 					while (ret.second != end() && _equal(k, *(ret.second)))
 						++ret.second;
@@ -910,12 +918,12 @@ namespace ft
 			ft::pair<const_iterator, const_iterator> ret(end(), end());
 			size_t	hashValue;
 
-			hashValue = hasher(k) % _t.size();
+			hashValue = _hasher(k) % _t.size();
 			for (const_local_iterator clit = _t[hashValue].begin(); clit != _t[hashValue].end(); ++clit)
 			{
-				if (_equal(k, clit->first))
+				if (_equal(k, *clit))
 				{
-					ret.first = const_iterator(&_t, hashValue, clit++);
+					ret.first = const_iterator(&_t, hashValue, *clit);
 					ret.second = ret.first;
 					while (ret.second != end() && _equal(k, *(ret.second)))
 						++ret.second;
@@ -939,7 +947,7 @@ namespace ft
 
 		iterator	insert(iterator hint, const value_type& val)
 		{
-			if (_size < _maxLoad && _equal(hint->first, val.first))
+			if (hint != end() && _equal(hint->first, val.first))
 				return _insert(hint, val);
 			return _insert(val);
 		}
@@ -1036,7 +1044,7 @@ namespace ft
 
 		float	load_factor() const
 		{
-			return _size / _t.size();
+			return static_cast<float>(_size) / _t.size();
 		}
 
 		void	max_load_factor(float z)
@@ -1049,21 +1057,26 @@ namespace ft
 
 		void	rehash(size_type n)
 		{
-			if (n > _t.size())
-				_rehash(n);
+			size_type newhashVal;
+			size_type minimum;
+
+			minimum = static_cast<size_type>(static_cast<float>(_size) / _maxLoadFactor);
+			newhashVal = ft::max(n, minimum);
+			if (newhashVal != _t.size())
+				_rehash(newhashVal);
 		}
 
 		void	reserve(size_type n)
 		{
-			size_type	growth;
+			size_type newHashVal;
+			size_type minimum;
+			size_type asked;
 
-			if (n >= _maxLoad)
-			{
-				growth = 8 * _t.size();
-				while ((size_type)((float)growth * _maxLoadFactor) <= n)
-					growth *= 8;
-				_rehash(growth);
-			}
+			minimum = static_cast<size_type>(ceilf(static_cast<float>(_size) / _maxLoadFactor));
+			asked = static_cast<size_type>(ceilf(static_cast<float>(n) / _maxLoadFactor));
+			newHashVal = ft::max(asked, minimum);
+			if (newHashVal != _t.size())
+				_rehash(newHashVal);
 		}
 
 		size_t bucket(const key_type& key)	const

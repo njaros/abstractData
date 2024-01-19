@@ -16,8 +16,6 @@
 
 void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 {
-	(void) currentPath;
-	(void) except;
 	std::string fileName;
 	std::ofstream outfile;
 
@@ -26,6 +24,7 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 	typedef unordered_map<std::string, std::string> S;
 	typedef unordered_map<int, int> I;
 	typedef unordered_map<float, int> F;
+	typedef unordered_map<double, int> D;
 	typedef unordered_map<int*, int> P;
 
 	map<std::string, std::string> mapS;
@@ -92,7 +91,7 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 		outfile << it->first.empty() << " | " << cit->first.empty() << '\n';
 
 		it->second = "pouet";
-		outfile << it->second << " | " << it->second << '\n';
+		outfile << it->second << '\n';
 
 		while (cit != sc.end())
 		{
@@ -156,46 +155,66 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 		fileName = currentPath + "insert.log";
 		outfile.open(fileName.c_str());
 
+		pair<F::iterator, bool> inserted;
+		F::iterator it;
 		F f;
 		F f2;
 		F f3;
 
-		f.insert(make_pair(2.4, 7));
+		inserted = f.insert(make_pair(2.4, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert 1 on empty hmap", outfile);
-		f.insert(make_pair(2.4, 7));
+		inserted = f.insert(make_pair(2.4, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same element", outfile);
-		f.insert(make_pair(2.4, 8));
+		inserted = f.insert(make_pair(2.4, 8));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same key", outfile);
-		f.insert(make_pair(6.477, 7));
-		displayHashMapForTests(f, "insert 1 on empty hmap", outfile);
-		f.insert(make_pair(6.477, 7));
+		inserted = f.insert(make_pair(6.477, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
+		displayHashMapForTests(f, "insert 1 other", outfile);
+		inserted = f.insert(make_pair(6.477, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same element", outfile);
-		f.insert(make_pair(6.477, 8));
+		inserted = f.insert(make_pair(6.477, 8));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same key", outfile);
-		f.insert(make_pair(6.747, 7));
-		displayHashMapForTests(f, "insert 1 on empty hmap", outfile);
-		f.insert(make_pair(6.747, 7));
+		inserted = f.insert(make_pair(6.747, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
+		displayHashMapForTests(f, "insert 1 other", outfile);
+		inserted = f.insert(make_pair(6.747, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same element", outfile);
-		f.insert(make_pair(6.747, 8));
+		inserted = f.insert(make_pair(6.747, 8));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same key", outfile);
-		f.insert(make_pair(0, 7));
-		displayHashMapForTests(f, "insert 1 on empty hmap", outfile);
-		f.insert(make_pair(0, 7));
+		inserted = f.insert(make_pair(0, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
+		displayHashMapForTests(f, "insert 1 other", outfile);
+		inserted = f.insert(make_pair(0, 7));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same element", outfile);
-		f.insert(make_pair(0, 8));
+		inserted = f.insert(make_pair(0, 8));
+		outfile << "inserted ?" << inserted.second << " : " << *(inserted.first) << '\n';
 		displayHashMapForTests(f, "insert same key", outfile);
 
-		f2.insert(f2.end(), make_pair(7.1, 2));
+		it = f2.insert(f2.end(), make_pair(7.1, 2));
+		outfile << *it << '\n';
 		displayHashMapForTests(f2, "hint insert 1 element", outfile);
-		f2.insert(f2.end(), make_pair(7.1, 2));
+		it = f2.insert(f2.end(), make_pair(7.1, 2));
+		outfile << *it << '\n';
 		displayHashMapForTests(f2, "hint insert same element", outfile);
-		f2.insert(f2.begin(), make_pair(5.1, 2));
+		it = f2.insert(f2.begin(), make_pair(5.1, 2));
+		outfile << *it << '\n';
 		displayHashMapForTests(f2, "hint insert 1 element", outfile);
-		f2.insert(f2.begin(), make_pair(-7.1, 2));
+		it = f2.insert(f2.begin(), make_pair(-7.1, 2));
+		outfile << *it << '\n';
 		displayHashMapForTests(f2, "hint insert 1 element", outfile);
-		f2.insert(++f2.begin(), make_pair(7.0, 2));
+		it = f2.insert(++f2.begin(), make_pair(7.0, 2));
+		outfile << *it << '\n';
 		displayHashMapForTests(f2, "hint insert 1 element", outfile);
-		f2.insert(++f2.begin(), make_pair(7, 2));
+		it = f2.insert(++f2.begin(), make_pair(7, 2));
+		outfile << *it << '\n';
 		displayHashMapForTests(f2, "hint insert 1 element", outfile);
 
 		const map<float, int> m(f.begin(), f.end());
@@ -238,9 +257,9 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 	
 		I mi2(mi);
 
-		I::iterator toErase = mi2.begin();
-		while (toErase != mi2.end())
-			toErase = mi2.erase(toErase);
+		I::iterator it = mi2.begin();
+		while (it != mi2.end())
+			it = mi2.erase(it);
 
 		displayHashMapForTests(mi2, "full erase by iterator", outfile);
 
@@ -250,10 +269,16 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 		
 		displayHashMapForTests(mi, "erase by iterator", outfile, 10);
 
-		mi.erase(mi.begin(), mi.end());
+		it = mi.begin();
+		++(++it);
+		outfile << (it == mi.erase(mi.begin(), ++(++(mi.begin())))) << '\n';
+
+		it = mi.erase(mi.begin(), mi.end());
+		outfile << (it == mi.end()) << '\n';
 		displayHashMapForTests(mi, "erase all by range", outfile, 10);
-		mi.erase(mi.begin(), mi.end());
-		displayHashMapForTests(mi, "erase all by range", outfile, 10);
+		it = mi.erase(mi.begin(), mi.end());
+		outfile << (it == mi.end()) << '\n';
+		displayHashMapForTests(mi, "erase all by range, crash test", outfile, 10);
 
 		outfile.close();
 	}
@@ -396,7 +421,7 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 	//BUCKET
 
 	{
-		fileName = currentPath + "bucket.log";
+		fileName = currentPath + "NCbucket.log";
 		outfile.open(fileName.c_str());
 
 		I mi;
@@ -411,8 +436,118 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except)
 			outfile << i * i << " can be set at bucket " << mi.bucket(i * i) << '\n';
 		}
 
+		for (I::size_type i = 0; i < 7; ++i)
+		{
+			for (I::local_iterator lite = mi.begin(i); lite != mi.end(i); ++lite)
+			{
+				lite->second = 42;
+			}
+		}
+
+		displayHashMap(mi, "bucket view after use of bucket iterator (local_iterator), begin(i) and end(i)", outfile);
+
+		mi.rehash(100);
+		displayHashMap(mi, "rehash for more bucket", outfile);
+
+		mi.rehash(30);
+		displayHashMap(mi, "rehash for less bucket", outfile);
+
+		mi.reserve(130);
+		displayHashMap(mi, "reserve more", outfile);
+
+		mi.reserve(40);
+		displayHashMap(mi, "reserve less", outfile);
+
+		mi.max_load_factor(0.5);
+		displayHashMap(mi, "diminish max_load_factor but insert nothing", outfile);
+
+		mi.insert(make_pair(6, 123456));
+		displayHashMap(mi, "diminish max_load_factor and insert existing key", outfile);
+
+		mi.insert(make_pair(789456, 123456));
+		displayHashMap(mi, "diminish max_load_factor and insert something", outfile);
+
+		mi.max_load_factor(1.5);
+		displayHashMap(mi, "augment max_load_factor but insert nothing", outfile);
+
+		mi.insert(make_pair(-789456, 123456));
+		displayHashMap(mi, "augment max_load_factor and insert something", outfile);
+
 		outfile.close();
 	}
 
-	//
+	//OBSERVERS
+
+	{
+		fileName = currentPath + "NCobservers.log";
+		outfile.open(fileName.c_str());
+
+		D d;
+		D::hasher hash = d.hash_function();
+		D::key_equal equal = d.key_eq();
+		D::allocator_type alloc = d.get_allocator();
+		pair<const double, int> pouet(4.310, 1);
+
+		outfile << hash(3.409) << '\n';
+		outfile << equal(3.09, 3.09) << '|' << equal(4.0849, 4.2918) << '|' << equal(5.009, 1.993) << '\n';
+		outfile << alloc.address(pouet) << '\n';
+
+		outfile.close();
+	}
+
+	//RELATIONNAL
+
+	{
+		fileName = currentPath + "relationnal.log";
+		outfile.open(fileName.c_str());
+
+		D d1;
+		D d2;
+
+		d1.insert(make_pair(1.1, 2));
+		d1.insert(make_pair(1.3, 2));
+		d1.insert(make_pair(1.5, 2));
+		d1.insert(make_pair(1.2, 2));
+		d1.insert(make_pair(1.11, 2));
+		d1.insert(make_pair(1.122, 2));
+		d1.insert(make_pair(1.133, 2));
+		d1.insert(make_pair(1.144, 2));
+
+		d2 = d1;
+
+		const D cd1(d1);
+
+		outfile << "must be equal : " << (d2 == d1) << '\n';
+		outfile << "must be equal : " << (d2 == cd1) << '\n';
+		outfile << "must be equal : " << (d1 == d2) << '\n';
+		outfile << "must be equal : " << (cd1 == d2) << '\n';
+		outfile << "musn't be different : " << (d2 != d1) << '\n';
+		outfile << "musn't be different : " << (d2 != cd1) << '\n';
+		outfile << "musn't be different : " << (d1 != d2) << '\n';
+		outfile << "musn't be different : " << (cd1 != d2) << '\n';
+
+		d2.rehash(100);
+
+		outfile << "must be equal : " << (d2 == d1) << '\n';
+
+		d1.insert(make_pair(0, 0));
+		outfile << "musn't be equal : " << (d2 == d1) << '\n';
+		outfile << "musn't be equal : " << (d1 == cd1) << '\n';
+		outfile << "must be different : " << (d1 != d2) << '\n';
+		outfile << "must be different : " << (d1 != cd1) << '\n';
+
+		d1.erase(1.2);
+		outfile << "musn't be equal : " << (d2 == d1) << '\n';
+		outfile << "musn't be equal : " << (d1 == cd1) << '\n';
+		outfile << "must be different : " << (d1 != d2) << '\n';
+		outfile << "must be different : " << (d1 != cd1) << '\n';
+
+		d1.insert(make_pair(5.5, 3));
+		d2.insert(make_pair(5.5, 4));
+		outfile << "musn't be equal : " << (d2 == d1) << '\n';
+		outfile << "must be different : " << (d1 != d2) << '\n';
+
+		outfile.close();
+	}
+
 }

@@ -225,10 +225,13 @@ int diff_logs(const std::string& mainPath1, const std::string& mainPath2, std::o
 		}
 		else
 		{
-			diff_res = diff_files(cit1->second, cit2->second, diffFile);
-			if (diff_res == -1)
-				return diff_res;
-			count += diff_res;
+			if (cit1->first.compare(0, 2, "NC"))
+			{
+				diff_res = diff_files(cit1->second, cit2->second, diffFile);
+				if (diff_res == -1)
+					return diff_res;
+				count += diff_res;
+			}
 			++cit1;
 			++cit2;
 		}

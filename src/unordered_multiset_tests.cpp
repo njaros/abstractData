@@ -12,8 +12,7 @@
 	using namespace std;
 #endif
 
-void unordered_multiset_tests(const std::string& currentPath, std::ostream& except)
+void unordered_multiset_tests(const std::string& currentPath)
 {
 	(void) currentPath;
-	(void) except;
 }
