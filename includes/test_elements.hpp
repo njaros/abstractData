@@ -722,17 +722,17 @@ void forwardIteratorTests(Cont& c, std::ofstream& outfile)
 	Cit cit = c2.begin();
 	it = c.begin();
 
-	outfile << "++, *(), *++ const_iterator tests\n\n";
-	outfile << (*++cit == *cit++) << '\n';
-	outfile << (*cit++ == *cit++) << '\n';
-	outfile << (*cit++ == *++cit) << '\n';
-	outfile << (*++cit == *++cit) << '\n';
+	outfile << "++ const_iterator tests\n\n";
+	outfile << (++cit == cit++) << '\n';
+	outfile << (cit++ == cit++) << '\n';
+	outfile << (cit++ == ++cit) << '\n';
+	outfile << (++cit == ++cit) << '\n';
 
-	outfile << "\n++, *(), *++, iterator tests\n\n";
-	outfile << (*++it == *it++) << '\n';
-	outfile << (*it++ == *it++) << '\n';
-	outfile << (*it++ == *++it) << '\n';
-	outfile << (*++it == *++it) << '\n';
+	outfile << "\n++ iterator tests\n\n";
+	outfile << (++it == it++) << '\n';
+	outfile << (it++ == it++) << '\n';
+	outfile << (it++ == ++it) << '\n';
+	outfile << (++it == ++it) << '\n';
 
 	it = c.begin();
 	cit = c2.begin();
@@ -740,12 +740,12 @@ void forwardIteratorTests(Cont& c, std::ofstream& outfile)
 	Cit cit3(cit2);
 	outfile << "\niterator and const_iterator comparisons : \n\n";
 	outfile << (*++cit == *++cit2) << "  " << (cit == cit2) << '\n';
-	outfile << (*++cit3 == *cit2) << "  " << (cit3 == cit2) << '\n';
-	outfile << (*++cit3 == *cit2) << "  " << (cit3 == cit2) << '\n';
-	outfile << (*++it == *cit2) << "  " << (it == cit2) << '\n';
-	outfile << (*it == *++cit2) << "  " << (it == cit2) << '\n';
-	outfile << (*++cit != *++cit2) << "  " << (cit != cit2) << '\n';
-	outfile << (*++cit != *cit2) << "  " << (cit != cit2) << '\n';
+	outfile << (++cit3 == cit2) << "  " << (cit3 == cit2) << '\n';
+	outfile << (++cit3 == cit2) << "  " << (cit3 == cit2) << '\n';
+	outfile << (++it == cit2) << "  " << (it == cit2) << '\n';
+	outfile << (it == ++cit2) << "  " << (it == cit2) << '\n';
+	outfile << (++cit != ++cit2) << "  " << (cit != cit2) << '\n';
+	outfile << (++cit != cit2) << "  " << (cit != cit2) << '\n';
 	it = c.begin();
 	cit = c2.begin();
 	cit2 = it;

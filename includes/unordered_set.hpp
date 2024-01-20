@@ -33,10 +33,16 @@ namespace ft
 		typedef typename Alloc::difference_type	difference_type;
 		typedef Pred		key_equal;
 		typedef Hash		hasher;
+
+	private:
+
 		typedef ft::list< value_type, Alloc >		_bucket;
 		typedef ft::vector< _bucket >				_table;
 		typedef typename _table::iterator			_tableIterator;
 		typedef typename _table::const_iterator		_tableConstIterator;
+
+	public:
+
 		typedef typename _bucket::iterator			local_iterator;
 		typedef typename _bucket::const_iterator	const_local_iterator;
 
@@ -61,7 +67,7 @@ namespace ft
 			size_type				_tablePos;
 			const_local_iterator	_bucketPos;
 
-			_hTIt(const _table* ctx, const size_type& tPos, const const_local_iterator& bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
+			_hTIt(const _table* ctx, const size_type& tPos, const_local_iterator bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
 
 		public:
 
@@ -567,7 +573,7 @@ namespace ft
 		lhs.swap(rhs);
 	}
 
-	template < class Key, class T, class Hash = ft::hash<Key>, class Pred = ft::equal_to<Key>, class Alloc = std::allocator< ft::pair< const Key, T > > >
+	template < class Key, class Hash = ft::hash<Key>, class Pred = ft::equal_to<Key>, class Alloc = std::allocator< Key > >
 	class unordered_multiset
 	{
 
@@ -576,8 +582,7 @@ namespace ft
 	public:
 
 		typedef Key						key_type;
-		typedef T						mapped_type;
-		typedef ft::pair<const Key, T>	value_type;
+		typedef Key						value_type;
 		typedef Alloc					allocator_type;
 		typedef typename Alloc::reference		reference;
 		typedef typename Alloc::const_reference const_reference;
@@ -587,10 +592,16 @@ namespace ft
 		typedef typename Alloc::difference_type	difference_type;
 		typedef Pred		key_equal;
 		typedef Hash		hasher;
+
+	private:
+
 		typedef ft::list< value_type, Alloc >		_bucket;
 		typedef ft::vector< _bucket >				_table;
 		typedef typename _table::iterator			_tableIterator;
 		typedef typename _table::const_iterator		_tableConstIterator;
+
+	public:
+
 		typedef typename _bucket::iterator			local_iterator;
 		typedef typename _bucket::const_iterator	const_local_iterator;
 
@@ -628,7 +639,7 @@ namespace ft
 			size_type				_tablePos;
 			const_local_iterator		_bucketPos;
 
-			_hTIt(const _table* ctx, const size_type& tPos, const const_local_iterator& bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
+			_hTIt(const _table* ctx, const size_type& tPos, const_local_iterator bPos) : _ctx(ctx), _tablePos(tPos), _bucketPos(bPos) {}
 
 		public:
 
@@ -923,7 +934,7 @@ namespace ft
 			{
 				if (_equal(k, *clit))
 				{
-					ret.first = const_iterator(&_t, hashValue, *clit);
+					ret.first = const_iterator(&_t, hashValue, clit);
 					ret.second = ret.first;
 					while (ret.second != end() && _equal(k, *(ret.second)))
 						++ret.second;
@@ -937,7 +948,7 @@ namespace ft
 
 		iterator	insert(const value_type& val)
 		{
-			iterator found = find(val.first);
+			iterator found = find(val);
 
 			if (found != end())
 				return _insert(found, val);
@@ -947,7 +958,7 @@ namespace ft
 
 		iterator	insert(iterator hint, const value_type& val)
 		{
-			if (hint != end() && _equal(hint->first, val.first))
+			if (hint != end() && _equal(*hint, val))
 				return _insert(hint, val);
 			return _insert(val);
 		}
@@ -1148,12 +1159,14 @@ namespace ft
 			while (rangeLhs.first != rangeLhs.second)
 			{
 				lhsL.push_back(&(*(rangeLhs.first)));
+				if (rangeRhs.first == rangeRhs.second)
+					return false;
 				rhsL.push_back(&(*(rangeRhs.first)));
 				++rangeLhs.first;
 				++rangeRhs.first;
 			}
-			if (lhsL.size() != rhsL.size())
-				return false;
+			if (rangeRhs.first != rangeRhs.second)
+					return false;
 			while (!lhsL.empty())
 			{
 				returnFalse = true;
@@ -1177,14 +1190,14 @@ namespace ft
 		return true;
 	}
 
-	template <class Key, class T, class Hash, class Pred, class Alloc>
-	bool operator!= (const unordered_multiset<Key, T, Hash, Pred, Alloc>& lhs, const unordered_multiset<Key, T, Hash, Pred, Alloc>& rhs)
+	template <class Key, class Hash, class Pred, class Alloc>
+	bool operator!= (const unordered_multiset<Key, Hash, Pred, Alloc>& lhs, const unordered_multiset<Key, Hash, Pred, Alloc>& rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	template <class Key, class T, class Hash, class Pred, class Alloc>
-	void	swap(unordered_multiset<Key, T, Hash, Pred, Alloc>& lhs, unordered_multiset<Key, T, Hash, Pred, Alloc>& rhs)
+	template <class Key, class Hash, class Pred, class Alloc>
+	void	swap(unordered_multiset<Key, Hash, Pred, Alloc>& lhs, unordered_multiset<Key, Hash, Pred, Alloc>& rhs)
 	{
 		lhs.swap(rhs);
 	}

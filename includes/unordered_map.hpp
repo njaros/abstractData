@@ -744,10 +744,16 @@ namespace ft
 		typedef typename Alloc::difference_type	difference_type;
 		typedef Pred		key_equal;
 		typedef Hash		hasher;
+
+	private:
+
 		typedef ft::list< value_type, Alloc >		_bucket;
 		typedef ft::vector< _bucket >				_table;
 		typedef typename _table::iterator			_tableIterator;
 		typedef typename _table::const_iterator		_tableConstIterator;
+
+	public:
+
 		typedef typename _bucket::iterator			local_iterator;
 		typedef typename _bucket::const_iterator	const_local_iterator;
 
@@ -1417,6 +1423,8 @@ namespace ft
 			while (rangeLhs.first != rangeLhs.second)
 			{
 				lhsL.push_back(&(rangeLhs.first->second));
+				if (rangeRhs.first == rangeRhs.second)
+					return false;
 				rhsL.push_back(&(rangeRhs.first->second));
 				++rangeLhs.first;
 				++rangeRhs.first;

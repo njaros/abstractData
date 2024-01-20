@@ -393,7 +393,7 @@ void unordered_set_tests(const std::string& currentPath)
 		}
 		outfile << '\n';
 
-		displayHashMap(mi, "bucket view after use of bucket iterator (local_iterator), begin(i) and end(i)", outfile);
+		displayHashMap(mi, "bucket view", outfile);
 
 		mi.rehash(100);
 		displayHashMap(mi, "rehash for more bucket", outfile);
