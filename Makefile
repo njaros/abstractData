@@ -124,7 +124,7 @@ clean :
 					rm -rf obj_ft obj_std obj_bonus_ft obj_bonus_std
 
 fclean :			clean
-					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe dif.exe
+					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe AbstractDataTestsBonusFT.exe AbstractDataTestsBonusSTD.exe dif.exe
 					rm -rf ft_logs std_logs ft_logs_bonus std_logs_bonus
 
 re :				fclean all

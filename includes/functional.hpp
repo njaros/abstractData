@@ -2,7 +2,7 @@
 # define FUNCTIONAL_HPP
 
 #include <string>
-#include <type_traits.hpp>
+#include "type_traits.hpp"
 
 namespace ft
 {
