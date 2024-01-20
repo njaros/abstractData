@@ -9,8 +9,11 @@ namespace priority_queue {
 		FNAME
 		std::vector<typename C::value_type> v = monkey::get_random_vector<typename C::value_type>();
 		typename C::container_type underlying(v.begin(), v.end());
-		std::cout << "a = C(compare(), underlying) with underlying: " << std::endl;
-		monkey::print_range(v.begin(), v.end());
+		if (toPrint)
+		{
+			std::cout << "a = C(compare(), underlying) with underlying: " << std::endl;
+			monkey::print_range(v.begin(), v.end());
+		}
 		a = C(typename C::value_compare(), underlying);
 	}
 
@@ -19,7 +22,8 @@ namespace priority_queue {
 	{
 		FNAME
 		typename C::value_type value((monkey::get_value()));
-		std::cout << "a.push(value) with value = [" << value << "]" << std::endl;
+		if (toPrint)
+			std::cout << "a.push(value) with value = [" << value << "]" << std::endl;
 		a.push(value);
 	}
 
@@ -29,7 +33,8 @@ namespace priority_queue {
 		FNAME
 		if (a.empty())
 			return;
-		std::cout << "a.pop()" << std::endl;
+		if (toPrint)
+			std::cout << "a.pop()" << std::endl;
 		a.pop();
 	}
 

@@ -37,6 +37,8 @@ std::ostream &operator<<(std::ostream &s, NAMESPACE::pair<A, B> p) {
 }
 #endif
 
+bool toPrint;
+
 namespace monkey {
 
 	// this class return a random value of the desired type (can be used like a function)
@@ -167,6 +169,8 @@ namespace monkey {
 
 	// pretty print name (with ==== on each side and in upper case)
 	void print_title(std::string name) {
+		if (!toPrint)
+			return;
 		int total_length = 80;
 		int name_length = name.length();
 		int lpad = ((total_length - name_length) / 2) - 1;
@@ -230,17 +234,23 @@ namespace monkey {
 		{
 			if (rand() % 2)
 				std::swap(a, b);
-			print_title("before");
-			std::cout << "a: " << std::endl;
-			monkey::print(*a);
-			std::cout << "b: " << std::endl;
-			monkey::print(*b);
+			if (toPrint)
+			{
+				print_title("before");
+				std::cout << "a: " << std::endl;
+				monkey::print(*a);
+				std::cout << "b: " << std::endl;
+				monkey::print(*b);
+			}
 			tests[rand() % tests.size()](*b, *a);
-			print_title("after");
-			std::cout << "a: " << std::endl;
-			monkey::print(*a);
-			std::cout << "b: " << std::endl;
-			monkey::print(*b);
+			if (toPrint)
+			{
+				print_title("after");
+				std::cout << "a: " << std::endl;
+				monkey::print(*a);
+				std::cout << "b: " << std::endl;
+				monkey::print(*b);
+			}
 		}
 	}
 }

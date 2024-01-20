@@ -402,15 +402,11 @@ namespace ft {
 			{
 				if (!_compare(getPredecessor(hint.base())->content->first, data.first))
 					return (insert(data).first);
-				else if (hint.base()->father == getPredecessor(hint.base()))
-					--hint;
 			}
 			else if (_compare(hint->first, data.first))
 			{
 				if (!_compare(data.first, getSuccessor(hint.base())->content->first))
 					return (insert(data).first);
-				else if (hint.base()->father == getSuccessor(hint.base()))
-					++hint;
 			}
             if (!_compare(hint->first, data.first) && !_compare(data.first, hint->first))
                 return (hint);
@@ -1096,16 +1092,12 @@ namespace ft {
             if (_compare(data.first, hint->first))
             {
                 if (_compare(data.first, getPredecessor(hint.base())->content->first))
-                    hint = iterator(_root);
-                else if (hint.base()->father == getPredecessor(hint.base()))
-					--hint;
+                    return insert(data);
             }
             else if (!_compare(data.first, hint->first))
             {
                 if (_compare(getSuccessor(hint.base())->content->first, data.first))
-                    hint = iterator(_root);
-                else if (hint.base()->father == getSuccessor(hint.base()))
-					++hint;
+                    return insert(data);
             }
             ++_size;
             iterator    inserted(recursiveInsertMultimap(hint.base(),

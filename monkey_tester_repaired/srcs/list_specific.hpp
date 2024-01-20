@@ -10,13 +10,17 @@ namespace list_specific
 	void	merge(C &a, C &b)
 	{
 		FNAME
-		std::cout << "a.sort(); C c = b; c.sort(); a.merge(c)" << std::endl;
+		if (toPrint)
+			std::cout << "a.sort(); C c = b; c.sort(); a.merge(c)" << std::endl;
 		C c = b;
 		a.sort();
 		c.sort();
 		a.merge(c);
-		std::cout << "c:" << std::endl;
-		monkey::print(c);
+		if (toPrint)
+		{
+			std::cout << "c:" << std::endl;
+			monkey::print(c);
+		}
 	}
 
 	template <class C>
@@ -24,9 +28,12 @@ namespace list_specific
 	{
 		FNAME
 		typename C::iterator pos = monkey::get_random_it(a.begin(), a.end());
-		std::cout << "a.splice(pos, b) with pos = ";
-		monkey::print_it(a, pos);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.splice(pos, b) with pos = ";
+			monkey::print_it(a, pos);
+			std::cout << std::endl;
+		}
 		a.splice(pos, b);
 	}
 
@@ -39,13 +46,16 @@ namespace list_specific
 		typename C::iterator pos = monkey::get_random_it(a.begin(), a.end());
 		typename C::iterator first = monkey::get_random_it(b.begin(), monkey::prev(b.end()));
 		typename C::iterator last = monkey::get_random_it(first, b.end());
-		std::cout << "a.splice(pos, first, last) with pos = ";
-		monkey::print_it(a, pos);
-		std::cout << ", first = ";
-		monkey::print_it(b, first);
-		std::cout << ", last = ";
-		monkey::print_it(b, last);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.splice(pos, first, last) with pos = ";
+			monkey::print_it(a, pos);
+			std::cout << ", first = ";
+			monkey::print_it(b, first);
+			std::cout << ", last = ";
+			monkey::print_it(b, last);
+			std::cout << std::endl;
+		}
 		a.splice(pos, b, first, last);
 	}
 
@@ -57,11 +67,14 @@ namespace list_specific
 			return;
 		typename C::iterator pos = monkey::get_random_it(a.begin(), a.end());
 		typename C::iterator it = monkey::get_random_it(b.begin(), monkey::prev(b.end()));
-		std::cout << "a.splice(pos, it) with pos = ";
-		monkey::print_it(a, pos);
-		std::cout << ", it = ";
-		monkey::print_it(b, it);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.splice(pos, it) with pos = ";
+			monkey::print_it(a, pos);
+			std::cout << ", it = ";
+			monkey::print_it(b, it);
+			std::cout << std::endl;
+		}
 		a.splice(pos, b, it);
 	}
 
@@ -70,7 +83,8 @@ namespace list_specific
 	{
 		FNAME
 		typename C::value_type value((monkey::get_value()));
-		std::cout << "a.remove(value) with value = [" << value << "]" << std::endl;
+		if (toPrint)
+			std::cout << "a.remove(value) with value = [" << value << "]" << std::endl;
 		a.remove(value);
 	}
 
@@ -79,7 +93,8 @@ namespace list_specific
 	{
 		FNAME
 		typename C::value_type value((monkey::get_value()));
-		std::cout << "a.remove_if(std::bind1st(std::less<std::string>(), value)) with value = [" << value << "]" << std::endl;
+		if (toPrint)
+			std::cout << "a.remove_if(std::bind1st(std::less<std::string>(), value)) with value = [" << value << "]" << std::endl;
 		a.remove_if(std::bind1st(std::less<std::string>(), value));
 	}
 
@@ -87,7 +102,8 @@ namespace list_specific
 	void	reverse(C &a, C &)
 	{
 		FNAME
-		std::cout << "a.reverse()" << std::endl;
+		if (toPrint)
+			std::cout << "a.reverse()" << std::endl;
 		a.reverse();
 	}
 
@@ -95,7 +111,8 @@ namespace list_specific
 	void	sort(C &a, C &)
 	{
 		FNAME
-		std::cout << "a.sort()" << std::endl;
+		if (toPrint)
+			std::cout << "a.sort()" << std::endl;
 		a.sort();
 	}
 
@@ -103,7 +120,8 @@ namespace list_specific
 	void	unique(C &a, C &)
 	{
 		FNAME
-		std::cout << "a.unique()" << std::endl;
+		if (toPrint)
+			std::cout << "a.unique()" << std::endl;
 		a.unique();
 	}
 

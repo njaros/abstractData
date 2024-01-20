@@ -250,15 +250,11 @@ namespace ft {
 			{
 				if (!_compare(*(getPredecessor(hint.base())->content), data))
 					return (insert(data).first);
-				else if (hint.base()->father == getPredecessor(hint.base()))
-					--hint;
 			}
 			else if (_compare(*hint, data))
 			{
 				if (!_compare(data, *(getSuccessor(hint.base())->content)))
 					return (insert(data).first);
-				else if (hint.base()->father == getSuccessor(hint.base()))
-					++hint;
 			}
 			else
 				return (hint);
@@ -818,16 +814,12 @@ namespace ft {
 			if (_compare(data, *hint))
 			{
 				if (_compare(data, *(getPredecessor(hint.base())->content)))
-					hint = iterator(_root);
-				else if (hint.base()->father == getPredecessor(hint.base()))
-					--hint;
+					return insert(data);
 			}
 			else if (!_compare(data, *hint))
 			{
 				if (_compare(*(getSuccessor(hint.base())->content), data))
-					hint = iterator(_root);
-				else if (hint.base()->father == getSuccessor(hint.base()))
-					++hint;
+					return insert(data);
 			}
 			++_size;
 			iterator	inserted(recursiveInsertMultiset(hint.base(), newNode<value_type, \

@@ -12,8 +12,11 @@ namespace associative
 		FNAME
 		std::vector<typename C::value_type> v = monkey::get_random_vector<typename C::value_type>();
 
-		std::cout << "a = C(range) with range: " << std::endl;
-		monkey::print_range(v.begin(), v.end());
+		if (toPrint)
+		{
+			std::cout << "a = C(range) with range: " << std::endl;
+			monkey::print_range(v.begin(), v.end());
+		}
 
 		a = C(v.begin(), v.end());
 	}
@@ -22,7 +25,8 @@ namespace associative
 	void key_comp(C &a, C &b)
 	{
 		FNAME
-		std::cout << "a.key_comp() == b.key_comp(): " << (a.key_comp() == b.key_comp()) << std::endl;
+		if (toPrint)
+			std::cout << "a.key_comp() == b.key_comp(): " << (a.key_comp() == b.key_comp()) << std::endl;
 	}
 
 	// little hack to handle the two version of insert(value) (multi and uniq)
@@ -48,8 +52,13 @@ namespace associative
 		FNAME
 		typename C::value_type value((monkey::get_value()));
 
-		std::cout << "a.insert(value) with value = [" << value << "]" << std::endl;
-		print_insert_value_ret<C>(a, a.insert(value));
+		if (toPrint)
+		{
+			std::cout << "a.insert(value) with value = [" << value << "]" << std::endl;
+			print_insert_value_ret<C>(a, a.insert(value));
+		}
+		else
+			a.insert(value);
 	}
 
 	template <class C>
@@ -58,13 +67,19 @@ namespace associative
 		FNAME
 		typename C::value_type value((monkey::get_value()));
 		typename C::iterator hint = monkey::get_random_it(a.begin(), a.end());
-		std::cout << "a.insert(hint, value) with hint: ";
-		monkey::print_it(a, hint);
-		std::cout << " and value: [" << value << "]" << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.insert(hint, value) with hint: ";
+			monkey::print_it(a, hint);
+			std::cout << " and value: [" << value << "]" << std::endl;
+		}
 		typename C::iterator ret = a.insert(hint, value);
-		std::cout << "ret = ";
-		monkey::print_it(a, ret);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = ";
+			monkey::print_it(a, ret);
+			std::cout << std::endl;
+		}
 	}
 
 	template <class C>
@@ -72,9 +87,12 @@ namespace associative
 	{
 		FNAME
 		std::vector<typename C::value_type> range = monkey::get_random_vector<typename C::value_type>();
-		std::cout << "a.insert(range) with range: ";
-		monkey::print_range(range.begin(), range.end());
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.insert(range) with range: ";
+			monkey::print_range(range.begin(), range.end());
+			std::cout << std::endl;
+		}
 
 		a.insert(range.begin(), range.end());
 	}
@@ -85,9 +103,11 @@ namespace associative
 		FNAME
 		typename C::key_type value((monkey::get_value()));
 
-		std::cout << "a.erase(value) with value = [" << value << "]" << std::endl;
+		if (toPrint)
+			std::cout << "a.erase(value) with value = [" << value << "]" << std::endl;
 		typename C::size_type ret = a.erase(value);
-		std::cout << "ret = " << ret << std::endl;
+		if (toPrint)
+			std::cout << "ret = " << ret << std::endl;
 	}
 
 	template <class C>
@@ -98,9 +118,12 @@ namespace associative
 			return;
 		typename C::iterator it = monkey::get_random_it(a.begin(), --a.end());
 
-		std::cout << "a.erase(it) with it = ";
-		monkey::print_it(a, it);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.erase(it) with it = ";
+			monkey::print_it(a, it);
+			std::cout << std::endl;
+		}
 		a.erase(it);
 	}
 
@@ -111,11 +134,14 @@ namespace associative
 		typename C::iterator it1 = monkey::get_random_it(a.begin(), a.end());
 		typename C::iterator it2 = monkey::get_random_it(it1, a.end());
 
-		std::cout << "a.erase(it1, it2) with it1 = ";
-		monkey::print_it(a, it1);
-		std::cout << " and it2 = ";
-		monkey::print_it<C>(a, it2);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.erase(it1, it2) with it1 = ";
+			monkey::print_it(a, it1);
+			std::cout << " and it2 = ";
+			monkey::print_it<C>(a, it2);
+			std::cout << std::endl;
+		}
 		a.erase(it1, it2);
 	}
 
@@ -125,11 +151,15 @@ namespace associative
 	{
 		FNAME
 		typename C::key_type key((monkey::get_value()));
-		std::cout << "a.find(key) with k = " << key << std::endl;
+		if (toPrint)
+			std::cout << "a.find(key) with k = " << key << std::endl;
 		typename C::iterator ret = a.find(key);
-		std::cout << "ret = ";
-		monkey::print_it(a, ret);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = ";
+			monkey::print_it(a, ret);
+			std::cout << std::endl;
+		}
 	}
 
 	template <class C>
@@ -137,11 +167,15 @@ namespace associative
 	{
 		FNAME
 		typename C::key_type key((monkey::get_value()));
-		std::cout << "a.lower_bound(key) with k = " << key << std::endl;
+		if (toPrint)
+			std::cout << "a.lower_bound(key) with k = " << key << std::endl;
 		typename C::iterator ret = a.lower_bound(key);
-		std::cout << "ret = ";
-		monkey::print_it(a, ret);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = ";
+			monkey::print_it(a, ret);
+			std::cout << std::endl;
+		}
 	}
 
 	template <class C>
@@ -149,11 +183,15 @@ namespace associative
 	{
 		FNAME
 		typename C::key_type key((monkey::get_value()));
-		std::cout << "a.upper_bound(key) with k = " << key << std::endl;
+		if (toPrint)
+			std::cout << "a.upper_bound(key) with k = " << key << std::endl;
 		typename C::iterator ret = a.upper_bound(key);
-		std::cout << "ret = ";
-		monkey::print_it(a, ret);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = ";
+			monkey::print_it(a, ret);
+			std::cout << std::endl;
+		}
 	}
 
 	template <class C>
@@ -161,13 +199,17 @@ namespace associative
 	{
 		FNAME
 		typename C::key_type key((monkey::get_value()));
-		std::cout << "a.equal_range(key) with k = " << key << std::endl;
+		if (toPrint)
+			std::cout << "a.equal_range(key) with k = " << key << std::endl;
 		NAMESPACE::pair<typename C::iterator, typename C::iterator> ret = a.equal_range(key);
-		std::cout << "ret = {";
-		monkey::print_it(a, ret.first);
-		std::cout << ", ";
-		monkey::print_it(a, ret.second);
-		std::cout << "}" << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = {";
+			monkey::print_it(a, ret.first);
+			std::cout << ", ";
+			monkey::print_it(a, ret.second);
+			std::cout << "}" << std::endl;
+		}
 	}
 
 	BUILD_TABLE(

@@ -25,7 +25,7 @@ int main(int ac, char **av)
 		std::cerr << "Invalid number of arguments" << std::endl;
 		return 1;
 	}
-	int context_size = 10;
+	int context_size = 30;
 	if (ac == 4)
 		context_size = atoi(av[3]);
 	FILE *a = popen(av[1], "r");

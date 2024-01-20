@@ -17,8 +17,11 @@ namespace sequence
 		FNAME
 		std::vector<typename C::value_type> v = monkey::get_random_vector<typename C::value_type>();
 
-		std::cout << "a = C(range) with range: " << std::endl;
-		monkey::print_range(v.begin(), v.end());
+		if (toPrint)
+		{
+			std::cout << "a = C(range) with range: " << std::endl;
+			monkey::print_range(v.begin(), v.end());
+		}
 
 		a = C(v.begin(), v.end());
 	}
@@ -30,7 +33,8 @@ namespace sequence
 		typename C::value_type	value = monkey::get_value();
 		typename C::size_type	count = rand() % BASE_SIZE;
 
-		std::cout << "a = C(count, value) with count = " << count << " and value = " << value << std::endl;
+		if (toPrint)
+			std::cout << "a = C(count, value) with count = " << count << " and value = " << value << std::endl;
 		a = C(count, value);
 	}
 
@@ -40,13 +44,19 @@ namespace sequence
 		FNAME
 		typename C::value_type value((monkey::get_value()));
 		typename C::iterator pos = monkey::get_random_it(a.begin(), a.end());
-		std::cout << "a.insert(pos, value) with pos: ";
-		monkey::print_it(a, pos);
-		std::cout << " and value: [" << value << "]" << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.insert(pos, value) with pos: ";
+			monkey::print_it(a, pos);
+			std::cout << " and value: [" << value << "]" << std::endl;
+		}
 		typename C::iterator ret = a.insert(pos, value);
-		std::cout << "ret = ";
-		monkey::print_it(a, ret);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = ";
+			monkey::print_it(a, ret);
+			std::cout << std::endl;
+		}
 	}
 
 
@@ -56,10 +66,13 @@ namespace sequence
 		FNAME
 		typename C::iterator pos = monkey::get_random_it(a.begin(), a.end());
 		std::vector<typename C::value_type> range = monkey::get_random_vector<typename C::value_type>();
-		std::cout << "a.insert(range) with range = ";
-		monkey::print_range(range.begin(), range.end());
-		std::cout << " and pos = " << std::endl;
-		monkey::print_it(a, pos);
+		if (toPrint)
+		{
+			std::cout << "a.insert(range) with range = ";
+			monkey::print_range(range.begin(), range.end());
+			std::cout << " and pos = " << std::endl;
+			monkey::print_it(a, pos);
+		}
 		a.insert(pos, range.begin(), range.end());
 	}
 
@@ -71,9 +84,12 @@ namespace sequence
 		typename C::iterator pos = monkey::get_random_it(a.begin(), a.end());
 		typename C::size_type	count = rand() % BASE_SIZE;
 		typename C::value_type	value = monkey::get_value();
-		std::cout << "a.insert(pos, count, value) with pos = ";
-		monkey::print_it(a, pos);
-		std::cout << ", count = " << count << " and value = " << value << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.insert(pos, count, value) with pos = ";
+			monkey::print_it(a, pos);
+			std::cout << ", count = " << count << " and value = " << value << std::endl;
+		}
 		a.insert(pos, count, value);
 	}
 
@@ -85,13 +101,19 @@ namespace sequence
 			return;
 		typename C::iterator it = monkey::get_random_it(a.begin(), monkey::prev(a.end()));
 
-		std::cout << "a.erase(it) with it = ";
-		monkey::print_it(a, it);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.erase(it) with it = ";
+			monkey::print_it(a, it);
+			std::cout << std::endl;
+		}
 		typename C::iterator ret = a.erase(it);
-		std::cout << "ret = ";
-		monkey::print_it(a, ret);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = ";
+			monkey::print_it(a, ret);
+			std::cout << std::endl;
+		}
 	}
 
 	template <class C>
@@ -101,15 +123,21 @@ namespace sequence
 		typename C::iterator it1 = monkey::get_random_it(a.begin(), a.end());
 		typename C::iterator it2 = monkey::get_random_it(it1, a.end());
 
-		std::cout << "a.erase(it1, it2) with it1 = ";
-		monkey::print_it(a, it1);
-		std::cout << " and it2 = ";
-		monkey::print_it<C>(a, it2);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "a.erase(it1, it2) with it1 = ";
+			monkey::print_it(a, it1);
+			std::cout << " and it2 = ";
+			monkey::print_it<C>(a, it2);
+			std::cout << std::endl;
+		}
 		typename C::iterator ret = a.erase(it1, it2);
-		std::cout << "ret = ";
-		monkey::print_it(a, ret);
-		std::cout << std::endl;
+		if (toPrint)
+		{
+			std::cout << "ret = ";
+			monkey::print_it(a, ret);	
+			std::cout << std::endl;
+		}
 	}
 
 	template <class C>
@@ -118,14 +146,16 @@ namespace sequence
 		FNAME
 		typename C::size_type	pos = rand() % BASE_SIZE;
 
-
-		std::cout << "a.at(pos) with pos = " << pos << std::endl;
-		try {
-			std::cout << " ret = " << a.at(pos) << std::endl;
-		}
-		catch (NAMESPACE::exception &)
+		if (toPrint)
 		{
-			std::cout << "exception thrown" << std::endl;
+			std::cout << "a.at(pos) with pos = " << pos << std::endl;
+			try {
+				std::cout << " ret = " << a.at(pos) << std::endl;
+			}
+			catch (NAMESPACE::exception &)
+			{
+				std::cout << "exception thrown" << std::endl;
+			}
 		}
 	}
 
@@ -133,7 +163,7 @@ namespace sequence
 	void	operator_at(C &a, C &)
 	{
 		FNAME
-		if (a.empty())
+		if (a.empty() || !toPrint)
 			return;
 		typename C::size_type	pos = rand() % a.size();
 
@@ -145,7 +175,7 @@ namespace sequence
 	void	front(C &a, C &)
 	{
 		FNAME
-		if (a.empty())
+		if (a.empty()|| !toPrint)
 			return;
 		std::cout << "a.front() = " << a.front() << std::endl;
 	}
@@ -154,7 +184,7 @@ namespace sequence
 	void	back(C &a, C &)
 	{
 		FNAME
-		if (a.empty())
+		if (a.empty() || !toPrint)
 			return;
 		std::cout << "a.back() = " << a.back() << std::endl;
 	}
@@ -164,7 +194,8 @@ namespace sequence
 	{
 		FNAME
 		typename C::value_type value((monkey::get_value()));
-		std::cout << "a.push_back(value) with value = [" << value << "]" << std::endl;
+		if (toPrint)
+			std::cout << "a.push_back(value) with value = [" << value << "]" << std::endl;
 		a.push_back(value);
 	}
 
@@ -174,7 +205,8 @@ namespace sequence
 		FNAME
 		if (a.empty())
 			return;
-		std::cout << "a.pop_back()" << std::endl;
+		if (toPrint)
+			std::cout << "a.pop_back()" << std::endl;
 		a.pop_back();
 	}
 
@@ -183,7 +215,8 @@ namespace sequence
 	{
 		FNAME
 		typename C::value_type value((monkey::get_value()));
-		std::cout << "a.push_front(value) with value = [" << value << "]" << std::endl;
+		if (toPrint)
+			std::cout << "a.push_front(value) with value = [" << value << "]" << std::endl;
 		a.push_front(value);
 	}
 
@@ -193,7 +226,8 @@ namespace sequence
 		FNAME
 		if (a.empty())
 			return;
-		std::cout << "a.pop_front()" << std::endl;
+		if (toPrint)
+			std::cout << "a.pop_front()" << std::endl;
 		a.pop_front();
 	}
 
@@ -203,7 +237,8 @@ namespace sequence
 		FNAME
 		typename C::size_type	count = rand() % BASE_SIZE;
 		typename C::value_type	value = monkey::get_value();
-		std::cout << "a.resize(n, value) with n = " << count  << " and value = " << value << std::endl;
+		if (toPrint)
+			std::cout << "a.resize(n, value) with n = " << count  << " and value = " << value << std::endl;
 		a.resize(count, value);
 	}
 

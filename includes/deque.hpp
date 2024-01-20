@@ -918,7 +918,6 @@ namespace ft
 
 		void	_moveDataLeft(_edge& position, size_type holeSize)
 		{
-			//EN COURS
 			_edge	src = _begin;
 			_edge	dest = _begin;
 
@@ -1218,7 +1217,7 @@ namespace ft
 				}
 				--first.first;
 				--last.first;
-				while (last.first > _begin.first)
+				while (first.first >= _begin.first)
 				{
 					_swapChunk(first.first, last.first);
 					--first.first;
@@ -1229,12 +1228,12 @@ namespace ft
 			{
 				//  first           last
 				//[ooooo~~~][...][~~~~~ooo]
-				//  last            first
-				//[~~~~~~~~][...][oooooooo]
+				//  first           last
+				//[oooooooo][...][~~~~~~~~]
 				for (int i = last.second; i < copyEnd; ++i)
 					_constructDataChunk(_chunks[first.first], i, _chunks[last.first][i]);
 				_destroyDataChunk(_chunks[last.first], last.second, copyEnd - last.second);
-				while (last.first > _begin.first)
+				while (first.first >= _begin.first)
 				{
 					_swapChunk(first.first, last.first);
 					--first.first;

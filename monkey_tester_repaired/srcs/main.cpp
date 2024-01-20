@@ -41,7 +41,9 @@
 #endif
 
 #include "container.hpp"
+#include "common.hpp"
 #include "utils/stateful_comparator.hpp"
+#include <cstring>
 #if defined (TEST_SET) || defined(TEST_MAP) || defined(TEST_MULTISET) || defined(TEST_MULTIMAP)
 # include "associative.hpp"
 #endif
@@ -147,6 +149,11 @@ int main(int argc, char **argv)
 		seed = atol(argv[1]);
 	if (argc > 2)
 		ntest = atol(argv[2]);
+	if (argc > 3 && !strcmp("noprint", argv[3]))
+		toPrint = false;
+	else
+		toPrint = true;
+
 	srand(seed);
 
 	#ifdef TEST_MAP
