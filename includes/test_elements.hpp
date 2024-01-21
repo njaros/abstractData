@@ -760,7 +760,6 @@ void forwardIteratorTests(Cont& c, std::ofstream& outfile)
 
 //MANDATORY TESTS
 
-void flat_basket_tests();
 void vector_tests(const std::string& currentPath, std::ostream& except);
 void deque_tests(const std::string& currentPath, std::ostream& except);
 void stack_tests(const std::string& currentPath);
@@ -778,5 +777,9 @@ void unordered_map_tests(const std::string& currentPath, std::ostream& except);
 void unordered_set_tests(const std::string& currentPath);
 void unordered_multimap_tests(const std::string& currentPath);
 void unordered_multiset_tests(const std::string& currentPath);
+
+//MY CONTAINER TEST
+
+void flat_basket_tests(const std::string& currentPath);
 
 #endif

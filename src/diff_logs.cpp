@@ -157,7 +157,7 @@ int diff_logs(const std::string& mainPath1, const std::string& mainPath2, std::o
 	while (entry2)
 	{
 		fileInfo(entry2);
-		if (entry2->d_type == DT_DIR && strcmp(entry2->d_name, ".") && strcmp(entry2->d_name, ".."))
+		if (entry2->d_type == DT_DIR && strcmp(entry2->d_name, ".") && strcmp(entry2->d_name, "..") && strncmp(entry2->d_name, "NC", 2))
 			dirList2[entry2->d_name] = dirName(mainPath2, entry2->d_name);
 		else if (entry2->d_type == DT_REG)
 			fileList2[entry2->d_name] = dirName(mainPath2, entry2->d_name);

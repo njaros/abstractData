@@ -7,12 +7,24 @@
 
 namespace ft
 {
-
+	/**
+	 *  @brief A container I created for containers with limited size,
+	 *  with simulation of object droppable from the container, falling
+	 *  down in a vector Ground, which can be shared between other flat_baskets.
+	 * 
+	 *  @ingroup sequences
+	 * 
+	 * 
+	 *  @tparam T	Type of objects.
+	 *  @tparam Alloc	Allocator type, defaults to allocator<T>
+	 * 
+	 *  Complexity of insertion and deletion are the same as vector because this container
+	 *  uses vector<T> an underlyings containers.
+	 *  This container is intended for simulations of limited sized "baskets".
+	*/
 	template <class T, class Alloc = std::allocator< T > >
 	class flat_basket
 	{
-
-		//friend class myIterator;
 
 	public:
 
@@ -93,6 +105,13 @@ namespace ft
 		* because of sequence container rules imposed to have a [begin, last) distance equal to the number of elements in constructors parameter
 		* I am forced to throw an exception when the user insert more than the basket capacity (only in constructors)
 		*/
+
+		/**
+		 *  @brief	Creates a %flat_basket with no element, with a capacity fixed to 8, and his
+		 *  self ground management.
+		 * 
+		 *  @param	alloc	An allocator object
+		*/
 		flat_basket(const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(0), _basketCapacity(8), _selfGround(false)
 		{
@@ -100,6 +119,13 @@ namespace ft
 			_groundControl();
 		}
 
+		/**
+		 *  @brief	Creates a %flat_basket with no element, with a capacity fixed to n, and his
+		 *  self ground management.
+		 * 
+		 *  @param  n	capacity of the basket
+		 *  @param	alloc	An allocator object
+		*/
 		flat_basket(size_type n, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(0), _basketCapacity(n), _selfGround(false)
 		{
@@ -107,6 +133,13 @@ namespace ft
 			_groundControl();
 		}
 
+		/**
+		 *  @brief	Creates a %flat_basket with no element, with a capacity fixed to 8, and a
+		 *  given ground pointed by groundPtr, not managed with this container.
+		 * 
+		 *  @param  groundPtr	pointer to a shared vector<T>
+		 *  @param	alloc	An allocator object
+		*/
 		flat_basket(ground_type* groundPtr, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(groundPtr), _basketCapacity(8), _selfGround(false)
 		{
@@ -114,6 +147,16 @@ namespace ft
 			_groundControl();
 		}
 		
+		/**
+		 *  @brief	Creates a %flat_basket with n elements of val, with a capacity fixed to 8, and a
+		 *  self managed ground.
+		 * 
+		 *  @param  n	number of objects inserted to the basket
+		 *  @param	val	object to copy
+		 *  @param	alloc	An allocator object
+		 * 
+		 *  @exception  if n > capacity, it abort with ft::length_error exception
+		*/
 		flat_basket(size_type n, const value_type& val, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(0), _basketCapacity(8), _selfGround(false)
 		{
@@ -124,6 +167,18 @@ namespace ft
 			_basket.insert(begin(), n, val);
 		}
 
+		/**
+		 *  @brief	Creates a %flat_basket with n elements of val, with a given capacity, and a
+		 *  given ground pointed by ground, not managed with this container.
+		 *
+		 *  @param  n	number of objects inserted to the basket
+		 *  @param	val	object to copy
+		 *  @param	basketCapacity	capacity of the basket
+		 *  @param  groundPtr	pointer to a shared vector<T>
+		 *  @param	alloc	An allocator object
+		 * 
+		 *  @exception  if n > capacity, it abort with ft::length_error exception
+		*/
 		flat_basket(size_type n, const value_type& val, size_type basketCapacity, ground_type* ground, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(ground), _basketCapacity(basketCapacity), _selfGround(false)
 		{
@@ -134,7 +189,15 @@ namespace ft
 			_basket.insert(begin(), n, val);
 		}
 
-		//Main constructor to use !
+		/**
+		 *  @brief	Creates a %flat_basket with no element, with a given capacity, and a
+		 *  given ground pointed by ground, not managed with this container. This is the
+		 *  most logical constructor to use.
+		 * 
+		 *  @param	basketCapacity	capacity of the basket
+		 *  @param  ground	pointer to a shared vector<T>
+		 *  @param	alloc	An allocator object
+		*/
 		flat_basket(size_type basketCapacity, ground_type* ground, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(ground), _basketCapacity(basketCapacity), _selfGround(false)
 		{
@@ -142,6 +205,17 @@ namespace ft
 			_groundControl();
 		}
 
+		/**
+		 *  @brief	Creates a %flat_basket with n elements of val, with a capacity fixed to 8, and a
+		 *  given ground pointed by ground, not managed with this container.
+		 * 
+		 *  @param  n	number of objects inserted to the basket
+		 *  @param	val	object to copy
+		 *  @param  ground	pointer to a shared vector<T>
+		 *  @param	alloc	An allocator object
+		 * 
+		 *  @exception  if n > capacity, it abort with ft::length_error exception
+		*/
 		flat_basket(size_type n, const value_type& val, ground_type* ground, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(ground), _basketCapacity(8), _selfGround(false)
 		{
@@ -152,6 +226,17 @@ namespace ft
 			_basket.insert(begin(), n, val);
 		}
 
+		/**
+		 *  @brief	Creates a %flat_basket with n elements of val, with a capacity fixed to 8, and a
+		 *  given ground pointed by ground, not managed with this container.
+		 * 
+		 *  @param  n	number of objects inserted to the basket
+		 *  @param	val	object to copy
+		 *  @param  basketCapacity	capacity of the basket
+		 *  @param	alloc	An allocator object
+		 * 
+		 *  @exception  if n > capacity, it abort with ft::length_error exception
+		*/
 		flat_basket(size_type n, const value_type& val, size_type basketCapacity, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(0), _basketCapacity(basketCapacity), _selfGround(false)
 		{
@@ -162,9 +247,29 @@ namespace ft
 			_basket.insert(begin(), n, val);
 		}
 
+		/**
+		 *  @brief	Creates %flat_basket which is a copy of another %flat_basket. They will share
+		 *  the same ground, but this container will not manage the ground after construction.
+		 * 
+		 *  @param	o	flat_basket to copy
+		*/
 		flat_basket(const flat_basket& o)
 			: _alloc(o._alloc), _allocGround(o._allocGround), _basket(o._basket), _ground(o._ground), _basketCapacity(o._basketCapacity), _selfGround(false) {}
 
+		/**
+		 *  @brief	Creates a %flat_basket with copy element in range (first, last]. basketCapacity is 8
+		 *  by default, and ground is self by default.
+		 * 
+		 *	@tparam	InputIterator	Ether an iterator or a pointer
+		 * 
+		 *  @param	first	element pointing to the first object to copy
+		 *  @param	last	element pointing just after the last element to copy
+		 *  @param	basketCapacity	capacity of the basket (8 by default)
+		 *  @param	ground	pointer to a shared vector<T>
+		 *  @param	alloc	An allocator object
+		 *
+		 *  @exception if ft::distance(first, last) > capacity, an exception ft::length_error is thrown.
+		*/
 		template < class InputIterator, typename ft::enable_if< !is_integral< InputIterator >::value >::type >
 		flat_basket(InputIterator first, InputIterator last, size_type basketCapacity = 8, ground_type* ground = 0, const allocator_type& alloc = allocator_type())
 			: _alloc(alloc), _allocGround(_AllocGround_type()), _basket(alloc), _ground(ground), _basketCapacity(basketCapacity)
@@ -182,6 +287,10 @@ namespace ft
 				push_back(*first++);
 		}
 
+		/**
+		 * Destructor will call the ground destructor only if he used to manage
+		 * him, it can be a problem only if the user uses badly the manage_ground(bool)
+		*/
 		~flat_basket()
 		{
 			if (_selfGround)
@@ -191,6 +300,9 @@ namespace ft
 			}
 		}
 
+		/**
+		 *  @brief %flat_basket assignment operator.
+		*/
 		flat_basket& operator=(const flat_basket& o)
 		{
 			if (&o != this)
@@ -204,30 +316,105 @@ namespace ft
 
 		//ITERATORS ACCESSORS
 
+		/**
+		 *  @brief	return a non_const iterator pointing to the first element in the %flat_basket.
+		*/
 		iterator				begin() { return _basket.begin(); }
+		/**
+		 *  @brief	return a const iterator pointing to the first element in the %flat_basket.
+		*/
 		const_iterator			begin()		const { return _basket.begin(); }
+		/**
+		 *  @brief	return a non_const iterator pointing to the after last element in the %flat_basket.
+		*/
 		iterator				end() { return _basket.end(); }
+		/**
+		 *  @brief	return a const iterator pointing to the after last element in the %flat_basket.
+		*/
 		const_iterator			end()		const { return _basket.end(); }
+		/**
+		 *  @brief	return a non_const reverse iterator pointing to the last element in the %flat_basket.
+		*/
 		reverse_iterator		rbegin() { return _basket.rbegin(); }
+		/**
+		 *  @brief	return a const reverse iterator pointing to the last element in the %flat_basket.
+		*/
 		const_reverse_iterator	rbegin()	const { return _basket.rbegin(); }
+		/**
+		 *  @brief	return a non_const reverse iterator pointing to the before first element in the %flat_basket.
+		*/
 		reverse_iterator		rend() { return _basket.rend(); }
+		/**
+		 *  @brief	return a const reverse iterator pointing to the before first element in the %flat_basket.
+		*/
 		const_reverse_iterator	rend()		const { return _basket.rend(); }
 
+		/**
+		 *  @brief	return true if the iterator is in the basket of this container
+		 * 
+		 * 	That is usefull to know is an object was dropped to the ground or not.
+		 * 
+		 *  @param	iterator	An iterator
+		*/
 		bool	in_basket(iterator position) const { return position >= begin() && position < end(); }
 
 		//CAPACITY
 
+		/**
+		 *  @brief  return true if the basket is empty.
+		 * 
+		 *  Note that the ground doesn't infer.
+		*/
 		bool		empty()		const { return _basket.empty(); }
+		
+		/**
+		 *  @brief  return true is the basket is full
+		 * 
+		 *  If true, a next inserted element will fall to the ground.
+		*/
 		bool		full()		const { return _basket.size() == _basketCapacity; }
+		
+		/**
+		 *  @brief  return the number of objects in the basket.
+		*/
 		size_type	size()		const { return _basket.size(); }
+
+		/**
+		 *  @brief	return the capacity of the basket
+		 * 
+		 *  Note, this value can be set thanks of enlarge_your_basket or reduce_your_basket
+		 *  because only magic can change a size of an basket.
+		*/
 		size_type	capacity()	const { return _basketCapacity; }
+
+		/**
+		 *  @brief	same as capacity
+		*/
 		size_type	max_size()	const { return _basketCapacity; }
+
+		/**
+		 *  @brief	return the number of objects the basket can take before it's fulled.
+		*/
 		size_type	size_left()	const { return _basketCapacity - _basket.size(); }
+		
+		/**
+		 *  @brief	augment the capacity of the basket
+		 * 
+		 *  @param	n	if n > capacity(), effectively set the capacity to n
+		*/
 		void		enlarge_your_basket(size_type n)
 		{ 
 			if (n > _basketCapacity)
 				_basketCapacity = n;
 		}
+
+		/**
+		 *  @brief	diminish the capacity of the basket
+		 * 
+		 *  @param	n	if n < capacity(), effectively set the capacity to n
+		 * 
+		 *  Lasts elements which can't be content will be dropped to the ground.
+		*/
 		void		reduce_your_basket(size_type n)
 		{
 			if (n < _basketCapacity)
@@ -240,29 +427,130 @@ namespace ft
 				}
 			}
 		}
+
+		/**
+		 *  @brief  resize the basket
+		 * 
+		 *  @param	n	resize wanted
+		 *  @param	val	value of object inserted if resize > size() 
+		 * 
+		 *  Note that if n > capacity(), the resize lenght will be reduced to the capacity of the bucket.
+		*/
 		void		resize(size_type n, value_type val = value_type()) { _basket.resize(ft::min(n, _basketCapacity), val); }
 
 		//ELEMENT ACCESS
 
+		/**
+		 *  @brief  return a non const reference to the n'th element of the basket
+		 * 
+		 *  @param	n	the n'th reference to return
+		 * 
+		 *  if n is out of basket bounds, it causes an undefined behavior
+		*/
 		reference	operator[](size_type n) { return _basket[n]; }
+
+		/**
+		 *  @brief  return a const reference to the n'th element of the basket
+		 * 
+		 *  @param	n	the n'th reference to return
+		 * 
+		 *  if n is out of basket bounds, it causes an undefined behavior
+		*/
 		const_reference operator[](size_type n)	const { return _basket[n]; }
+
+		/**
+		 *  @brief  return a reference to the n'th element of the basket
+		 * 
+		 *  @param	n	the n'th reference to return
+		 * 
+		 *  @exception	if n is out of basket bound, an ft::out_of_bound exception is thrown.
+		*/
 		reference at(size_type n) { return _basket.at(n); }
+
+		/**
+		 *  @brief  return a const_reference to the n'th element of the basket
+		 * 
+		 *  @param	n	the n'th reference to return
+		 * 
+		 *  @exception	if n is out of basket bound, an ft::out_of_bound exception is thrown.
+		*/
 		const_reference at(size_type n)			const { return _basket.at(n); }
+
+		/**
+		 *  @brief	return a reference of the first element to the basket
+		 * 
+		 *  if the basket is empty, it causes undefined behavior.
+		*/
 		reference	front() { return _basket.front(); }
+
+		/**
+		 *  @brief	return a const reference of the first element to the basket
+		 * 
+		 *  if the basket is empty, it causes undefined behavior.
+		*/
 		const_reference	front()					const { return _basket.front(); }
+
+		/**
+		 *  @brief  return a reference of the last element to the basket
+		 * 
+		 *  if the basket is empty, it causes undefined behavior.
+		*/
 		reference	back() { return _basket.back(); }
+
+		/**
+		 *  @brief	return a const reference of the last element to the basket
+		 * 
+		 *  If the basket is empty, it causes undefined behavior.
+		*/
 		const_reference	back()					const { return _basket.back(); }
 
 		//GROUND MANAGEMENT
 
+		/**
+		 *  @brief  return a pointer of the ground.
+		*/
 		ground_type*		ground() { return _ground; }
+
+		/**
+		 *  @brief  return a const_pointer of the ground.
+		*/
 		const ground_type*	ground()	const { return _ground; }
+
+		/**
+		 *  @brief  set a new pointer of a ground.
+		 * 
+		 *  @param  groundPtr	a pointer to a ground
+		 * 
+		 *  If the previous ground is self managed, he'll be destroy and deallocate
+		 *  If the groundPtr is the same as the previous ground, nothing happends
+		 *  If the groundPtr is null, the previous ground is replaced by a new managed ground,
+		 *  and previous ground is destroy and deallocate is he's sefl managed.
+		*/
 		void				ground(ground_type* groundptr) { _groundControl(groundptr); }
+		
+		/**
+		 *  @brief  return true if the ground of this instance is managed by this instance.
+		*/
 		bool				manage_ground() const { return _selfGround; }
+
+		/**
+		 *  @brief  set the management of the current ground.
+		 * 
+		 *  Bad use will causes leaks or double free
+		*/
 		void				manage_ground(bool aJhon) { _selfGround = aJhon; }
 
 		//BASKET / GROUND INTERACTIONS
 
+		/**
+		 *  @brief  drop the object pointed by the iterator on the ground
+		 * 
+		 *  @param  position  iterator pointing to the object to drop
+		 * 
+		 *  @return An iterator pointing to the element dropped to the ground
+		 * 
+		 *  The object is copied to the ground then erased of the basket
+		*/
 		iterator	drop(iterator position)
 		{
 			iterator	groundIterator;
@@ -272,6 +560,16 @@ namespace ft
 			return groundIterator;
 		}
 
+		/**
+		 *  @brief  drop a range of objects
+		 * 
+		 *  @param  first 	iterator pointing to the first object to drop
+		 *  @param  last	iterator pointing after the last object to drop
+		 * 
+		 *  @return An iterator pointing to the first element dropped to the ground
+		 * 
+		 *  The objects are copied to the ground then erased of the basket
+		*/
 		iterator	drop(iterator first, iterator last)
 		{
 			iterator	groundIterator;
@@ -281,6 +579,13 @@ namespace ft
 			return groundIterator;
 		}
 
+		/**
+		 *  @brief  drop all the basket content to thr ground
+		 * 
+		 *  @return An iterator pointing to the first element dropped to the ground
+		 * 
+		 *  The objects are copied to the ground then erased of the basket
+		*/
 		ft::pair<iterator, size_type>	drop()
 		{
 			ft::pair<iterator, size_type> ret;
@@ -291,12 +596,34 @@ namespace ft
 			return ret;
 		}
 
+		/**
+		 *  @brief  drop the last element of the basket
+		 * 
+		 *  The object is copied to the ground then erased of the basket
+		 *  If the basket is empty, it causes undefined behaviour
+		*/
 		void	drop_back()
 		{
 			if (!empty())
 				drop(--end());
 		}
 
+		/**
+		 *  @brief  try to pick the elements on the ground between first and last to the basket
+		 * 
+		 *  @param  basketPosition	iterator where the elements will be inserted
+		 *  @param  first	iterator pointing to the first element to insert
+		 *  @param  last	iterator pointing after the last element to insert
+		 * 
+		 *  @return  the numbers of element succesfully inserted to the basket
+		 * 
+		 *  @exception  if first > last, a ft::length_error exception is thrown
+		 * 
+		 *  If the basket is full, nothing happends
+		 *  If the number of element to insert is > than size_left(), then size_left()
+		 *  elements will be inserted
+		 *  Elements are copied to the basket, then erased to the ground
+		*/
 		size_type	pick_up(iterator basketPosition, iterator first, iterator last)
 		{
 			difference_type	dist;
@@ -313,6 +640,19 @@ namespace ft
 			return count;
 		}
 
+		/**
+		 *  @brief  try to pick an element on the ground
+		 * 
+		 *  @param  basketPosition	iterator where the elements will be inserted
+		 *  @param  groundPosition	iterator pointing to the element to insert
+		 *  
+		 *  @return  the numbers of element succesfully inserted to the basket
+		 * 
+		 *  @exception  if first > last, a ft::length_error exception is thrown
+		 * 
+		 *  If the basket is full, nothing happends
+		 *  Elements are copied to the basket, then erased to the ground
+		*/
 		size_type	pick_up(iterator basketPosition, iterator groundPosition)
 		{
 			if (!full())
@@ -324,6 +664,14 @@ namespace ft
 			return 0;
 		}
 
+		/**
+		 *  @brief  try to pick the last elements on the ground
+		 * 
+		 *  @return  the numbers of element succesfully inserted to the baset
+		 * 
+		 *  If the basket is full, nothing happends
+		 *  Elements are copied to the basket, then erased to the ground
+		*/
 		size_type	pick_up()
 		{
 			if (!_ground->empty)
@@ -331,11 +679,31 @@ namespace ft
 			return 0;
 		}
 
+		/**
+		 *  @brief  pick elements on the ground until the basket is full or the ground is empty
+		 * 
+		 * 	@param  basketPosition  iterator pointing the element which will go after inserted elements.
+		 *  @param  groundPosition  iterator pointing to the first element to insert until the end of the ground.
+		 *  @return  the numbers of element succesfully inserted to the baset
+		 * 
+		 *  If the basket is full, nothing happends
+		 *  Elements are copied to the basket, then erased to the ground
+		*/
 		size_type	fill(iterator basketPosition, iterator groundPosition)
 		{
 			return pick_up(basketPosition, groundPosition, _ground->end());
 		}
 
+		/**
+		 *  @brief  pick elements on the ground until the basket is full or the ground is empty
+		 * 
+		 *  @return  the numbers of element succesfully inserted to the baset
+		 * 
+		 *  The element are inserted at the iterator end() of the basket
+		 *  The range to insert is the possibles lasts element of the ground
+		 *  If the basket is full, nothing happends
+		 *  Elements are copied to the basket, then erased to the ground
+		*/
 		size_type	fill()
 		{
 			size_type	sizeToPick;
@@ -344,8 +712,20 @@ namespace ft
 			return fill(end(), _ground->end() - sizeToPick);
 		}
 
+		/**
+		 *  @brief  pour_out all the content of the basket in another basket
+		 * 
+		 *  @param  o  a reference to another basket
+		 * 
+		 *  @return  the number of element succesfully inserted to the other basket
+		 * 
+		 *  If the size_left() of the another basket is smaller than the content of this basket,
+		 *  the surpluses are dropped to the ground of the another basket
+		*/
 		size_type	pour_out(flat_basket& o)
 		{
+			if (&o == this)
+				return 0;
 			size_type	before = o.size();
 			o.insert(o.end(), begin(), end());
 			clear();
@@ -355,8 +735,25 @@ namespace ft
 
 		//MODIFIERS
 
+		/**
+		 *  @brief  clear the basket underlying container
+		 * 
+		 *  This will not clear the ground.
+		*/
 		void	clear() { _basket.clear(); }
 
+		/**
+		 *  @brief  insert an element to the basket or drop it to the ground
+		 * 
+		 *  @param  position  iterator pointing to the element which will go after the
+		 *                    inserted element
+		 *  @param  val   the value to copy
+		 * 
+		 *  @return  an iterator pointing to the inserted element
+		 * 
+		 *  The returned iterator can be a basket iterator or a ground iterator if the basket was full.
+		 *  
+		*/
 		iterator insert(iterator position, const value_type& val)
 		{
 			if (!full())
@@ -364,16 +761,43 @@ namespace ft
 			return _ground->insert(_ground->end(), val);
 		}
 
-		iterator insert(iterator position, size_type n, const value_type& val)
+		/**
+		 *  @brief  insert n elements to the basket and drop the surpluses to the ground.
+		 * 
+		 *  @param  position  Iterator pointing to the element which will go after the
+		 *                    inserted element
+		 *  @param  n     The number of elements to copy.
+		 *  @param  val   The value to copy.
+		 * 
+		 *  @return  an iterator pointing to the inserted element
+		 * 
+		 *  The returned iterator can be a basket iterator or a ground iterator if the basket was full.
+		 *  
+		*/
+		void insert(iterator position, size_type n, const value_type& val)
 		{
-			if (n >= _alloc.max_size())
-				throw(ft::length_error("ft::flat_basket::insert : too much element."));
 			if (n <= size_left())
-				return _basket.insert(position, n, val);
-			_basket.insert(position, size_left(), val);
-			return _ground->insert(_ground->end(), n - size_left(), val);
+				_basket.insert(position, n, val);
+			else
+			{
+				_basket.insert(position, size_left(), val);
+				_ground->insert(_ground->end(), n - size_left(), val);
+			}
 		}
 
+		/**
+		 *  @brief  insert a range of elements to the basket and drop the surpluses to the ground.
+		 * 
+		 *  @param  position  iterator pointing to the element which will go after the
+		 *                    inserted element
+		 *  @param  first   InputIterator pointing to the first object to copy
+		 *  @param  last    InputIterator pointing after the last iterator to copy
+		 *  @return  an iterator pointing to the inserted element
+		 * 
+		 *  @exception  if first > last, a ft::length_error exception is thrown.
+		 * 
+		 *  The returned iterator can be a basket iterator or a ground iterator if the basket was full. 
+		*/
 		template < class InputIterator >
 		typename ft::enable_if<!is_integral<InputIterator>::value, iterator>::type
 			insert(iterator position, InputIterator first, InputIterator last)
@@ -396,11 +820,27 @@ namespace ft
 			return position;
 		}
 
+		/**
+		 *  @brief  try to insert an element at the end of the bucket.
+		 * 
+		 *  @param  val  The element to copy.
+		 * 
+		 *  If the bucket is full, the element is copied at the end of the ground.
+		*/
 		void	push_back(const value_type& val)
 		{
 			insert(end(), val);
 		}
 
+		/**
+		 *  @brief  insert an element and drop the last element is the bucket is full.
+		 * 
+		 *  @param  position  Iterator pointing element which will go after the inserted element.
+		 *  @param  val  The value to copy.
+		 * 
+		 *  If the bucket is full, the element is still inserted but
+		 *  the last element is dropped to the ground.
+		*/
 		iterator insert_force(iterator position, const value_type& val)
 		{
 			if (full())
@@ -411,6 +851,16 @@ namespace ft
 			return _basket.insert(position, val);
 		}
 
+		/**
+		 *  @brief  insert n elements and drop the lasts elements is the bucket has not enought space.
+		 * 
+		 *  @param  position  Iterator pointing element which will go after the inserted element.
+		 *  @param  n  The number of elements to insert.
+		 *  @param  val  The value to copy.
+		 * 
+		 *  If the bucket doesn,t have enought space, the elements are still inserted but
+		 *  the lasts elements is dropped to the ground. The surpluses of inserted element fall to the ground too.
+		*/
 		iterator insert_force(iterator position, size_type n, const value_type& val)
 		{
 			size_type	nbToPop;
@@ -431,6 +881,18 @@ namespace ft
 			return _basket.insert(position, n, val);
 		}
 
+		/**
+		 *  @brief  insert a range of elements and drop the lasts elements is the bucket has not enought space.
+		 * 
+		 *  @param  position  Iterator pointing element which will go after the inserted element.
+		 *  @param  first  InputIterator pointing to the first element to insert.
+		 *  @param  last  InputIterator pointing after the last element to insert.
+		 * 
+		 *  @exception  if first > last, a ft::length_error exception is thrown
+		 * 
+		 *  If the bucket doesn,t have enought space, the elements are still inserted but
+		 *  the lasts elements is dropped to the ground. The surpluses of inserted element fall to the ground too.
+		*/
 		template < class InputIterator >
 		typename enable_if<!is_integral< InputIterator >::value, iterator>::type
 			insert_force(iterator position, InputIterator first, InputIterator last)

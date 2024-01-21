@@ -84,4 +84,12 @@ int main()
 	displayTime(t1, FT, "UNORDERED_MULTISET");
 
 	exceptionFile.close();
+	
+	#if FT == 1
+		gettimeofday(&t1, 0);
+		mkdir(dirName(mainPath, ctxPath, "NC_flat_basket_tests").c_str(), 0777);
+		flat_basket_tests(filePath(ctxPath, "NC_flat_basket_tests"));
+		displayTime(t1, FT, "FLAT_BASKET");
+	#endif
+
 }
