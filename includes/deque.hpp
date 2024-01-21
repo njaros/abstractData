@@ -1591,12 +1591,16 @@ namespace ft
 
 		void	pop_back()
 		{
-			erase(end() - 1);
+			--_size;
+			_edgeSub(_end, 1);
+			_alloc.destroy(&(_chunks[_end.first][_end.second]));
 		}
 
 		void	pop_front()
 		{
-			erase(begin());
+			_alloc.destroy(&(_chunks[_begin.first][_begin.second]));
+			--_size;
+			_edgeAdd(_begin, 1);
 		}
 
 		void	swap(deque& other)

@@ -240,25 +240,6 @@ namespace ft
 			_maxLoad = size_type(float(_t.size()) * _maxLoadFactor);
 		}
 
-		iterator	_insert(const value_type& val)
-		{
-			size_t	hashValue;
-			size_type	growth;
-
-			if (++_size > _maxLoad)
-			{
-				growth = 8 * _t.size();
-				while ((size_type)((float)growth * _maxLoadFactor) <= _size)
-					growth *= 8;
-				_rehash(growth);
-			}
-
-			hashValue = _hasher(val) % _t.size();
-			_t[hashValue].push_front(val);
-
-			return iterator(&_t, hashValue, _t[hashValue].begin());
-		}
-
 	public:
 
 		size_type	size()	const
@@ -363,15 +344,28 @@ namespace ft
 
 		ft::pair<iterator, bool> insert(const value_type& val)
 		{
-			iterator found = find(val);
-			bool	inserted = false;
+			size_t		hashVal;
+			size_type	growth;
 
-			if (found == end())
+			hashVal = _hasher(val) % _t.size();
+			for (local_iterator it = begin(hashVal); it != end(hashVal); ++it)
 			{
-				found = _insert(val);
-				inserted = true;
+				if (_equal(*it, val))
+					return ft::make_pair(iterator(&_t, hashVal, it), false);
 			}
-			return ft::make_pair(found, inserted);
+
+			if (++_size > _maxLoad)
+			{
+				growth = 8 * _t.size();
+				while ((size_type)((float)growth * _maxLoadFactor) <= _size)
+					growth *= 8;
+				_rehash(growth);
+				hashVal = _hasher(val) % _t.size();
+			}
+
+			_t[hashVal].push_front(val);
+
+			return ft::make_pair(iterator(&_t, hashVal, _t[hashVal].begin()), true);
 		}
 
 		iterator	insert(iterator hint, const value_type& val)
@@ -720,7 +714,7 @@ namespace ft
 			_maxLoadFactor(o._maxLoadFactor), _maxLoad(o._maxLoad)
 		{
 			for (const_iterator cit = o.begin(); cit != o.end(); ++cit)
-				_insert(*cit);
+				insert(*cit);
 		}
 
 		template< class InputIterator >
@@ -728,7 +722,7 @@ namespace ft
 			: _alloc(alloc), _t(n, _bucket(_alloc)), _hasher(h), _equal(eq), _size(0), _maxLoadFactor(1), _maxLoad(n)
 		{
 			while (first != last)
-				_insert(*first++);
+				insert(*first++);
 		}
 		//no need to take care about memory, underlying containers does !
 		~unordered_multiset()
@@ -810,25 +804,6 @@ namespace ft
 			}
 			_t.swap(swapper);
 			_maxLoad = size_type(float(_t.size()) * _maxLoadFactor);
-		}
-
-		iterator	_insert(const value_type& val)
-		{
-			size_t	hashValue;
-			size_type	growth;
-
-			if (++_size > _maxLoad)
-			{
-				growth = 8 * _t.size();
-				while ((size_type)((float)growth * _maxLoadFactor) <= _size)
-					growth *= 8;
-				_rehash(growth);
-			}
-
-			hashValue = _hasher(val) % _t.size();
-			_t[hashValue].push_front(val);
-
-			return iterator(&_t, hashValue, _t[hashValue].begin());
 		}
 
 		// Hint is a bucket iterator with a key equal to the key of val (only for multimap)
@@ -946,21 +921,37 @@ namespace ft
 
 		//INSERTS
 
-		iterator	insert(const value_type& val)
+		iterator insert(const value_type& val)
 		{
-			iterator found = find(val);
+			size_t		hashVal;
+			size_type	growth;
 
-			if (found != end())
-				return _insert(found, val);
+			hashVal = _hasher(val) % _t.size();
+			for (local_iterator it = begin(hashVal); it != end(hashVal); ++it)
+			{
+				if (_equal(*it, val))
+					return _insert(iterator(&_t, hashVal, it), val);
+			}
 
-			return _insert(val);
+			if (++_size > _maxLoad)
+			{
+				growth = 8 * _t.size();
+				while ((size_type)((float)growth * _maxLoadFactor) <= _size)
+					growth *= 8;
+				_rehash(growth);
+				hashVal = _hasher(val) % _t.size();
+			}
+
+			_t[hashVal].push_front(val);
+
+			return iterator(&_t, hashVal, _t[hashVal].begin());
 		}
 
 		iterator	insert(iterator hint, const value_type& val)
 		{
 			if (hint != end() && _equal(*hint, val))
 				return _insert(hint, val);
-			return _insert(val);
+			return insert(val);
 		}
 
 		template <class InputIterator>
