@@ -1,6 +1,7 @@
 # include "../includes/flat_basket.hpp"
 # include "../includes/map.hpp"
 # include <iostream>
+# include <fstream>
 # include <string>
 
 template < typename T >
@@ -52,9 +53,10 @@ static void	displayData(const ft::flat_basket<T>& f, bool displayGround, const c
 	outfile << "\nground ptr = " << f.ground();
 	outfile << "\nmanage his own ground = " << f.manage_ground();
 	outfile << '\n';
-	displayContent(f, name);
+	displayContent(f, name, outfile);
 	if (displayGround)
-		displayContent(*f.ground(), "ground");
+		displayContent(*f.ground(), "ground", outfile);
+	outfile << '\n';
 }
 
 void	flat_basket_tests(const std::string& currentPath)
@@ -63,14 +65,91 @@ void	flat_basket_tests(const std::string& currentPath)
 	std::ofstream outfile;
 	std::boolalpha(outfile);
 
+	ft::vector<std::string> ground;
+	ground.push_back("pouet");
+	ground.push_back("pouet2");
+	ground.push_back("pouet3");
+	ground.push_back("pouet4");
+	ground.push_back("dodo");
+	ground.push_back("sleep");
+	ground.push_back("rofl");
+	typedef ft::flat_basket<std::string> S;
+
 	//CONSTRUCTORS
 
 	{
-		fileName = currentPath + "constructor.log"
+		fileName = currentPath + "constructor.log";
 		outfile.open(fileName.c_str());
 
+		S se;
 
+		displayData(se, true, "empty basket", outfile);
 
+		S sg(&ground);
+
+		displayData(sg, true, "empty basket with shared ground", outfile);
+
+		try
+		{
+			S except(15, "jj");
+		}
+		catch(const ft::exception& e)
+		{
+			outfile << e.what() << '\n';
+		}
+		
+		try
+		{
+			S except(ground.begin(), ground.end(), 4, &ground);
+		}
+		catch(const ft::exception &e)
+		{
+			outfile << e.what() << '\n';
+		}
+
+		S sf(14, "fromage qui pue", 16, &ground);
+
+		displayData(sf, true, "filled constructed + capacity and ground set", outfile);
+
+		S sr(sf.begin() + 4, sf.end(), 15);
+
+		displayData(sr, true, "range constructor", outfile);
+
+		se.ground()->push_back("poule");
+
+		S sf2(4, "renard", se.ground());
+
+		displayData(sf2, true, "fill constructor with shared ground", outfile);
+
+		outfile.close();
+	}
+
+	//INSERT
+
+	{
+		fileName = currentPath + "insert.log";
+		outfile.open(fileName.c_str());
+		if (outfile.fail())
+			std::cerr << strerror(errno) << '\n';
+
+		S se(25);
+
+		se.insert(se.end(), 2, "boules de bowling");
+		displayData(se, true, "insert 2 on empty basket", outfile);
+
+		se.insert(se.begin() + 1, "cuillere de Arthur");
+		displayData(se, true, "insert 1 element somewhere in the basket", outfile);
+
+		se.insert(se.begin() + 2, 26, "cornichons");
+		displayData(se, true, "insert too much in the basket", outfile);
+
+		se.insert(se.begin(), "et un tire bouchon");
+		displayData(se, true, "1 more", outfile);
+
+		se.enlarge_your_basket(30);
+
+		se.insert(se.end(), ground.begin(), ground.end());
+		displayData(se, true, "enlarge then range insert", outfile);
 		outfile.close();
 	}
 
@@ -118,7 +197,7 @@ void	flat_basket_tests(const std::string& currentPath)
 		for (Sol::size_type i = 0; i < foret.size(); ++i)
 			beforeSim[foret[i]] += 1;
 	
-		displayDataMap(beforeSim, "beforeSim");
+		displayDataMap(beforeSim, "beforeSim", outfile);
 
 		outfile << "Un vieux typique, apres une nuit de pluie d'automne, s'empresse des l'aube pour son moment prefere de l'annee, la cueillette aux champignons.\n";
 		outfile << "Une fois gare au plus proche de son coin a champignons dont l'emplacement secret est jalousement garde, le vieux emporte avec lui ses deux fideles paniers de recoltes.\n";
@@ -177,7 +256,7 @@ void	flat_basket_tests(const std::string& currentPath)
 			inventory[*cit] += 1;
 			afterSim[*cit] += 1;
 		}
-		displayDataMap(inventory, "contenu de la voiture :");
+		displayDataMap(inventory, "contenu de la voiture :", outfile);
 
 		inventory.clear();
 		for (Sol::const_iterator cit = parking.begin(); cit != parking.end(); ++cit)
@@ -185,7 +264,7 @@ void	flat_basket_tests(const std::string& currentPath)
 			inventory[*cit] += 1;
 			afterSim[*cit] += 1;
 		}
-		displayDataMap(inventory, "Objets (ou animaux) jetes sur le parking : ");
+		displayDataMap(inventory, "Objets (ou animaux) jetes sur le parking : ", outfile);
 
 		inventory.clear();
 		for (Sol::const_iterator cit = foret.begin(); cit != foret.end(); ++cit)
@@ -193,7 +272,7 @@ void	flat_basket_tests(const std::string& currentPath)
 			inventory[*cit] += 1;
 			afterSim[*cit] += 1;
 		}
-		displayDataMap(inventory, "Objets (ou animaux) restants dans la foret : ");
+		displayDataMap(inventory, "Objets (ou animaux) restants dans la foret : ", outfile);
 
 		if (beforeSim == afterSim)
 			outfile << "Aucun objet n'a ete perdu lors de la simulation\n";

@@ -49,7 +49,7 @@ int main()
 	std::string mainPath;
 	std::string ctxPath;
 	std::ofstream exceptionFile;
-	timeval t1;
+	//timeval t1;
 
 	mainPathC = get_current_dir_name();
 	mainPath = mainPathC;
@@ -62,7 +62,7 @@ int main()
 	
 	mkdir(dirName(mainPath, ctxPath).c_str(), 0777);
 	exceptionFile.open((ctxPath + "/exceptions.log").c_str());
-
+/*
 	gettimeofday(&t1, 0);
 	mkdir(dirName(mainPath, ctxPath, "unordered_map").c_str(), 0777);
 	unordered_map_tests(filePath(ctxPath, "unordered_map"), exceptionFile);
@@ -82,14 +82,14 @@ int main()
 	mkdir(dirName(mainPath, ctxPath, "unordered_multiset").c_str(), 0777);
 	unordered_multiset_tests(filePath(ctxPath, "unordered_multiset"));
 	displayTime(t1, FT, "UNORDERED_MULTISET");
-
+*/
 	exceptionFile.close();
-	
+
 	#if FT == 1
-		gettimeofday(&t1, 0);
+		//gettimeofday(&t1, 0);
 		mkdir(dirName(mainPath, ctxPath, "NC_flat_basket_tests").c_str(), 0777);
 		flat_basket_tests(filePath(ctxPath, "NC_flat_basket_tests"));
-		displayTime(t1, FT, "FLAT_BASKET");
+		//displayTime(t1, FT, "FLAT_BASKET");
 	#endif
 
 }
