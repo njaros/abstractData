@@ -85,6 +85,18 @@ dif.exe					:	src/diff_logs.cpp
 
 bonus :					AbstractDataTestsBonusFT.exe AbstractDataTestsBonusSTD.exe dif.exe Makefile bonus_exe
 
+perf :					perf.exe
+						./perf.exe
+
+perf.exe :				${INCLUDES} src/performance_check.cpp src/functional.cpp src/exception.cpp Makefile
+						c++ src/performance_check.cpp src/functional.cpp src/exception.cpp -o $@
+
+sandbox :				sandbox.exe
+						./sandbox.exe
+
+sandbox.exe :			${INCLUDES} sandbox.cpp src/functional.cpp src/exception.cpp Makefile
+						c++ sandbox.cpp src/functional.cpp src/exception.cpp -o $@
+
 bonus_exe :
 						./AbstractDataTestsBonusFT.exe
 						./AbstractDataTestsBonusSTD.exe
@@ -124,7 +136,7 @@ clean :
 					rm -rf obj_ft obj_std obj_bonus_ft obj_bonus_std
 
 fclean :			clean
-					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe AbstractDataTestsBonusFT.exe AbstractDataTestsBonusSTD.exe dif.exe
+					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe AbstractDataTestsBonusFT.exe AbstractDataTestsBonusSTD.exe dif.exe perf.exe sandbox.exe
 					rm -rf ft_logs std_logs ft_logs_bonus std_logs_bonus
 
 re :				fclean all
