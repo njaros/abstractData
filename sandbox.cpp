@@ -21,12 +21,15 @@
 
 int main()
 {
-	ft::set<std::string> sentence;
-	sentence.insert("World");
-	sentence.insert("Hello ");
+	std::multimap<std::string, std::string> m1;
+	std::multimap<std::string, std::string>::iterator it;
+	it = m1.insert(std::make_pair("", ""));
+	m1.insert(it, std::make_pair("", ""));
 
-	for (ft::set<std::string>::const_iterator it = sentence.begin(); it != sentence.end(); ++it)
-		std::cout << *it;
-	std::cout << '\n';
+	for (std::multimap<std::string, std::string>::const_reverse_iterator cit = m1.rbegin(); cit != m1.rend(); ++cit)
+	{
+		std::cout << "pouet " << cit->first << std::endl;
+	}
+	
 	return 0;
 }
