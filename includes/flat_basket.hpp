@@ -890,12 +890,14 @@ namespace ft
 		*/
 		iterator insert_force(iterator position, size_type n, const value_type& val)
 		{
+			size_type	ctxSize;
 			size_type	nbToPop;
 			size_type	nbToInsert;
+			ctxSize = end() - position;
 
-			if (n > size_left())
+			if (ctxSize && n > size_left())
 			{
-				nbToPop = ft::min(size_left() + end() - position, n - size_left());
+				nbToPop = ft::min(ctxSize, n - size_left());
 				while (nbToPop--)
 				{
 					_ground->insert(_ground->end(), _basket.back());
@@ -928,16 +930,18 @@ namespace ft
 			difference_type dist;
 			size_type		nbToInsert;
 			size_type		nbToPop;
+			size_type		ctxSize;
 			InputIterator	basketFirst;
 
 			dist = ft::distance(first, last);
 			if (dist < 0)
 				throw(ft::length_error("ft::flat_basket::insert : iterator first must be less than iterator last."));
 
+			ctxSize = end() - position;
 			basketFirst = first;
-			if (dist > size_left())
+			if (ctxSize && dist > size_left())
 			{
-				nbToPop = ft::min(size_left() + end() - position, dist - size_left());
+				nbToPop = ft::min(ctxSize, dist - size_left());
 				while (nbToPop--)
 				{
 					_ground->insert(_ground->end(), _basket.back());
@@ -947,7 +951,9 @@ namespace ft
 				while (nbToInsert--)
 					++first;
 			}
-			position = insert(position, basketFirst, first);
+			else
+				first = last;
+			position = _basket.insert(position, basketFirst, first);
 			if (first != last)
 				position = _ground->insert(_ground->end(), first, last);
 			return position;

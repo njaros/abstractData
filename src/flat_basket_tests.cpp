@@ -134,7 +134,9 @@ void	flat_basket_tests(const std::string& currentPath)
 
 		S se(25);
 
-		se.insert(se.end(), 2, "boules de bowling");
+		S se2(12, se.ground());
+
+		se.insert(se.end(), 2, "boule de bowling");
 		displayData(se, true, "insert 2 on empty basket", outfile);
 
 		se.insert(se.begin() + 1, "cuillere de Arthur");
@@ -150,6 +152,130 @@ void	flat_basket_tests(const std::string& currentPath)
 
 		se.insert(se.end(), ground.begin(), ground.end());
 		displayData(se, true, "enlarge then range insert", outfile);
+
+		se2.insert_force(se2.begin(), 15, "chat");
+		displayData(se2, true, "insert force too much on empty basket", outfile);
+		outfile.close();
+	}
+
+	//PUSH_BACK
+
+	{
+		fileName = currentPath + "push_back.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//ASSIGN
+
+	{
+		fileName = currentPath + "assign.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//ERASE
+
+	{
+		fileName = currentPath + "erase.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//CLEAR
+
+	{
+		fileName = currentPath + "clear.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//DROP
+
+	{
+		fileName = currentPath + "drop.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//PICK_UP
+
+	{
+		fileName = currentPath + "pick_up.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//POUR_OUT
+
+	{
+		fileName = currentPath + "pour_out.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//GROUND_MANAGEMENT
+
+	{
+		fileName = currentPath + "ground_management.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//SWAP
+
+	{
+		fileName = currentPath + "swap.log";
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//RELATIONAL
+
+	{
+		fileName = currentPath + "relational.log"
+		outfile.open(fileName.c_str());
+
+
+
+		outfile.close();
+	}
+
+	//GET_ALLOCATOR
+
+	{
+		fileName = currentPath + "get_allocator.log";
+		outfile.open(fileName.c_str());
+
+
+
 		outfile.close();
 	}
 
