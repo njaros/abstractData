@@ -907,6 +907,12 @@ namespace ft
 				_basket.insert(position, nbToInsert, val);
 				return _ground->insert(_ground->end(), n - nbToInsert, val);
 			}
+			else if (n > size_left())
+			{
+				nbToInsert = size_left();
+				_basket.insert(position, nbToInsert, val);
+				return _ground->insert(_ground->end(), n - nbToInsert, val);
+			}
 			return _basket.insert(position, n, val);
 		}
 
@@ -939,13 +945,16 @@ namespace ft
 
 			ctxSize = end() - position;
 			basketFirst = first;
-			if (ctxSize && dist > size_left())
+			if ((size_type)dist > size_left())
 			{
-				nbToPop = ft::min(ctxSize, dist - size_left());
-				while (nbToPop--)
-				{
-					_ground->insert(_ground->end(), _basket.back());
-					_basket.pop_back();
+				if (ctxSize)
+				{				
+					nbToPop = ft::min(ctxSize, dist - size_left());
+					while (nbToPop--)
+					{
+						_ground->insert(_ground->end(), _basket.back());
+						_basket.pop_back();
+					}
 				}
 				nbToInsert = size_left();
 				while (nbToInsert--)
@@ -967,7 +976,9 @@ namespace ft
 		void	push_back_force(const value_type& val)
 		{
 			if (full() && _basketCapacity)
-				pop_back();
+			{
+				drop_back();
+			}
 			push_back(val);
 		}
 
@@ -977,7 +988,7 @@ namespace ft
 		 *  @param  n  Number of elements to assign.
 		 *  @param  val  Element to copy.
 		*/
-		void	assign(size_type n, value_type& val)
+		void	assign(size_type n, const value_type& val)
 		{
 			clear();
 			insert(begin(), n, val);
@@ -1045,7 +1056,7 @@ namespace ft
 			_allocGround = o._allocGround;
 			_ground = o._ground;
 			_basketCapacity = o._basketCapacity;
-			_selfGround = o._selfGroound;
+			_selfGround = o._selfGround;
 
 			o._alloc = allocTmp;
 			o._allocGround = allocGroundTmp;
@@ -1100,6 +1111,15 @@ namespace ft
 			o._alloc = allocTmp;
 			o._basketCapacity = basketCapacityTmp;
 		}
+
+		/**
+		 * @return A copy of the allocator used in this instance.
+		*/
+		allocator_type	get_allocator()	const
+		{
+			return _alloc;
+		}
+
 	};
 
 	/**

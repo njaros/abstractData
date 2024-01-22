@@ -75,22 +75,22 @@ int main()
 		gettimeofday(&t, 0);
 		for (int i = 0; i < 10000000; ++i)
 			stdm[i] = i;
-		displayTime(t, 0, "insert 10000000 ints");
+		displayTime(t, 0, "insert 10 000 000 ints");
 
 		gettimeofday(&t, 0);
 		for (int i = 0; i < 10000000; ++i)
 			ftm[i] = i;
-		displayTime(t, 1, "insert 10000000 ints");
+		displayTime(t, 1, "insert 10 000 000 ints");
 
 		gettimeofday(&t, 0);
 		for (int i = 2500000; i < 7500000; ++i)
 			stdm.erase(i);
-		displayTime(t, 0, "erase 5000000 ints");
+		displayTime(t, 0, "erase 5 000 000 ints");
 
 		gettimeofday(&t, 0);
 		for (int i = 2500000; i < 7500000; ++i)
 			ftm.erase(i);
-		displayTime(t, 1, "erase 5000000 ints");
+		displayTime(t, 1, "erase 5 000 000 ints");
 	}
 
 	{
