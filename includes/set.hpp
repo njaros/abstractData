@@ -800,17 +800,11 @@ namespace ft {
 		}
 
 		iterator					insert(iterator hint, const value_type& data) {
-			if (!_root || hint == end())
-				return insert(data);
 			bool	highest = false;
 			bool	smallest = false;
-			_it = begin();
-			if (_compare(data, *_it)) {
-				smallest = true;
-			}
-			else if (equalIterator(_it, --end()) && _compare(*_it, data)) {
-				highest = true;
-			}
+
+			if (!_root || hint == end())
+				return insert(data);
 			if (_compare(data, *hint))
 			{
 				if (_compare(data, *(getPredecessor(hint.base())->content)))
@@ -820,6 +814,12 @@ namespace ft {
 			{
 				if (_compare(*(getSuccessor(hint.base())->content), data))
 					return insert(data);
+			}
+			if (_compare(data, *begin())) {
+				smallest = true;
+			}
+			else if (!_compare(data, *(--end()))) {
+				highest = true;
 			}
 			++_size;
 			iterator	inserted(recursiveInsertMultiset(hint.base(), newNode<value_type, \

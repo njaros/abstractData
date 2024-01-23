@@ -1078,17 +1078,11 @@ namespace ft {
             return _it;
         }
         iterator                    insert(iterator hint, const value_type& data) {
-            if (!_root || hint == end())
-                return iterator(insert(data));
             bool    highest = false;
             bool    smallest = false;
-            _it = begin();
-            if (_compare(data.first, _it->first)) {
-                smallest = true;
-            }
-            else if (equalIterator(_it, --end()) && _compare(_it->first, data.first)) {
-                highest = true;
-            }
+
+            if (!_root || hint == end())
+                return iterator(insert(data));
             if (_compare(data.first, hint->first))
             {
                 if (_compare(data.first, getPredecessor(hint.base())->content->first))
@@ -1098,6 +1092,12 @@ namespace ft {
             {
                 if (_compare(getSuccessor(hint.base())->content->first, data.first))
                     return insert(data);
+            }
+            if (_compare(data.first, begin()->first)) {
+                smallest = true;
+            }
+            else if (!_compare(data.first, (--end())->first)) {
+                highest = true;
             }
             ++_size;
             iterator    inserted(recursiveInsertMultimap(hint.base(),
