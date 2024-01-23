@@ -47,9 +47,12 @@ int main()
 	std::string mainPath;
 	std::string ctxPath;
 	std::ofstream exceptionFile;
+	char*	pwd;
 	timeval t1;
 
-	mainPath = get_current_dir_name();
+	pwd = get_current_dir_name();
+	mainPath = pwd;
+	free(pwd);
 	mainPath += '/';
 	if (FT == 1)
 		ctxPath = "ft_logs";
