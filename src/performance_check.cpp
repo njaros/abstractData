@@ -1,21 +1,13 @@
 #include "../includes/deque.hpp"
 #include "../includes/vector.hpp"
 #include "../includes/list.hpp"
-#include "../includes/map.hpp"
-#include "../includes/set.hpp"
-#include "../includes/unordered_map.hpp"
-#include "../includes/unordered_set.hpp"
-#include "../includes/stack.hpp"
 #include "../includes/queue.hpp"
-#include <set>
+#include "../includes/map.hpp"
 #include <map>
 #include <vector>
 #include <deque>
-#include <unordered_map>
-#include <unordered_set>
-#include <list>
-#include <stack>
 #include <queue>
+#include <list>
 #include <iostream>
 #include <sys/time.h>
 
@@ -34,39 +26,6 @@ void displayTime(timeval t1, int idFT, const char* testName)
 int main()
 {
 	timeval t;
-
-	{
-		std::cout << "====UNORDERED_MAP====\n\n";
-		std::unordered_map<int, int> stdUm;
-		ft::unordered_map<int, int> ftUm;
-
-		gettimeofday(&t, 0);
-		for (int i = 0; i < 10000000; ++i)
-		{
-			stdUm.insert(std::make_pair(i * i, i));
-		}
-		displayTime(t, 0, "insert 10 000 000 ints");
-
-		gettimeofday(&t, 0);
-		for (int i = 0; i < 10000000; ++i)
-		{
-			ftUm.insert(ft::make_pair(i * i, i));
-		}
-		displayTime(t, 1, "insert 10 000 000 ints");
-
-		gettimeofday(&t, 0);
-		for (int i = 0; i < 10000000; i += 2)
-		{
-			stdUm.find(i);
-		}
-		displayTime(t, 0, "find 10 000 000 ints");
-		gettimeofday(&t, 0);
-		for (int i = 0; i < 10000000; i += 2)
-		{
-			stdUm.find(i);
-		}
-		displayTime(t, 1, "find 10 000 000 ints");
-	}
 
 	{
 		std::cout << "\n====MAP====\n\n";

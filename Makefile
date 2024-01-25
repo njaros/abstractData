@@ -89,7 +89,13 @@ perf :					perf.exe
 						./perf.exe
 
 perf.exe :				${INCLUDES} src/performance_check.cpp src/functional.cpp src/exception.cpp Makefile
-						c++ src/performance_check.cpp src/functional.cpp src/exception.cpp -o $@
+						${CC} ${FLAGS} src/performance_check.cpp src/functional.cpp src/exception.cpp -o $@
+
+perf_bonus :			perf_bonus.exe
+						./perf_bonus.exe
+
+perf_bonus.exe :		${INCLUDES} src/performance_check_bonus.cpp src/functional.cpp src/exception.cpp Makefile
+						${CC} ${FLAGS_BONUS_STD} src/performance_check_bonus.cpp src/functional.cpp src/exception.cpp -o $@
 
 sandbox :				sandbox.exe
 						./sandbox.exe
@@ -136,7 +142,7 @@ clean :
 					rm -rf obj_ft obj_std obj_bonus_ft obj_bonus_std
 
 fclean :			clean
-					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe AbstractDataTestsBonusFT.exe AbstractDataTestsBonusSTD.exe dif.exe perf.exe sandbox.exe
+					rm -f AbstractDataTestsFT.exe AbstractDataTestsSTD.exe AbstractDataTestsBonusFT.exe AbstractDataTestsBonusSTD.exe dif.exe perf.exe perf_bonus.exe sandbox.exe
 					rm -rf ft_logs std_logs ft_logs_bonus std_logs_bonus
 
 re :				fclean all
