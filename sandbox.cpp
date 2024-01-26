@@ -21,14 +21,14 @@
 
 int main()
 {
-	std::multimap<std::string, std::string> m1;
-	std::multimap<std::string, std::string>::iterator it;
-	it = m1.insert(std::make_pair("", ""));
-	m1.insert(it, std::make_pair("", ""));
+	ft::multimap<std::string, std::string> m1;
+	ft::multimap<std::string, std::string>::iterator it;
+	it = m1.insert(ft::make_pair("", ""));
+	it = m1.insert(it, ft::make_pair("", ""));
 
-	for (std::multimap<std::string, std::string>::const_reverse_iterator cit = m1.rbegin(); cit != m1.rend(); ++cit)
+	for (ft::multimap<std::string, std::string>::const_reverse_iterator cit = m1.rbegin(); cit != m1.rend(); ++cit)
 	{
-		std::cout << "pouet " << cit->first << std::endl;
+		std::cout << "coucou" << cit->first << '\n';
 	}
 	
 	return 0;
