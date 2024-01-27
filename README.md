@@ -1,8 +1,4 @@
-Status : Work in progress  
-
-## TODOS :
-
-- imposer le std=c++98 pour les perf vector et deque
+Status : Waiting for defense  
 
 Recoding of iterators, vector, map, set, deque, multimap/set, unordered_map/set/multimap/multiset, list, queue, priority_queue, stack + a bonus personal container  
   
