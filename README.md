@@ -1,4 +1,4 @@
-Status : Waiting for defense  
+Status : Validated
 
 Recoding of iterators, vector, map, set, deque, multimap/set, unordered_map/set/multimap/multiset, list, queue, priority_queue, stack + a bonus personal container  
   
